@@ -1,0 +1,30 @@
+# Eclipse IDE
+.settings/
+.metadata/
+
+# Arduino specific files
+build/
+bin/
+lib/
+binaries/
+Release/
+libraries/
+core/
+core.a
+*.hex
+*.elf
+*.eep
+*.lst
+*.map
+*.sym
+*.lss
+
+# Arduino project configuration files
+*.ino.cpp
+*.ino.hex
+*.cpp.o.d
+*.cpp.d
+*.pde
+
+# Other generated files
+*.class
