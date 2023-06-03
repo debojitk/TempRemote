@@ -40,7 +40,7 @@ EventManager *eventManager = new EventManager(serialObserver);
 //------------------------------------------------------------------------------
 void setup() {
 	Serial.begin(115200);
-	Serial.println(F("Start"));
+	Serial.println(F("Hello World!"));
 	Serial.println(freeMemory());
 	serialObserver->enable();
 	mainMenu->setBackIndex(3);
