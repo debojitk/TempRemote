@@ -32,17 +32,18 @@ AbstractMenuEntity *menu4 = new MenuEntity(serialRenderer, "Back", nullptr, 0);
 AbstractMenuEntity *mainMenus[] = {menu1, menu2, menu3, menu4};
 AbstractMenuEntity *mainMenu = new MenuEntity(serialRenderer, "Main Menu", mainMenus, 4);
 // creating eventSourceObserver
-IEventSourceObserver *serialObserver = new SerialObserver();
+//IEventSourceObserver *serialObserver = new SerialObserver();
 
+IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(2, 500);
 // creating eventManager
-EventManager *eventManager = new EventManager(serialObserver);
+EventManager *eventManager = new EventManager(buttonObserver);
 
 //------------------------------------------------------------------------------
 void setup() {
 	Serial.begin(115200);
 	Serial.println(F("Hello World!"));
 	Serial.println(freeMemory());
-	serialObserver->enable();
+	buttonObserver->enable();
 	mainMenu->setBackIndex(3);
 	mainMenu->setEventManager(eventManager);
 	menu1->setBackIndex(3);
@@ -52,6 +53,6 @@ void setup() {
 //------------------------------------------------------------------------------
 void loop() {
 	eventManager->processEvents();
-	delay(10);
+	//delay(10);
 }
 

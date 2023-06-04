@@ -38,13 +38,11 @@ void EventManager::processEvents(){
 		// process event
 		handleEvent(event);
 		eventSourceObserver->clearLastEvent();
-		Serial.print(F("Event cleared "));
+		Serial.println(F("Event cleared "));
 	} else{
 		eventSourceObserver->observeEvents();
 	}
 }
-
-
 
 
 EventType AbsEventSourceObserver::getLastEvent(){
@@ -85,22 +83,23 @@ void SerialObserver::observeEvents() {
 }
 
 
-ButtonInputObserver::ButtonInputObserver(){
+ButtonInputObserver *ButtonInputObserver::instance = nullptr;
+
+ButtonInputObserver::ButtonInputObserver(): ButtonInputObserver::ButtonInputObserver(2,500){
 	//default private constructor
 }
 
 ButtonInputObserver::ButtonInputObserver(int pin, int interval){
 	buttonPin = pin;
 	doubleClickInterval = interval;
-	waitingForDoubleClick = false;
-	lastButtonClickTime = 0;
 
 }
 void ButtonInputObserver::initialize(){
-	pinMode(buttonPin, INPUT_PULLUP);
-	Timer1.initialize(1000);
-	Timer1.attachInterrupt(ButtonInputObserver::timerInterruptInvoker);
-	enabled = true;
+	if (hasInitialized) return;
+	pinMode(buttonPin, INPUT_PULLUP);// by default the value is high, need to be shorted with ground to generate a low input
+	Timer1.initialize(100000);
+	//Timer1.attachInterrupt(ButtonInputObserver::timerInterruptInvoker);
+	hasInitialized = true;
 }
 void ButtonInputObserver::disable(){
 	if(enabled) {
@@ -110,36 +109,53 @@ void ButtonInputObserver::disable(){
 }
 void ButtonInputObserver::enable() {
 	if (!enabled) {
-		AbsEventSourceObserver::disable();
+		AbsEventSourceObserver::enable();
 		Timer1.attachInterrupt(ButtonInputObserver::timerInterruptInvoker);
 	}
 }
 
+bool ButtonInputObserver::hasClicked() {
+	lastClickCount = counter;
+	currentButtonState = digitalRead(buttonPin);
+
+	if (currentButtonState != lastButtonState) {
+		lastDebounceTime = millis();
+	}
+
+	if ((millis() - lastDebounceTime) > debounceDelay) {
+		if (currentButtonState != buttonState) {
+			buttonState = currentButtonState;
+			if (buttonState == LOW) {
+				counter++;
+				//Serial.println(counter);
+			}
+		}
+	}
+	lastButtonState = currentButtonState;
+
+	return counter-lastClickCount;
+}
 void ButtonInputObserver::timerInterrupt() {
 	// scan for events only if last event is handled
 	if(enabled && lastEvent == NoEvent) {
 		unsigned long currentTime = millis();
-		bool buttonState = digitalRead(buttonPin);
-
-		if (buttonState == LOW) {
-			if (!waitingForDoubleClick) {
-				// First click detected, start waiting for double-click
-				waitingForDoubleClick = true;
-				lastButtonClickTime = currentTime;
-			} else {
-				// Double-click detection window
-				if (currentTime - lastButtonClickTime <= doubleClickInterval) {
-					// Double-click detected
-					Serial.println(F("DoubleClickEvent"));
-					lastEvent = DoubleClickEvent;
-					waitingForDoubleClick = false;
-				} else {
-					// Timeout for double-click detection, treat as single click
-					Serial.println(F("SingleClickEvent"));
-					lastEvent = SingleClickEvent;
-					waitingForDoubleClick = false;
-				}
+		bool clicked = hasClicked();
+		if (clicked) {
+			clickInstant = millis();
+			currentTime = clickInstant;
+			clickCount++;
+		}
+		if (clickCount == 1) {
+			if ((currentTime - clickInstant) > doubleClickInterval){
+				Serial.println(F("SingleClickEvent"));
+				lastEvent = SingleClickEvent;
+				clickCount = 0;
+				clickInstant = 0;
 			}
+		} else if (clickCount == 2) {
+			Serial.println(F("DoubleClickEvent"));
+			lastEvent = DoubleClickEvent;
+			clickCount = 0;
 		}
 	}
 }
@@ -151,6 +167,7 @@ void ButtonInputObserver::timerInterruptInvoker(){
 ButtonInputObserver * ButtonInputObserver::getInstance(int pin, int interval){
 	if(ButtonInputObserver::instance == nullptr){
 		ButtonInputObserver::instance = new ButtonInputObserver(pin, interval);
+		ButtonInputObserver::instance->initialize();
 	}
 	return ButtonInputObserver::instance;
 }

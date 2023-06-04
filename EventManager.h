@@ -47,29 +47,43 @@ protected:
 	bool enabled = false;
 };
 
-class SerialObserver: public AbsEventSourceObserver {
+class SerialObserver: public AbsEventSourceObserver { // @suppress("Class has a virtual method and non-virtual destructor")
 
 public:
 	void initialize();
 	void observeEvents();
 };
 
-class ButtonInputObserver: public  AbsEventSourceObserver {
+class ButtonInputObserver: public  AbsEventSourceObserver { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	void initialize();
 	void disable();
 	void enable();
 	static ButtonInputObserver *getInstance(int pin, int interval);
 private:
+	static void timerInterruptInvoker();
+
 	ButtonInputObserver();
 	ButtonInputObserver(int pin, int interval);
+	void timerInterrupt();
+	bool hasClicked();
+
 	int buttonPin;
 	unsigned long doubleClickInterval;
-	bool waitingForDoubleClick;
-	unsigned long lastButtonClickTime;
-	void timerInterrupt();
-	static void timerInterruptInvoker();
 	static ButtonInputObserver *instance;
+	bool hasInitialized = false;
+
+	int counter = 0;
+	int buttonState = 0;
+	int lastButtonState = 0;
+	int lastClickCount = 0;
+	int currentButtonState = 0;
+	unsigned long lastDebounceTime = 0;
+	int debounceDelay = 25;
+	int clickCount = 0;
+	unsigned long clickInstant =0;
+
+
 };
 
 #endif /* EVENTMANAGER_H_ */
