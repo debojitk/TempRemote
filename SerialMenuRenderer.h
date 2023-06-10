@@ -10,7 +10,7 @@
 
 class MenuRenderer;
 class MenuEntity;
-class SerialMenuRenderer: public MenuRenderer {
+class SerialMenuRenderer: public MenuRenderer { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	void renderMenu(MenuEntity* menu);
 };

@@ -15,6 +15,11 @@ enum EventType: unsigned int {
 	LongPressEvent
 	// Add more event types as needed
 };
+struct CurrentTime {
+  int hours;
+  int minutes;
+  int seconds;
+};
 
 
 #endif /* COMMONITEMS_H_ */

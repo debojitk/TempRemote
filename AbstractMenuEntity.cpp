@@ -9,11 +9,13 @@
 #include "AbstractMenuEntity.h"
 #include "EventManager.h"
 #include "MenuRenderer.h"
+#include "MenuItemRenderer.h"
 #include <Arduino.h>
 
 // define the stack
 CustomStack<AbstractMenuEntity *, 10> AbstractMenuEntity::menuStack;
 
+// Definition for AbstractMenuEntity
 AbstractMenuEntity::AbstractMenuEntity(const char *name) {
 	this->name = name;
 }
@@ -62,24 +64,35 @@ void AbstractMenuEntity::setEventManager(EventManager *manager){
 	eventManager = manager;
 }
 
-MenuEntity::MenuEntity(MenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], int numItems): AbstractMenuEntity(name) {
-	this->items = items;
-	this->numItems = numItems;
-	this->renderer = renderer;
-}
 
-void MenuEntity::activate() {
+void AbstractMenuEntity::activate() {
 	Serial.print(F("menu is not active, activating ->"));
 	Serial.println(getName());
 	if(eventManager != nullptr){
 		eventManager->registereventReceiver(this);
 	}
 	this->setActive(true);
-	renderer->renderMenu(this);
+	render();
+}
+
+
+
+// Definition for MenuEntity
+MenuEntity::MenuEntity(MenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], int numItems): AbstractMenuEntity(name) {
+	this->items = items;
+	this->numItems = numItems;
+	this->renderer = renderer;
 }
 
 int MenuEntity::getNumItems() {
 	return numItems;
+}
+void MenuEntity::render(){
+	renderer->renderMenu(this);
+}
+
+void MenuEntity::activate(){
+	AbstractMenuEntity::activate();
 }
 
 AbstractMenuEntity* MenuEntity::getItem(int index) {
@@ -93,7 +106,8 @@ void MenuEntity::handleClick(){
 	if (!this->isActive())
 		return;
 	goToNextItem();
-	renderer->renderMenu(this);
+	//renderer->renderMenu(this);
+	render();
 }
 void MenuEntity::goToNextItem() {
 	currentIndex = (currentIndex + 1)%numItems;
@@ -134,14 +148,52 @@ void MenuEntity::back(){
 
 
 
+// Definition for MenuItem
+
 MenuItem::MenuItem(const char *name): AbstractMenuEntity(name){
 
 }
 
-FunctionMenuItem::FunctionMenuItem(const char* name, void (*func)()): MenuItem(name) {
-	this->func = func;
+// Definition for HomeMenu
+
+HomeMenu::HomeMenu(HomeMenuItemRenderer *renderer, const char *name, AbstractMenuEntity *child):MenuItem(name) {
+	this->child = child;
+	this->renderer = renderer;
+	this->setTime(12, 15, 17);
+	this->temperature = 30;
+}
+void HomeMenu::render(){
+	this->renderer->renderMenu(this);
 }
 
-void FunctionMenuItem::select() {
-	func();
+void HomeMenu::handleClick(){
+	// does nothing
 }
+void HomeMenu::handleDoubleClick(){
+	if (this->child && !this->child->isActive()){
+		AbstractMenuEntity::menuStack.push(this);
+		this->child->activate();
+	}
+}
+void HomeMenu::activate(){
+	Serial.println(F("Activating menu"));
+	AbstractMenuEntity::activate();
+}
+void HomeMenu::back(){
+	// does nothing
+}
+
+void HomeMenu::setTime(uint8_t hour, uint8_t min, uint8_t sec){
+	cTime.hours = hour;
+	cTime.minutes = min;
+	cTime.seconds = sec;
+}
+
+double HomeMenu::getTemperature(){
+	return temperature;
+}
+struct CurrentTime HomeMenu::getTime(){
+	return cTime;
+}
+
+
