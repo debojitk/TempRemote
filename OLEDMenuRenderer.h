@@ -10,15 +10,14 @@
 
 #include "SSD1306Ascii.h"
 #include "SSD1306AsciiAvrI2c.h"
+#include "IMenuRenderer.h"
+class AbstractMenuEntity;
 
-class MenuRenderer;
-class MenuEntity;
-
-class OLEDMenuRenderer: public MenuRenderer {
+class OLEDMenuRenderer: public IMenuRenderer {
 public:
 	OLEDMenuRenderer();
 	OLEDMenuRenderer(SSD1306AsciiAvrI2c& display);
-	void renderMenu(MenuEntity* menu);
+	void renderMenu(AbstractMenuEntity* menu);
 private:
 	SSD1306AsciiAvrI2c& display;
 	MenuEntity* menu = nullptr;

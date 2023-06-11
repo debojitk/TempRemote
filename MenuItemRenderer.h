@@ -11,21 +11,17 @@
 #include "SSD1306Ascii.h"
 #include "SSD1306AsciiAvrI2c.h"
 #include "CommonItems.h"
-class MenuItem;
+#include "IMenuRenderer.h"
+class AbstractMenuEntity;
+class HomeMenu;
 
-class MenuItemRenderer { // @suppress("Class has a virtual method and non-virtual destructor")
-public:
-	virtual void renderMenu(MenuItem* menu);
-protected:
-	MenuItem* menu = nullptr;
-};
-
-class HomeMenuItemRenderer: public MenuItemRenderer {
+class HomeMenuItemRenderer: public IMenuRenderer {
 public:
 	HomeMenuItemRenderer(SSD1306AsciiAvrI2c& display);
-	void renderMenu(MenuItem* menu);
+	void renderMenu(AbstractMenuEntity* menu);
 private:
 	SSD1306AsciiAvrI2c& display;
+	HomeMenu *menu;
 };
 
 

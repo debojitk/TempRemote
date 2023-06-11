@@ -9,10 +9,11 @@
 #include "AbstractMenuEntity.h"
 #include "CommonItems.h"
 #include "EventManager.h"
-#include "MenuRenderer.h"
 #include "SerialMenuRenderer.h"
 #include "OLEDMenuRenderer.h"
 #include "MenuItemRenderer.h"
+#include <EEPROM.h>
+#include "IMenuRenderer.h"
 // 0X3C+SA0 - 0x3C or 0x3D
 #define I2C_ADDRESS 0x3C
 #define CHAR_HEIGHT 12
@@ -22,7 +23,7 @@
 
 SSD1306AsciiAvrI2c display;
 // creating renderer
-MenuRenderer *oledMenuRenderer = new OLEDMenuRenderer(display);
+IMenuRenderer *oledMenuRenderer = new OLEDMenuRenderer(display);
 //// creating main menu
 AbstractMenuEntity *menu11 = new MenuEntity(oledMenuRenderer, "Hello 11", nullptr, 0);
 AbstractMenuEntity *menu12 = new MenuEntity(oledMenuRenderer, "Hello 12", nullptr, 0);

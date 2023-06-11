@@ -8,16 +8,17 @@
 #include "CustomStack.h"
 #include "AbstractMenuEntity.h"
 #include "EventManager.h"
-#include "MenuRenderer.h"
 #include "MenuItemRenderer.h"
 #include <Arduino.h>
+#include "IMenuRenderer.h"
 
 // define the stack
 CustomStack<AbstractMenuEntity *, 10> AbstractMenuEntity::menuStack;
 
 // Definition for AbstractMenuEntity
-AbstractMenuEntity::AbstractMenuEntity(const char *name) {
+AbstractMenuEntity::AbstractMenuEntity(const char *name, IMenuRenderer *renderer) {
 	this->name = name;
+	this->renderer = renderer;
 }
 const char* AbstractMenuEntity::getName() {
 	return this->name;
@@ -75,10 +76,13 @@ void AbstractMenuEntity::activate() {
 	render();
 }
 
+void AbstractMenuEntity::render(){
+	this->renderer->renderMenu(this);
+}
 
 
 // Definition for MenuEntity
-MenuEntity::MenuEntity(MenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], int numItems): AbstractMenuEntity(name) {
+MenuEntity::MenuEntity(IMenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], int numItems): AbstractMenuEntity(name, renderer) {
 	this->items = items;
 	this->numItems = numItems;
 	this->renderer = renderer;
@@ -86,9 +90,6 @@ MenuEntity::MenuEntity(MenuRenderer *renderer, const char* name, AbstractMenuEnt
 
 int MenuEntity::getNumItems() {
 	return numItems;
-}
-void MenuEntity::render(){
-	renderer->renderMenu(this);
 }
 
 void MenuEntity::activate(){
@@ -150,20 +151,16 @@ void MenuEntity::back(){
 
 // Definition for MenuItem
 
-MenuItem::MenuItem(const char *name): AbstractMenuEntity(name){
+MenuItem::MenuItem(const char *name, IMenuRenderer *renderer): AbstractMenuEntity(name, renderer){
 
 }
 
 // Definition for HomeMenu
 
-HomeMenu::HomeMenu(HomeMenuItemRenderer *renderer, const char *name, AbstractMenuEntity *child):MenuItem(name) {
+HomeMenu::HomeMenu(HomeMenuItemRenderer *renderer, const char *name, AbstractMenuEntity *child):MenuItem(name, renderer) {
 	this->child = child;
-	this->renderer = renderer;
 	this->setTime(12, 15, 17);
 	this->temperature = 30;
-}
-void HomeMenu::render(){
-	this->renderer->renderMenu(this);
 }
 
 void HomeMenu::handleClick(){

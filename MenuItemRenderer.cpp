@@ -11,22 +11,21 @@
 
 HomeMenuItemRenderer::HomeMenuItemRenderer(SSD1306AsciiAvrI2c& displayObject):display(displayObject){
 }
-void HomeMenuItemRenderer::renderMenu(MenuItem *menu) {
-	this->menu = menu;
-	HomeMenu *homeMenu = reinterpret_cast<HomeMenu *>(this->menu);
+void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
+	this->menu = reinterpret_cast<HomeMenu *>(menu);
 	display.clear();
 	display.setCursor(0, 0);
 	display.print(menu->getName());
 	display.setCursor(0, 2);
 	display.print(F("Temp: "));
-	display.print(homeMenu->getTemperature());
+	display.print(this->menu->getTemperature());
 	display.print(F(" C"));
 	display.setCursor(0, 4);
-	display.print(homeMenu->getTime().hours);
+	display.print(this->menu->getTime().hours);
 	display.print(F(":"));
-	display.print(homeMenu->getTime().minutes);
+	display.print(this->menu->getTime().minutes);
 	display.print(F(":"));
-	display.print(homeMenu->getTime().seconds);
+	display.print(this->menu->getTime().seconds);
 
 }
 

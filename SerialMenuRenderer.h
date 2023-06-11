@@ -7,12 +7,12 @@
 
 #ifndef SERIALMENURENDERER_H_
 #define SERIALMENURENDERER_H_
+#include "IMenuRenderer.h"
 
-class MenuRenderer;
-class MenuEntity;
-class SerialMenuRenderer: public MenuRenderer { // @suppress("Class has a virtual method and non-virtual destructor")
+class AbstractMenuEntity;
+class SerialMenuRenderer: public IMenuRenderer { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	void renderMenu(MenuEntity* menu);
+	void renderMenu(AbstractMenuEntity* menu);
 };
 
 #endif /* SERIALMENURENDERER_H_ */

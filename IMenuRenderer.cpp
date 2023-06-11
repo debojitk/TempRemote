@@ -6,8 +6,9 @@
  */
 
 
+#include "IMenuRenderer.h"
+
 #include "AbstractMenuEntity.h"
-#include "MenuRenderer.h"
 #include "SerialMenuRenderer.h"
 #include "OLEDMenuRenderer.h"
 #include <Arduino.h>
@@ -19,11 +20,12 @@
 #define I2C_ADDRESS 0x3C
 #define RST_PIN -1
 
-void MenuRenderer::renderMenu(MenuEntity* menu) {
+void IMenuRenderer::renderMenu(AbstractMenuEntity* menu) {
 	Serial.println(F("MenuRenderer::rendermenu called"));
 }
 
-void SerialMenuRenderer::renderMenu(MenuEntity* menu) {
+void SerialMenuRenderer::renderMenu(AbstractMenuEntity* _menu) {
+	MenuEntity *menu = reinterpret_cast<MenuEntity *>(_menu);
 	Serial.println(F("SerialMenuRenderer::rendermenu called"));
 	Serial.println(menu->getName());
 	for (int i = 0; i < menu->getNumItems(); i++) {
@@ -44,8 +46,8 @@ OLEDMenuRenderer:: OLEDMenuRenderer(SSD1306AsciiAvrI2c& displayObject):display(d
 	//setupOled();
 }
 
-void OLEDMenuRenderer::renderMenu(MenuEntity* menu) {
-	this->menu = menu;
+void OLEDMenuRenderer::renderMenu(AbstractMenuEntity* _menu) {
+	this->menu = reinterpret_cast<MenuEntity *>(_menu);
 	startRange = 0;
 	endRange = min(this->menu->getNumItems(), VIEWPORT_MENU_COUNT);
 	renderMenuHeader(this->menu->getName());

@@ -21,5 +21,13 @@ struct CurrentTime {
   int seconds;
 };
 
+class IEventReceiver { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	virtual void handleEvent(EventType event) = 0;
+};
+
+class IRenderable { // @suppress("Class has a virtual method and non-virtual destructor")
+	virtual void render() = 0;
+};
 
 #endif /* COMMONITEMS_H_ */
