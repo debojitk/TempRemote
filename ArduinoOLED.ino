@@ -14,6 +14,12 @@
 #include "MenuItemRenderer.h"
 #include <EEPROM.h>
 #include "IMenuRenderer.h"
+
+#include "HexProgrammer.h"
+#include "SensorTypes.h"
+
+using TempSensor = Sensor<TemperatureModule, TemperatureValue>;
+
 // 0X3C+SA0 - 0x3C or 0x3D
 #define I2C_ADDRESS 0x3C
 #define CHAR_HEIGHT 12
@@ -58,6 +64,7 @@ void setupOled() {
 	display.setFont(Verdana12_bold);
 }
 
+TempSensor tempMod;
 
 //------------------------------------------------------------------------------
 void setup() {
@@ -77,6 +84,9 @@ void setup() {
 
 	eventManager->registereventReceiver(mainMenu);
 	homeMenu->activate();
+
+	tempMod.get();
+
 }
 //------------------------------------------------------------------------------
 void loop() {

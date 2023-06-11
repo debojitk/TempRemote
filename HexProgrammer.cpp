@@ -2,8 +2,8 @@
 #include <arduino.h>
 #include <EEPROM.h>
 
-static_assert(sizeof(MemoryLayout) == ((sizeof(uint8_t) * NUM_INDEX) + (sizeof(uint32_t) * NUM_HEX)));
-static_assert(RemoteData::UNKNOWN == NUM_HEX);
+static_assert(sizeof(MemoryLayout) == ((sizeof(uint8_t) * CONFIG::NUM_INDEX) + (sizeof(uint32_t) * CONFIG::NUM_HEX)));
+static_assert(RemoteData::UNKNOWN == CONFIG::NUM_HEX);
 
 
 
@@ -32,8 +32,8 @@ BOOST: 0xCFF10E : 13627662
   _layout._hexCodes[RemoteData::FIVE]      = 0xCF11EE;
   _layout._hexCodes[RemoteData::BOOST]     = 0xCFF10E;
 
-  for (uint8_t i = 0; i < NUM_INDEX; ++i) {
-    _layout._index[i] = NUM_HEX;
+  for (uint8_t i = 0; i < CONFIG::NUM_INDEX; ++i) {
+    _layout._index[i] = CONFIG::NUM_HEX;
   }
 }
 
@@ -45,11 +45,11 @@ void RemoteData::program(uint8_t begin, uint8_t end, eButton e) {
 
 uint32_t
 RemoteData::at(uint8_t t) const {
-  if (t >= NUM_INDEX) {
+  if (t >= CONFIG::NUM_INDEX) {
     return 0xFFFFFF;
   }
   uint8_t hexIndex = _layout._index[t];
-  if (hexIndex >= NUM_HEX) {
+  if (hexIndex >= CONFIG::NUM_HEX) {
     return 0xFFFFFF;
   }
   return _layout._hexCodes[hexIndex];
@@ -59,7 +59,7 @@ void RemoteData::serialPrint() const {
   const char* NAMES[] = { "POWER", "ONE", "TWO", "THREE", "FOUR", "FIVE", "BOOST", "UNKNOWN" };
   char buffer[75];
   char* name = nullptr;
-  for (uint8_t i = 0; i < NUM_INDEX; ++i) {
+  for (uint8_t i = 0; i < CONFIG::NUM_INDEX; ++i) {
     uint32_t val = at(i);
     char* name = NAMES[_layout._index[i]];
 
@@ -68,6 +68,7 @@ void RemoteData::serialPrint() const {
     Serial.println(val, HEX);
   }
 }
+
 /*
 RemoteData remote;
 
@@ -85,4 +86,9 @@ void setup() {
   remote.program(40, 49, RemoteData::BOOST);
 
   remote.serialPrint();  // As PROGRAMMED
+}
+*/
+/* void loop() {
+
 } */
+

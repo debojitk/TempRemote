@@ -2,14 +2,29 @@
 
 #include <stdint.h>
 
-constexpr uint32_t NUM_INDEX = 50;
-constexpr uint32_t NUM_HEX = 7;
-
+namespace CONFIG {
+    constexpr uint32_t NUM_INDEX = 50;
+    constexpr uint32_t NUM_HEX = 7;
+    constexpr uint32_t BAUD_RATE = 9600;
+};
 
 struct MemoryLayout {
-  uint8_t _index[NUM_INDEX];    // temperature index
-  uint32_t _hexCodes[NUM_HEX];  // hexCode index
+  uint8_t  _index[CONFIG::NUM_INDEX];    // temperature index
+  uint32_t _hexCodes[CONFIG::NUM_HEX];  // hexCode index
 };
+
+template <typename SensorModule, typename Value>
+class Sensor {
+public:
+    Value       get() const           { return _s.get(); }
+    bool        set(const Value& val) { _s.set(val); }
+    const char* error() const         { _s.error(); }
+    void        setup()               { _s.setup(); }
+private:
+    SensorModule _s;
+};
+
+
 
 class RemoteData {
 public:
