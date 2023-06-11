@@ -1,6 +1,8 @@
 # Eclipse IDE
 .settings/
 .metadata/
+.cproject
+.project
 
 # Arduino specific files
 build/
@@ -28,3 +30,4 @@ core.a
 
 # Other generated files
 *.class
+
