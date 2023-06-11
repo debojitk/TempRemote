@@ -16,7 +16,7 @@
 
 #define CHAR_HEIGHT 2
 #define VIEWPORT_MENU_COUNT 3
-
+#define OLED_COLUMNS 128
 #define I2C_ADDRESS 0x3C
 #define RST_PIN -1
 
@@ -38,9 +38,6 @@ void SerialMenuRenderer::renderMenu(AbstractMenuEntity* _menu) {
 }
 
 
-OLEDMenuRenderer::OLEDMenuRenderer(){
-	//setupOled();
-}
 OLEDMenuRenderer:: OLEDMenuRenderer(SSD1306AsciiAvrI2c& displayObject):display(displayObject){
 	//this->display = display;
 	//setupOled();
@@ -49,7 +46,7 @@ OLEDMenuRenderer:: OLEDMenuRenderer(SSD1306AsciiAvrI2c& displayObject):display(d
 void OLEDMenuRenderer::renderMenu(AbstractMenuEntity* _menu) {
 	this->menu = reinterpret_cast<MenuEntity *>(_menu);
 	startRange = 0;
-	endRange = min(this->menu->getNumItems(), VIEWPORT_MENU_COUNT);
+	endRange = min(this->menu->getNumItems() + 1, VIEWPORT_MENU_COUNT); // +1 for back menu
 	renderMenuHeader(this->menu->getName());
 	selectMenu(this->menu->getCurrentIndex());
 }
@@ -90,7 +87,62 @@ void OLEDMenuRenderer::selectMenu(int index) {
 			display.setInvertMode(true);
 		}
 		display.clearToEOL();
-		display.print(menu->getItem(i)->getName());
+		if (i == menu->getBackIndex()){
+			display.print(F("Back"));
+		} else{
+			display.print(menu->getItem(i)->getName());
+		}
 		display.setInvertMode(false);
 	}
+}
+
+//OLEDSingleFieldMenuItemRenderer definition
+
+OLEDSingleFieldMenuItemRenderer::OLEDSingleFieldMenuItemRenderer(SSD1306AsciiAvrI2c &displayObject):display(displayObject) {
+}
+
+void OLEDSingleFieldMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
+	this->menu = reinterpret_cast<SingleFieldMenuItem *>(menu);
+	display.clear();
+	display.setInvertMode(false);
+	display.setCursor(0, 0);
+	display.print(this->menu->getName());
+
+	display.setCursor(52, 3);
+	display.setFont(lcdnums12x16);
+	if(this->menu->getValue() < 10){
+		display.print(F("0"));
+		display.setCol(64);
+	}
+	display.print(this->menu->getValue());
+	display.setFont(Verdana12_bold);
+	display.setCursor(0, 6);
+	display.print(F("Save"));
+	display.setCursor(OLED_COLUMNS/2, 6);
+	display.print(F("Back"));
+	display.setInvertMode(true);
+
+	switch(this->menu->getCurrentIndex()){
+	case SingleFieldMenuItem::DATA_INDEX://value
+		display.setCursor(52, 3);
+		display.setFont(lcdnums12x16);
+		if(this->menu->getValue() < 10){
+			display.print(F("0"));
+			display.setCol(64);
+		}
+		display.print(this->menu->getValue());
+		display.setFont(Verdana12_bold);
+		break;
+	case SingleFieldMenuItem::SAVE_INDEX://save
+		display.setCursor(0, 6);
+		display.print(F("Save"));
+		break;
+	case SingleFieldMenuItem::BACK_INDEX:
+		display.setCursor(OLED_COLUMNS/2, 6);
+		display.print(F("Back"));
+		break;
+	default:
+		break;
+	}
+	display.setInvertMode(false);
 }

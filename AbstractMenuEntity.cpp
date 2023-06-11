@@ -24,9 +24,6 @@ const char* AbstractMenuEntity::getName() {
 	return this->name;
 }
 
-void AbstractMenuEntity::setBackIndex(int index){
-	this->backIndex = index;
-}
 int AbstractMenuEntity::getBackIndex(){
 	return this->backIndex;
 }
@@ -80,12 +77,26 @@ void AbstractMenuEntity::render(){
 	this->renderer->renderMenu(this);
 }
 
+void AbstractMenuEntity::back(){
+	Serial.print(F("menu is deactivated ->"));
+	Serial.println(getName());
+	this->setActive(false);
+	AbstractMenuEntity *prevMenu = AbstractMenuEntity::menuStack.pop();
+	if (prevMenu != nullptr) {
+		Serial.print(F("Popped menu->"));
+		Serial.println(prevMenu->getName());
+		prevMenu->activate();
+	}
+}
+
+
 
 // Definition for MenuEntity
-MenuEntity::MenuEntity(IMenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], int numItems): AbstractMenuEntity(name, renderer) {
+MenuEntity::MenuEntity(IMenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], uint8_t numitems): AbstractMenuEntity(name, renderer) {
 	this->items = items;
-	this->numItems = numItems;
+	this->numItems = numitems;
 	this->renderer = renderer;
+	this->backIndex = numItems;
 }
 
 int MenuEntity::getNumItems() {
@@ -107,11 +118,10 @@ void MenuEntity::handleClick(){
 	if (!this->isActive())
 		return;
 	goToNextItem();
-	//renderer->renderMenu(this);
 	render();
 }
 void MenuEntity::goToNextItem() {
-	currentIndex = (currentIndex + 1)%numItems;
+	currentIndex = (currentIndex + 1)%(numItems + 1);
 	Serial.print(F("currentIndex = "));
 	Serial.println(currentIndex);
 }
@@ -129,24 +139,12 @@ void MenuEntity::handleDoubleClick(){
 				AbstractMenuEntity::menuStack.push(this);
 				Serial.print(F("Pushing menu->"));
 				Serial.println(this->getName());
+				item->setEventManager(eventManager);
 				item->activate();
 			}
 		}
 	}
 }
-
-void MenuEntity::back(){
-	Serial.print(F("menu is deactivated ->"));
-	Serial.println(getName());
-	this->setActive(false);
-	AbstractMenuEntity *prevMenu = AbstractMenuEntity::menuStack.pop();
-	if (prevMenu != nullptr) {
-		Serial.print(F("Popped menu->"));
-		Serial.println(prevMenu->getName());
-		prevMenu->activate();
-	}
-}
-
 
 
 // Definition for MenuItem
@@ -169,13 +167,11 @@ void HomeMenu::handleClick(){
 void HomeMenu::handleDoubleClick(){
 	if (this->child && !this->child->isActive()){
 		AbstractMenuEntity::menuStack.push(this);
+		this->child->setEventManager(eventManager);
 		this->child->activate();
 	}
 }
-void HomeMenu::activate(){
-	Serial.println(F("Activating menu"));
-	AbstractMenuEntity::activate();
-}
+
 void HomeMenu::back(){
 	// does nothing
 }
@@ -193,4 +189,61 @@ struct CurrentTime HomeMenu::getTime(){
 	return cTime;
 }
 
+// Definition for SingleFieldMenuItem
 
+SingleFieldMenuItem::SingleFieldMenuItem(IMenuRenderer *renderer,const char *name, const char *label, uint8_t maxValue):MenuItem(name, renderer) {
+	this->label = label;
+	this->value = 0;
+	this->backIndex = SingleFieldMenuItem::BACK_INDEX;
+	this->maxValue = maxValue;
+}
+
+int SingleFieldMenuItem::getValue() {
+	return this->value;
+}
+
+void SingleFieldMenuItem::setValue(int value) {
+	this->value = value;
+}
+
+const char* SingleFieldMenuItem::getLabel() {
+	return this->label;
+}
+
+void SingleFieldMenuItem::handleClick() {
+	if (!this->isActive())
+		return;
+	if(changeData){
+		value = (value + 1)%(maxValue+1);
+	} else {
+		currentIndex = (currentIndex + 1)%3;
+	}
+	Serial.print(F("Rendering on click:"));
+	Serial.println(currentIndex);
+	render();
+}
+
+void SingleFieldMenuItem::handleDoubleClick() {
+
+	switch(currentIndex){
+	case SingleFieldMenuItem::BACK_INDEX:
+		back();
+		break;
+	case SingleFieldMenuItem::DATA_INDEX:
+		changeData = !changeData;
+		break;
+	case SingleFieldMenuItem::SAVE_INDEX:
+		save();
+		break;
+	default:
+		break;
+	}
+}
+
+void SingleFieldMenuItem::save() {
+	//TODO: Need to implement a IKeyValuePairRepository
+}
+
+void SingleFieldMenuItem::back() {
+	AbstractMenuEntity::back();
+}

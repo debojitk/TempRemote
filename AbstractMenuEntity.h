@@ -20,7 +20,6 @@ class AbstractMenuEntity: public IEventReceiver, public IRenderable { // @suppre
 public:
 	AbstractMenuEntity(const char *name, IMenuRenderer *renderer);
 	const char* getName();
-	void setBackIndex(int index);
 	int getBackIndex();
 	void setCurrentIndex(int index);
 	int getCurrentIndex();
@@ -35,7 +34,7 @@ public:
 	virtual void activate();
 	virtual void handleClick() = 0;
 	virtual void handleDoubleClick() = 0;
-	virtual void back() = 0;
+	virtual void back();
 	// declare the stack
 	static CustomStack<AbstractMenuEntity *, 10> menuStack;
 protected:
@@ -50,23 +49,21 @@ protected:
 
 class MenuEntity: public AbstractMenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	MenuEntity(IMenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], int numItems);
+	MenuEntity(IMenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], uint8_t numitems);
 	void activate();
 	int getNumItems();
 	AbstractMenuEntity* getItem(int index);
 	void handleClick();
 	void goToNextItem();
 	void handleDoubleClick();
-	void back();
 private:
 	AbstractMenuEntity** items;
-	int numItems;
+	uint8_t numItems = 0;
 };
 
 class MenuItem: public AbstractMenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	MenuItem(const char *name, IMenuRenderer *renderer);
-	virtual void activate();
 	virtual void handleClick() = 0;
 	virtual void handleDoubleClick() = 0;
 	virtual void back() = 0;
@@ -78,7 +75,6 @@ public:
 	void setTime(uint8_t hour, uint8_t min, uint8_t sec);
 	void handleClick();
 	void handleDoubleClick();
-	void activate();
 	void back();
 	double getTemperature();
 	struct CurrentTime getTime();
@@ -89,6 +85,25 @@ private:
 	AbstractMenuEntity *child = nullptr;
 };
 
+class SingleFieldMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	SingleFieldMenuItem(IMenuRenderer *renderer, const char* name, const char *label, uint8_t maxValue);
+	int getValue();
+	void setValue(int value);
+	const char *getLabel();
+	void handleClick();
+	void handleDoubleClick();
+	void save();
+	void back();
+    static constexpr uint8_t DATA_INDEX  = 0;
+    static constexpr uint8_t SAVE_INDEX = 1;
+    static constexpr uint8_t BACK_INDEX  = 2;
+private:
+	const char *label;
+	uint8_t value;
+	uint8_t maxValue;
+	bool changeData = false;
+};
 
 
 #endif /* ABSTRACTMENUENTITY_H_ */

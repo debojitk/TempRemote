@@ -30,19 +30,20 @@ using TempSensor = Sensor<TemperatureModule, TemperatureValue>;
 SSD1306AsciiAvrI2c display;
 // creating renderer
 IMenuRenderer *oledMenuRenderer = new OLEDMenuRenderer(display);
-//// creating main menu
-AbstractMenuEntity *menu11 = new MenuEntity(oledMenuRenderer, "Hello 11", nullptr, 0);
-AbstractMenuEntity *menu12 = new MenuEntity(oledMenuRenderer, "Hello 12", nullptr, 0);
-AbstractMenuEntity *menu13 = new MenuEntity(oledMenuRenderer, "Hello 13", nullptr, 0);
-AbstractMenuEntity *menu14 = new MenuEntity(oledMenuRenderer, "Back", nullptr, 0);
-AbstractMenuEntity *menus1[] = {menu11, menu12, menu13, menu14};
+IMenuRenderer *oledSingleFieldMenuRenderer = new OLEDSingleFieldMenuItemRenderer(display);
 
-AbstractMenuEntity *menu1 = new MenuEntity(oledMenuRenderer, "Hello 1", menus1, 4);
-AbstractMenuEntity *menu2 = new MenuEntity(oledMenuRenderer, "Hello 2", nullptr, 0);
-AbstractMenuEntity *menu3 = new MenuEntity(oledMenuRenderer, "Hello 3", nullptr, 0);
-AbstractMenuEntity *menu4 = new MenuEntity(oledMenuRenderer, "Back", nullptr, 0);
-AbstractMenuEntity *mainMenus[] = {menu1, menu2, menu3, menu4};
-AbstractMenuEntity *mainMenu = new MenuEntity(oledMenuRenderer, "Main Menu", mainMenus, 4);
+//// creating main menu
+
+MenuItem *hourMenu = new SingleFieldMenuItem(oledSingleFieldMenuRenderer, "Set Hour", "", 23);
+MenuItem *minuteMenu = new SingleFieldMenuItem(oledSingleFieldMenuRenderer, "Set Minute", "", 59);
+MenuItem *secondMenu = new SingleFieldMenuItem(oledSingleFieldMenuRenderer, "Set Second", "", 59);
+AbstractMenuEntity *clockMenu[] = {hourMenu, minuteMenu, secondMenu};
+
+AbstractMenuEntity *menu1 = new MenuEntity(oledMenuRenderer, "Clock", clockMenu, 3);
+AbstractMenuEntity *menu2 = new MenuEntity(oledMenuRenderer, "Schedule", nullptr, 0);
+AbstractMenuEntity *menu3 = new MenuEntity(oledMenuRenderer, "Train", nullptr, 0);
+AbstractMenuEntity *mainMenus[] = {menu1, menu2, menu3};
+AbstractMenuEntity *mainMenu = new MenuEntity(oledMenuRenderer, "Main Menu", mainMenus, 3);
 
 HomeMenuItemRenderer *renderer = new HomeMenuItemRenderer(display);
 AbstractMenuEntity *homeMenu = new HomeMenu(renderer, "TempRemote V1.0", mainMenu);
@@ -72,20 +73,17 @@ void setup() {
 	setupOled();
 	Serial.println(F("Hello World!"));
 	Serial.println(freeMemory());
+
 	buttonObserver->enable();
 
 	homeMenu->setEventManager(eventManager);
-
-	mainMenu->setBackIndex(3);
 	mainMenu->setEventManager(eventManager);
-
-	menu1->setBackIndex(3);
 	menu1->setEventManager(eventManager);
 
 	eventManager->registereventReceiver(mainMenu);
 	homeMenu->activate();
 
-	tempMod.get();
+	//tempMod.get();
 
 }
 //------------------------------------------------------------------------------
