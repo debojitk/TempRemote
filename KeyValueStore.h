@@ -11,92 +11,119 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
-template <typename T>
-struct KeyValuePair {
-  char* key;
-  T value;
+enum ValueType{
+	IntType = 1,
+	FloatType,
+	TimeType,
+	DateType,
+	StringType,
+	RemoteHexType,
+	ScheduleType
+
 };
-
-template <typename T>
-class KeyValueStore {
-private:
-  const int MAX_KEY_LENGTH = 32;
-  const int EEPROM_START_ADDRESS = 0;
-
+class KeyValueStoreClass {
 public:
-  void set(KeyValuePair<T> kvp) {
-    int address = findKeyAddress(kvp.key);
-    if (address == -1) {
-      address = findEmptyAddress();
-      if (address == -1) {
-        // EEPROM is full, handle the error accordingly
-        return;
-      }
-      writeKey(address, kvp.key);
-    }
-    writeValue(address, kvp.value);
-  }
+	//category is used to have same key for different data type
+	template<typename T>
+	T &get(ValueType category, const char* key, T &value) {
+		size_t address = findKeyAddress(category, key);
+		if (address != 0) {
+			address += sizeof(category) + MAX_KEY_LENGTH; // Move past the category and key
+			EEPROM.get(address, value);
+		}
+		return value;
+	}
 
-  T get(const char* key) {
-    int address = findKeyAddress(key);
-    if (address == -1) {
-      // Key not found, handle the error accordingly
-      T defaultValue;
-      return defaultValue;
-    }
-    return readValue(address);
-  }
+	template <typename T>
+	void set(ValueType category, const char* key, const T& value) {
+		size_t address = findKeyAddress(category, key);
+		if (address != 0) {
+			address += sizeof(category) + MAX_KEY_LENGTH; // Move past the key
+			EEPROM.put(address, value);
+		} else {
+			address = findEmptyAddress();
+			if (address == 0) {
+				return;
+			}
+
+			// Store the category
+			EEPROM.put(address, category);
+			address += sizeof(category);
+
+			// Store the key
+			puts(address, key);
+			address += MAX_KEY_LENGTH;
+			// Store the value
+			EEPROM.put(address, value);
+		}
+	}
+
 
 private:
-  int findKeyAddress(const char* key) {
-    for (int address = EEPROM_START_ADDRESS; address < EEPROM.length(); address += MAX_KEY_LENGTH + sizeof(T)) {
-      if (strcmp(key, readKey(address)) == 0) {
-        return address;
-      }
-    }
-    return -1;  // Key not found
-  }
+	static constexpr int MAX_KEY_LENGTH = 15;
+	static constexpr int EEPROM_START_ADDRESS = 1;
+	size_t findKeyAddress(ValueType category, const char* key) {
+		size_t address = EEPROM_START_ADDRESS;
+		ValueType storedCategory;
+		char storedKey[MAX_KEY_LENGTH];
 
-  int findEmptyAddress() {
-    for (int address = EEPROM_START_ADDRESS; address < EEPROM.length(); address += MAX_KEY_LENGTH + sizeof(T)) {
-      if (readKey(address)[0] == '\0') {
-        return address;
-      }
-    }
-    return -1;  // EEPROM is full
-  }
+		while (address < EEPROM.length()) {
+			EEPROM.get(address, storedCategory);
+			if (storedCategory == category) {
+				address += sizeof(storedCategory);
+				EEPROM.get(address, storedKey);
 
-  char* readKey(int address) {
-    static char key[MAX_KEY_LENGTH + 1];
-    for (int i = 0; i < MAX_KEY_LENGTH; i++) {
-      key[i] = EEPROM.read(address + i);
-    }
-    key[MAX_KEY_LENGTH] = '\0';
-    return key;
-  }
+				bool keyMatches = true;
+				for (size_t i = 0; i < MAX_KEY_LENGTH; ++i) {
+					if (key[i] == '\0' || key[i] != storedKey[i]) {
+						keyMatches = false;
+						break;
+					}
+				}
 
-  void writeKey(int address, const char* key) {
-    for (int i = 0; i < MAX_KEY_LENGTH; i++) {
-      EEPROM.write(address + i, key[i]);
-    }
-  }
+				if (keyMatches) {
+					return address;
+				}
 
-  T readValue(int address) {
-    T value;
-    for (int i = 0; i < sizeof(T); i++) {
-      *((uint8_t*)&value + i) = EEPROM.read(address + MAX_KEY_LENGTH + i);
-    }
-    return value;
-  }
+				address += MAX_KEY_LENGTH;
+			} else {
+				// Skip to the next entry
+				size_t entrySize = sizeof(storedCategory) + MAX_KEY_LENGTH;
+				address += entrySize;
+			}
+		}
 
-  void writeValue(int address, const T& value) {
-    for (int i = 0; i < sizeof(T); i++) {
-      EEPROM.write(address + MAX_KEY_LENGTH + i, *((uint8_t*)&value + i));
-    }
-  }
+		return 0; // Key not found
+	}
+
+
+	size_t findEmptyAddress() {
+		size_t address = EEPROM_START_ADDRESS;
+		ValueType storedCategory;
+
+		while (address < EEPROM.length()) {
+			EEPROM.get(address, storedCategory);
+			if (storedCategory == 0) {
+				return address; // Found an empty address
+			} else {
+				// Skip to the next entry
+				address += sizeof(storedCategory) + MAX_KEY_LENGTH;
+			}
+		}
+
+		return 0; // No empty address found
+	}
+
+	void puts(size_t address, const char* data) {
+		size_t dataLength = strlen(data);
+		for (size_t i = 0; i < dataLength; i++) {
+			EEPROM.write(address + i, data[i]);
+		}
+		for (size_t i = dataLength; i < MAX_KEY_LENGTH; i++) {
+			EEPROM.write(address + i, 0xFF); // Fill with non-zero value
+		}
+	}
 };
 
-
-
-
+static KeyValueStoreClass KeyValueStore;
 #endif /* KEYVALUESTORE_H_ */

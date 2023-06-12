@@ -67,8 +67,14 @@ void setupOled() {
 
 TempSensor tempMod;
 
-KeyValueStore<int> intStore;
-KeyValueStore<float> floatStore;
+
+void keyvaluestoreTest(){
+	int x=50;
+	KeyValueStore.set(IntType, "testKey", x);
+	int y = 20;
+	KeyValueStore.get(IntType, "testKey", y);
+	Serial.println(y);
+}
 
 
 //------------------------------------------------------------------------------
@@ -86,7 +92,7 @@ void setup() {
 
 	eventManager->registereventReceiver(mainMenu);
 	homeMenu->activate();
-
+	keyvaluestoreTest();
 	//tempMod.get();
 
 }
@@ -95,5 +101,4 @@ void loop() {
 	eventManager->processEvents();
 	//delay(10);
 }
-
 
