@@ -14,7 +14,7 @@
 #include "MenuItemRenderer.h"
 #include <EEPROM.h>
 #include "IMenuRenderer.h"
-
+#include "KeyValueStore.h"
 #include "HexProgrammer.h"
 #include "SensorTypes.h"
 
@@ -39,9 +39,9 @@ MenuItem *minuteMenu = new SingleFieldMenuItem(oledSingleFieldMenuRenderer, "Set
 MenuItem *secondMenu = new SingleFieldMenuItem(oledSingleFieldMenuRenderer, "Set Second", "", 59);
 AbstractMenuEntity *clockMenu[] = {hourMenu, minuteMenu, secondMenu};
 
-AbstractMenuEntity *menu1 = new MenuEntity(oledMenuRenderer, "Clock", clockMenu, 3);
-AbstractMenuEntity *menu2 = new MenuEntity(oledMenuRenderer, "Schedule", nullptr, 0);
-AbstractMenuEntity *menu3 = new MenuEntity(oledMenuRenderer, "Train", nullptr, 0);
+AbstractMenuEntity *menu1 = new MenuEntity(oledMenuRenderer, "Set Time", clockMenu, 3);
+AbstractMenuEntity *menu2 = new MenuEntity(oledMenuRenderer, "Set Schedule", nullptr, 0);
+AbstractMenuEntity *menu3 = new MenuEntity(oledMenuRenderer, "Train Remote", nullptr, 0);
 AbstractMenuEntity *mainMenus[] = {menu1, menu2, menu3};
 AbstractMenuEntity *mainMenu = new MenuEntity(oledMenuRenderer, "Main Menu", mainMenus, 3);
 
@@ -66,6 +66,10 @@ void setupOled() {
 }
 
 TempSensor tempMod;
+
+KeyValueStore<int> intStore;
+KeyValueStore<float> floatStore;
+
 
 //------------------------------------------------------------------------------
 void setup() {
