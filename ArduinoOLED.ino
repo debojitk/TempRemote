@@ -66,7 +66,7 @@ void setupOled() {
 }
 
 TempSensor tempMod;
-
+TimeModule t;
 
 void keyvaluestoreTest(){
 	int x=50;
