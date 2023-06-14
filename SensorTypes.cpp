@@ -1,8 +1,11 @@
+
+
 #include "SensorTypes.h"
 #include <Arduino.h>
 #include <Wire.h> // must be included here so that Arduino library object file references work
 #include <RtcDS3231.h>
 #include <IRremote.h>
+
 #if defined(__RTC_DS_3231__)
 TimeModule::TimeModule():_rtc(Wire) {
 }
@@ -23,12 +26,11 @@ void TimeModule::setup() {
 	{
 		_rtc.SetDateTime(compiled);
 	}
-
 }
 
 TimeValue TimeModule::get() const {
 	TimeValue t;
-	RtcDateTime dt((const RtcDateTime&)_rtc.GetDateTime());
+	RtcDateTime dt = const_cast<RtcDS3231<TwoWire>&>(_rtc).GetDateTime();
 	t._day = dt.Day();
 	t._hour = dt.Hour();
 	t._min = dt.Minute();
@@ -41,6 +43,7 @@ TimeValue TimeModule::get() const {
 bool TimeModule::set(const TimeValue &val) {
 	RtcDateTime dateTime(val._year, val._month, val._day, val._hour, val._min, val._sec);
 	_rtc.SetDateTime(dateTime);
+	return true;
 }
 #endif
 

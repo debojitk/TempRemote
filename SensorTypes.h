@@ -1,11 +1,8 @@
 #pragma once
-
 #include <DHT22.h>
-#include <RtcDS1302.h>
-#include <Wire.h> // must be included here so that Arduino library object file references work
-#include <RtcDS3231.h>
 
 #define __RTC_DS_3231__
+
 struct TimeValue {
 	uint8_t  _month;
 	uint8_t  _day;
@@ -39,6 +36,7 @@ struct TimeValue {
 };
 
 #if defined(__RTC_DS1302__)
+#include <RtcDS1302.h>
 class TimeModule {
 public:
 	TimeModule() : _myWire(IO, CLK, CE), _rtc(_myWire) {}
@@ -58,6 +56,8 @@ private:
 	RtcDS1302<ThreeWire> _rtc;
 };
 #elif defined(__RTC_DS_3231__)
+#include <RtcDS3231.h>
+#include <Wire.h> // must be included here so that Arduino library object file references work
 class TimeModule {
 public:
 	TimeModule();
