@@ -16,6 +16,7 @@
 #include "IMenuRenderer.h"
 #include "KeyValueStore.h"
 #include "HexProgrammer.h"
+#include "Sensor.h"
 #include "SensorTypes.h"
 
 using TempSensor = Sensor<TemperatureModule, TemperatureValue>;
