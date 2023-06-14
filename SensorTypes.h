@@ -44,7 +44,10 @@ public:
 	TimeModule() : _myWire(IO, CLK, CE), _rtc(_myWire) {}
 	void setup() {
 		RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
-
+		RtcDateTime now = _rtc.GetDateTime();
+		if (now < compiled) {
+			_rtc.SetDateTime(compiled);
+		}
 	}
 private:
 	static constexpr uint8_t IO  = 3;
@@ -92,3 +95,19 @@ private:
 	DHT22 _dht22;
 };
 
+
+using RemoteRXValue = uint32_t;
+class IRrecv;
+class decode_results;
+
+class RemoteRXModule {
+public:
+	RemoteRXModule();
+	~RemoteRXModule();
+	RemoteRXValue get();
+	void setup();
+private:
+	static constexpr uint8_t PIN = 11;
+	IRrecv* _rx;
+	decode_results* _results;
+};

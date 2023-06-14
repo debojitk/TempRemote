@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <Wire.h> // must be included here so that Arduino library object file references work
 #include <RtcDS3231.h>
+#include <IRremote.h>
 #if defined(__RTC_DS_3231__)
 TimeModule::TimeModule():_rtc(Wire) {
 }
@@ -42,3 +43,31 @@ bool TimeModule::set(const TimeValue &val) {
 	_rtc.SetDateTime(dateTime);
 }
 #endif
+
+RemoteRXModule::RemoteRXModule() :
+		_rx(new IRrecv(PIN)),
+		_results(new decode_results) {}
+
+RemoteRXModule::~RemoteRXModule() {
+	delete _rx;
+	delete _results;
+}
+
+void
+RemoteRXModule::setup() {
+	_rx->enableIRIn();
+}
+
+RemoteRXValue
+RemoteRXModule::get() {
+	if (_rx->decode(_results)) {  //this line checks if we received a signal from the IR receiver
+		RemoteRXValue irVal = _results->value;
+		if (irVal == 0xffffffff) {
+			_rx->resume();
+			return 0xffffffff;
+		}
+		_rx->resume();
+		return irVal;
+	}
+	return 0xffffffff;
+}
