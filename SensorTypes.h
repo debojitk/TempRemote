@@ -95,8 +95,9 @@ private:
 	DHT22 _dht22;
 };
 
-
 using RemoteRXValue = uint32_t;
+constexpr RemoteRXValue NullRemoteRXValue = 0xffffffff;
+
 class IRrecv;
 class decode_results;
 

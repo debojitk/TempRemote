@@ -62,12 +62,12 @@ RemoteRXValue
 RemoteRXModule::get() {
 	if (_rx->decode(_results)) {  //this line checks if we received a signal from the IR receiver
 		RemoteRXValue irVal = _results->value;
-		if (irVal == 0xffffffff) {
+		if (irVal == NullRemoteRXValue) {
 			_rx->resume();
-			return 0xffffffff;
+			return NullRemoteRXValue;
 		}
 		_rx->resume();
 		return irVal;
 	}
-	return 0xffffffff;
+	return NullRemoteRXValue;
 }
