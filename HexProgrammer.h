@@ -5,12 +5,21 @@
 namespace CONFIG {
     constexpr uint32_t NUM_INDEX = 50;
     constexpr uint32_t NUM_HEX = 7;
+    constexpr uint32_t NUM_SCHEDULE = 4;
     constexpr uint32_t BAUD_RATE = 9600;
 };
-
+struct SchedulerTime {
+	uint8_t _hr = 0;
+	uint8_t _min = 0;
+};
+struct Schedule {
+	SchedulerTime _begin;
+	SchedulerTime _end;
+};
 struct MemoryLayout {
-  uint8_t  _index[CONFIG::NUM_INDEX];    // temperature index
-  uint32_t _hexCodes[CONFIG::NUM_HEX];  // hexCode index
+  uint8_t   _index[CONFIG::NUM_INDEX];    // temperature index
+  uint32_t  _hexCodes[CONFIG::NUM_HEX];  // hexCode index
+  Schedule  _schedules[CONFIG::NUM_SCHEDULE];
 };
 
 template <typename SensorModule, typename Value>

@@ -2,7 +2,9 @@
 #include <arduino.h>
 #include <EEPROM.h>
 
-static_assert(sizeof(MemoryLayout) == ((sizeof(uint8_t) * CONFIG::NUM_INDEX) + (sizeof(uint32_t) * CONFIG::NUM_HEX)));
+static_assert(sizeof(MemoryLayout) == ((sizeof(uint8_t) * CONFIG::NUM_INDEX) +
+		                               (sizeof(uint32_t) * CONFIG::NUM_HEX)) +
+									   (sizeof(Schedule) * CONFIG::NUM_SCHEDULE));
 static_assert(RemoteData::UNKNOWN == CONFIG::NUM_HEX);
 
 
