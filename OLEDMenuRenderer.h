@@ -17,6 +17,7 @@ class OLEDMenuRenderer: public IMenuRenderer {
 public:
 	OLEDMenuRenderer(SSD1306AsciiAvrI2c& display);
 	void renderMenu(AbstractMenuEntity* menu);
+	void clear();
 private:
 	SSD1306AsciiAvrI2c& display;
 	MenuEntity* menu = nullptr;
@@ -32,6 +33,7 @@ class OLEDSingleFieldMenuItemRenderer: public IMenuRenderer {
 public:
 	OLEDSingleFieldMenuItemRenderer(SSD1306AsciiAvrI2c& display);
 	void renderMenu(AbstractMenuEntity* menu);
+	void clear();
 private:
 	SSD1306AsciiAvrI2c& display;
 	SingleFieldMenuItem *menu = nullptr;

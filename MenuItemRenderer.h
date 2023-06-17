@@ -19,6 +19,7 @@ class HomeMenuItemRenderer: public IMenuRenderer {
 public:
 	HomeMenuItemRenderer(SSD1306AsciiAvrI2c& display);
 	void renderMenu(AbstractMenuEntity* menu);
+	void clear();
 private:
 	SSD1306AsciiAvrI2c& display;
 	HomeMenu *menu;

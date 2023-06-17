@@ -64,8 +64,8 @@ void AbstractMenuEntity::setEventManager(EventManager *manager){
 
 
 void AbstractMenuEntity::activate() {
-	Serial.print(F("menu is not active, activating ->"));
-	Serial.println(getName());
+	SerialPrint(F("menu is not active, activating ->"));
+	SerialPrintln(getName());
 	if(eventManager != nullptr){
 		eventManager->registereventReceiver(this);
 	}
@@ -78,13 +78,13 @@ void AbstractMenuEntity::render(){
 }
 
 void AbstractMenuEntity::back(){
-	Serial.print(F("menu is deactivated ->"));
-	Serial.println(getName());
+	SerialPrint(F("menu is deactivated ->"));
+	SerialPrintln(getName());
 	this->setActive(false);
 	AbstractMenuEntity *prevMenu = AbstractMenuEntity::menuStack.pop();
 	if (prevMenu != nullptr) {
-		Serial.print(F("Popped menu->"));
-		Serial.println(prevMenu->getName());
+		SerialPrint(F("Popped menu->"));
+		SerialPrintln(prevMenu->getName());
 		prevMenu->activate();
 	}
 }
@@ -122,8 +122,8 @@ void MenuEntity::handleClick(){
 }
 void MenuEntity::goToNextItem() {
 	currentIndex = (currentIndex + 1)%(numItems + 1);
-	Serial.print(F("currentIndex = "));
-	Serial.println(currentIndex);
+	SerialPrint(F("currentIndex = "));
+	SerialPrintln(currentIndex);
 }
 
 void MenuEntity::handleDoubleClick(){
@@ -137,8 +137,8 @@ void MenuEntity::handleDoubleClick(){
 			if (item != nullptr){
 				this->setActive(false);
 				AbstractMenuEntity::menuStack.push(this);
-				Serial.print(F("Pushing menu->"));
-				Serial.println(this->getName());
+				SerialPrint(F("Pushing menu->"));
+				SerialPrintln(this->getName());
 				item->setEventManager(eventManager);
 				item->activate();
 			}
@@ -218,8 +218,8 @@ void SingleFieldMenuItem::handleClick() {
 	} else {
 		currentIndex = (currentIndex + 1)%3;
 	}
-	Serial.print(F("Rendering on click:"));
-	Serial.println(currentIndex);
+	SerialPrint(F("Rendering on click:"));
+	SerialPrintln(currentIndex);
 	render();
 }
 

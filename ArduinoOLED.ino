@@ -26,6 +26,7 @@ using TempSensor = Sensor<TemperatureModule, TemperatureValue>;
 #define CHAR_HEIGHT 12
 #define VIEWPORT_MENU_COUNT 3
 #define RST_PIN -1
+#define BUTTON_PIN 2
 
 
 SSD1306AsciiAvrI2c display;
@@ -51,9 +52,33 @@ AbstractMenuEntity *homeMenu = new HomeMenu(renderer, "TempRemote V1.0", mainMen
 // creating eventSourceObserver
 //IEventSourceObserver *serialObserver = new SerialObserver();
 
-IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(2, 500);
+IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_PIN, 500);
 // creating eventManager
+SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 5000);
 EventManager *eventManager = new EventManager(buttonObserver);
+
+void sleepCallback() {
+	display.clear();
+	buttonObserver->disable();
+}
+void wakeupCallback() {
+	if (eventManager->geteventReceiver()) {
+		AbstractMenuEntity *currentMenu = reinterpret_cast<AbstractMenuEntity *>(eventManager->geteventReceiver());
+		currentMenu->render();
+		buttonObserver->enable();
+		Serial.println(freeMemory());
+	}
+}
+
+void setupSleepWakeupHandler() {
+	interruptHandler->setSleepCallback(sleepCallback);
+	interruptHandler->setWakeupCallback(wakeupCallback);
+}
+
+void receiveEvent(EventType event) {
+	interruptHandler->clearLastEvent();
+}
+
 
 void setupOled() {
 #if RST_PIN >= 0
@@ -66,40 +91,40 @@ void setupOled() {
 	display.setFont(Verdana12_bold);
 }
 
-TempSensor tempMod;
-TimeModule t;
+//TempSensor tempMod;
+//TimeModule t;
 
-void keyvaluestoreTest(){
-	int x=50;
-	KeyValueStore.set(IntType, "testKey", x);
-	int y = 20;
-	KeyValueStore.get(IntType, "testKey", y);
-	Serial.println(y);
-}
+//void keyvaluestoreTest(){
+//	int x=50;
+//	KeyValueStore.set(IntType, "testKey", x);
+//	int y = 20;
+//	KeyValueStore.get(IntType, "testKey", y);
+//	Serial.println(y);
+//}
 
 
 //------------------------------------------------------------------------------
 void setup() {
 	Serial.begin(115200);
 	setupOled();
-	Serial.println(F("Hello World!"));
-	Serial.println(freeMemory());
-
+	SerialPrint(F("Hello World!"));
+	SerialPrintln(freeMemory());
+	setupSleepWakeupHandler();
 	buttonObserver->enable();
 
 	homeMenu->setEventManager(eventManager);
 	mainMenu->setEventManager(eventManager);
 	menu1->setEventManager(eventManager);
-
 	eventManager->registereventReceiver(mainMenu);
+	eventManager->setEventCallback(receiveEvent);
 	homeMenu->activate();
-	keyvaluestoreTest();
 	//tempMod.get();
-
 }
 //------------------------------------------------------------------------------
 void loop() {
 	eventManager->processEvents();
-	//delay(10);
+	interruptHandler->observeEvents();
+	//Serial.println(freeMemory());
+	//delay(100);
 }
 

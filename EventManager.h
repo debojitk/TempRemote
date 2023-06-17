@@ -10,6 +10,7 @@
 
 enum EventType: unsigned int;
 class IEventReceiver;
+class SleepWakeupInterruptHandler;
 
 class IEventSourceObserver{
 public:
@@ -29,10 +30,12 @@ public:
 	void unregisterEventReceiver();
 	void handleEvent(EventType event);
 	void processEvents();
-
+	void setEventCallback(void (*_eventCallback)(EventType));
 private:
 	IEventReceiver *eventReceiver;
 	IEventSourceObserver *eventSourceObserver;
+	void (*_eventCallback)(EventType) = nullptr;
+
 };
 
 class AbsEventSourceObserver: public IEventSourceObserver {
@@ -84,6 +87,32 @@ private:
 	unsigned long clickInstant =0;
 
 
+};
+
+class SleepWakeupInterruptHandler: public AbsEventSourceObserver { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	void enable();
+	void disable();
+	void initialize();
+	void sleep();
+	void wakeup();
+	void clearLastEvent();
+	void observeEvents();
+	void setSleepCallback(void (*cb)());
+	void setWakeupCallback(void (*cb)());
+	static SleepWakeupInterruptHandler *getInstance(uint8_t pin, uint16_t interval);
+private:
+	SleepWakeupInterruptHandler();
+	SleepWakeupInterruptHandler(uint8_t pin, uint16_t interval);
+	uint8_t pin;
+	uint16_t disableDelay;
+	uint32_t lastEventInstant = 0;
+	bool hasInitialized = false;
+	void (*_sleepCallback)() = nullptr;
+	void (*_wakeupCallback)() = nullptr;
+	static SleepWakeupInterruptHandler *_instance;
+	static void interruptHandlerInvoker();
+	void interruptHandler();
 };
 
 #endif /* EVENTMANAGER_H_ */

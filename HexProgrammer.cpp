@@ -1,6 +1,7 @@
 #include "HexProgrammer.h"
 #include <arduino.h>
 #include <EEPROM.h>
+#include "CommonItems.h"
 
 static_assert(sizeof(MemoryLayout) == ((sizeof(uint8_t) * CONFIG::NUM_INDEX) +
 		                               (sizeof(uint32_t) * CONFIG::NUM_HEX)) +
@@ -66,8 +67,8 @@ void RemoteData::serialPrint() const {
     char* name = NAMES[_layout._index[i]];
 
     sprintf(buffer, "Temperature: %dC : Mode: %s : Hex: 0x", i, name);
-    Serial.print(buffer);
-    Serial.println(val, HEX);
+    SerialPrint(buffer);
+    SerialPrintln(val, HEX);
   }
 }
 

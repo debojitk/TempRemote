@@ -29,3 +29,6 @@ void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 
 }
 
+void HomeMenuItemRenderer::clear() {
+	display.clear();
+}

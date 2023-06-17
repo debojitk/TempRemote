@@ -21,20 +21,20 @@
 #define RST_PIN -1
 
 void IMenuRenderer::renderMenu(AbstractMenuEntity* menu) {
-	Serial.println(F("MenuRenderer::rendermenu called"));
+	SerialPrintln(F("MenuRenderer::rendermenu called"));
 }
 
 void SerialMenuRenderer::renderMenu(AbstractMenuEntity* _menu) {
 	MenuEntity *menu = reinterpret_cast<MenuEntity *>(_menu);
-	Serial.println(F("SerialMenuRenderer::rendermenu called"));
-	Serial.println(menu->getName());
+	SerialPrintln(F("SerialMenuRenderer::rendermenu called"));
+	SerialPrintln(menu->getName());
 	for (int i = 0; i < menu->getNumItems(); i++) {
-		Serial.print(i + 1);
-		Serial.print(F(". "));
-		Serial.println(menu->getItem(i)->getName());
+		SerialPrint(i + 1);
+		SerialPrint(F(". "));
+		SerialPrintln(menu->getItem(i)->getName());
 	}
-	Serial.print(F("Currently selected = "));
-	Serial.println(menu->getCurrentIndex());
+	SerialPrint(F("Currently selected = "));
+	SerialPrintln(menu->getCurrentIndex());
 }
 
 
@@ -145,4 +145,15 @@ void OLEDSingleFieldMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 		break;
 	}
 	display.setInvertMode(false);
+}
+
+void OLEDMenuRenderer::clear() {
+	display.clear();
+}
+
+void OLEDSingleFieldMenuItemRenderer::clear() {
+	display.clear();
+}
+
+void SerialMenuRenderer::clear() {
 }

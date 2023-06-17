@@ -7,6 +7,7 @@
 
 #ifndef COMMONITEMS_H_
 #define COMMONITEMS_H_
+//#define DISABLE_SERIAL_PRINT
 
 enum EventType: unsigned int {
 	NoEvent = 0,
@@ -30,4 +31,12 @@ class IRenderable { // @suppress("Class has a virtual method and non-virtual des
 	virtual void render() = 0;
 };
 
+
+#ifdef DISABLE_SERIAL_PRINT
+  #define SerialPrint(...)
+  #define SerialPrintln(...)
+#else
+  #define SerialPrint(...) Serial.print(__VA_ARGS__)
+  #define SerialPrintln(...) Serial.println(__VA_ARGS__)
+#endif
 #endif /* COMMONITEMS_H_ */

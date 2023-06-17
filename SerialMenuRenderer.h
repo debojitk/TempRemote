@@ -13,6 +13,7 @@ class AbstractMenuEntity;
 class SerialMenuRenderer: public IMenuRenderer { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	void renderMenu(AbstractMenuEntity* menu);
+	void clear();
 };
 
 #endif /* SERIALMENURENDERER_H_ */

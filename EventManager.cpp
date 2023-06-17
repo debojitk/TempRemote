@@ -14,6 +14,10 @@ EventManager::EventManager(IEventSourceObserver *observer){
 	eventReceiver = nullptr;
 	this->eventSourceObserver = observer;
 }
+void EventManager::setEventCallback(void (*eventCallback)(EventType)){
+	_eventCallback = eventCallback;
+}
+
 void EventManager::registereventReceiver(IEventReceiver *eventReceiver){
 	this->eventReceiver = eventReceiver;
 }
@@ -25,20 +29,23 @@ void EventManager::unregisterEventReceiver(){
 }
 void EventManager::handleEvent(EventType event){
 	if(this->eventReceiver != nullptr){
-		Serial.print(F("Handling event "));
-		Serial.println(event);
+		SerialPrint(F("Handling event "));
+		SerialPrintln(event);
 		this->eventReceiver->handleEvent(event);
 	}
 }
 void EventManager::processEvents(){
 	EventType event = eventSourceObserver->getLastEvent();
 	if (event != NoEvent){
-		Serial.print(F("Event captured "));
-		Serial.println(event);
+		SerialPrint(F("Event captured "));
+		SerialPrintln(event);
 		// process event
 		handleEvent(event);
+		if (_eventCallback != nullptr) {
+			_eventCallback(event);
+		}
 		eventSourceObserver->clearLastEvent();
-		Serial.println(F("Event cleared "));
+		SerialPrintln(F("Event cleared "));
 	} else{
 		eventSourceObserver->observeEvents();
 	}
@@ -69,14 +76,14 @@ void SerialObserver::observeEvents() {
 	if(enabled && lastEvent == NoEvent){
 		if (Serial.available()) {
 			int input = Serial.parseInt();
-			Serial.print(F("Event Received "));
-			Serial.println(input);
+			SerialPrint(F("Event Received "));
+			SerialPrintln(input);
 			if (input == 1) {
 				lastEvent = SingleClickEvent;
 			} else if (input == 2) {
 				lastEvent = DoubleClickEvent;
 			} else{
-				Serial.print(F("Unknown event"));
+				SerialPrint(F("Unknown event"));
 			}
 		}
 	}
@@ -105,12 +112,14 @@ void ButtonInputObserver::disable(){
 	if(enabled) {
 		AbsEventSourceObserver::disable();
 		Timer1.detachInterrupt();
+		SerialPrintln(F("ButtonInputObserver disabled"));
 	}
 }
 void ButtonInputObserver::enable() {
 	if (!enabled) {
 		AbsEventSourceObserver::enable();
 		Timer1.attachInterrupt(ButtonInputObserver::timerInterruptInvoker);
+		SerialPrintln(F("ButtonInputObserver enabled"));
 	}
 }
 
@@ -127,7 +136,6 @@ bool ButtonInputObserver::hasClicked() {
 			buttonState = currentButtonState;
 			if (buttonState == LOW) {
 				counter++;
-				//Serial.println(counter);
 			}
 		}
 	}
@@ -147,13 +155,13 @@ void ButtonInputObserver::timerInterrupt() {
 		}
 		if (clickCount == 1) {
 			if ((currentTime - clickInstant) > doubleClickInterval){
-				Serial.println(F("SingleClickEvent"));
+				SerialPrintln(F("SingleClickEvent"));
 				lastEvent = SingleClickEvent;
 				clickCount = 0;
 				clickInstant = 0;
 			}
 		} else if (clickCount == 2) {
-			Serial.println(F("DoubleClickEvent"));
+			SerialPrintln(F("DoubleClickEvent"));
 			lastEvent = DoubleClickEvent;
 			clickCount = 0;
 		}
@@ -171,3 +179,90 @@ ButtonInputObserver * ButtonInputObserver::getInstance(int pin, int interval){
 	}
 	return ButtonInputObserver::instance;
 }
+
+
+SleepWakeupInterruptHandler *SleepWakeupInterruptHandler::_instance = nullptr;
+
+SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(): SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(2,5000){
+	//default private constructor
+}
+
+SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(uint8_t pin,
+		uint16_t disableDelay) {
+	this->pin = pin;
+	this->disableDelay = disableDelay;
+	AbsEventSourceObserver::disable();
+}
+
+void SleepWakeupInterruptHandler::enable() {
+	if(enabled) return;
+	AbsEventSourceObserver::enable();
+	SerialPrintln(F("SleepWakeupInterruptHandler enabled"));
+	attachInterrupt(digitalPinToInterrupt(pin), SleepWakeupInterruptHandler::interruptHandlerInvoker, LOW);
+}
+
+void SleepWakeupInterruptHandler::disable() {
+	if(!enabled) return;
+	AbsEventSourceObserver::disable();
+	SerialPrintln(F("SleepWakeupInterruptHandler disabled"));
+	detachInterrupt(digitalPinToInterrupt(pin));
+}
+
+void SleepWakeupInterruptHandler::initialize() {
+	if(hasInitialized) return;
+	pinMode(pin, INPUT_PULLUP);// by default the value is high, need to be shorted with ground to generate a low input
+	hasInitialized = true;
+}
+
+SleepWakeupInterruptHandler* SleepWakeupInterruptHandler::getInstance(uint8_t pin, uint16_t interval) {
+	if(SleepWakeupInterruptHandler::_instance == nullptr){
+		SleepWakeupInterruptHandler::_instance = new SleepWakeupInterruptHandler(pin, interval);
+		SleepWakeupInterruptHandler::_instance->initialize();
+	}
+	return SleepWakeupInterruptHandler::_instance;
+}
+
+void SleepWakeupInterruptHandler::interruptHandlerInvoker() {
+	SleepWakeupInterruptHandler::_instance->interruptHandler();
+}
+
+void SleepWakeupInterruptHandler::sleep() {
+	enable();
+	if (_sleepCallback) {
+		_sleepCallback();
+	}
+}
+
+void SleepWakeupInterruptHandler::wakeup() {
+	disable();
+	if (_wakeupCallback) {
+		_wakeupCallback();
+	}
+}
+
+void SleepWakeupInterruptHandler::interruptHandler() {
+	SerialPrintln(F("interruptHandler executed"));
+	wakeup();
+	clearLastEvent();
+}
+
+void SleepWakeupInterruptHandler::clearLastEvent() {
+	lastEventInstant = millis();
+}
+
+void SleepWakeupInterruptHandler::observeEvents() {
+	if (!enabled) {
+		if (millis()<lastEventInstant) lastEventInstant = millis();
+		if ((millis() - lastEventInstant) > disableDelay) {
+			sleep();
+		}
+	}
+}
+
+void SleepWakeupInterruptHandler::setSleepCallback(void (*cb)()){
+	this->_sleepCallback = cb;
+}
+void SleepWakeupInterruptHandler::setWakeupCallback(void (*cb)()){
+	this->_wakeupCallback = cb;
+}
+
