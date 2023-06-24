@@ -1,7 +1,14 @@
 #pragma once
-#include <DHT22.h>
 
-#define __RTC_DS_3231__
+#include <DHT22.h>
+#include <RtcDS1302.h>
+//#elif defined(__RTC_DS_3231__)
+#include <RtcDS3231.h>
+#include <Wire.h> // must be included here so that Arduino library object file references work
+
+class IRrecv;
+class IRsend;
+class decode_results;
 
 struct TimeValue {
 	uint8_t  _month;
@@ -35,11 +42,11 @@ struct TimeValue {
 	}
 };
 
-#if defined(__RTC_DS1302__)
-#include <RtcDS1302.h>
-class TimeModule {
+
+
+class TimeModuleDS1302 {
 public:
-	TimeModule() : _myWire(IO, CLK, CE), _rtc(_myWire) {}
+	TimeModuleDS1302() : _myWire(IO, CLK, CE), _rtc(_myWire) {}
 	void setup() {
 		RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
 		RtcDateTime now = _rtc.GetDateTime();
@@ -50,17 +57,15 @@ public:
 private:
 	static constexpr uint8_t IO  = 3;
 	static constexpr uint8_t CLK = 4;
-	static constexpr uint8_t CE  = 2;
+	static constexpr uint8_t CE  = 8;
 
 	ThreeWire            _myWire; // (IO, CLK, CE); // IO, SCLK, CE
 	RtcDS1302<ThreeWire> _rtc;
 };
-#elif defined(__RTC_DS_3231__)
-#include <RtcDS3231.h>
-#include <Wire.h> // must be included here so that Arduino library object file references work
-class TimeModule {
+
+class TimeModuleDS3231 {
 public:
-	TimeModule();
+	TimeModuleDS3231();
 	void setup();
 	TimeValue get() const;
 	bool set(const TimeValue& val);
@@ -69,7 +74,7 @@ private:
 	RtcDS3231<TwoWire> _rtc;
 };
 
-#endif
+//#endif
 using TemperatureValue = float;
 using HumidityValue = float;
 
@@ -95,16 +100,15 @@ private:
 	DHT22 _dht22;
 };
 
-using RemoteRXValue = uint32_t;
-constexpr RemoteRXValue NullRemoteRXValue = 0xffffffff;
-
-class IRrecv;
-class decode_results;
+using RemoteRXValue = IRNode*;
+constexpr RemoteRXValue NullRemoteRXValue = nullptr;
 
 class RemoteRXModule {
 public:
 	RemoteRXModule();
 	~RemoteRXModule();
+	// The get API returns a ptr which it will not delete
+	// Its a caller's responsibility to delete the ptr
 	RemoteRXValue get();
 	void setup();
 private:
@@ -112,3 +116,16 @@ private:
 	IRrecv* _rx;
 	decode_results* _results;
 };
+
+class RemoteTXModule {
+public:
+	RemoteTXModule();
+	~RemoteTXModule();
+
+	void set(RemoteRXValue val);
+	void setup();
+private:
+	static constexpr uint8_t PIN = 11;
+	IRsend& _tx;
+};
+

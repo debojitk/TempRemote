@@ -14,8 +14,9 @@
 #include <Arduino.h>
 
 
+
 #define CHAR_HEIGHT 2
-#define VIEWPORT_MENU_COUNT 3
+#define VIEWPORT_MENU_COUNT 1
 #define OLED_COLUMNS 128
 #define I2C_ADDRESS 0x3C
 #define RST_PIN -1
@@ -59,7 +60,7 @@ void OLEDMenuRenderer::setupOled() {
 #endif // RST_PIN >= 0
 	// Call oled.setI2cClock(frequency) to change from the default frequency.
 
-	display.setFont(Verdana12_bold);
+	display.setFont(font8x8);
 }
 
 

@@ -1,12 +1,17 @@
+#if 0
+
 #include "HexProgrammer.h"
 #include <arduino.h>
 #include <EEPROM.h>
 #include "CommonItems.h"
+#include <IRremote.h>
+
 
 static_assert(sizeof(MemoryLayout) == ((sizeof(uint8_t) * CONFIG::NUM_INDEX) +
-		                               (sizeof(uint32_t) * CONFIG::NUM_HEX)) +
-									   (sizeof(Schedule) * CONFIG::NUM_SCHEDULE));
-static_assert(RemoteData::UNKNOWN == CONFIG::NUM_HEX);
+		                                sizeof(uint8_t) +
+		                               (sizeof(IRNode) * CONFIG::MAX_HEX_CODES) +
+									   (sizeof(Schedule) * CONFIG::NUM_SCHEDULE)));
+
 
 
 
@@ -27,50 +32,51 @@ FOUR : 0xCFC936 : 13617462
 FIVE : 0xCF11EE : 13570542
 BOOST: 0xCFF10E : 13627662
 ***/
-  _layout._hexCodes[RemoteData::POWER]     = 0xCF8976;
-  _layout._hexCodes[RemoteData::ONE]       = 0xCFD12E;
-  _layout._hexCodes[RemoteData::TWO]       = 0xCF09F6;
-  _layout._hexCodes[RemoteData::THREE]     = 0xCF51AE;
-  _layout._hexCodes[RemoteData::FOUR]      = 0xCFC936;
-  _layout._hexCodes[RemoteData::FIVE]      = 0xCF11EE;
-  _layout._hexCodes[RemoteData::BOOST]     = 0xCFF10E;
+//  _layout._hexCodes[0]       = 0xCF8976;
+//  _layout._hexCodes[1]       = 0xCFD12E;
+//  _layout._hexCodes[2]       = 0xCF09F6;
+//  _layout._hexCodes[3]       = 0xCF51AE;
+//  _layout._hexCodes[4]       = 0xCFC936;
+//  _layout._hexCodes[5]       = 0xCF11EE;
+//  _layout._hexCodes[6]       = 0xCFF10E;
 
   for (uint8_t i = 0; i < CONFIG::NUM_INDEX; ++i) {
-    _layout._index[i] = CONFIG::NUM_HEX;
+    _layout._index[i] = CONFIG::MAX_HEX_CODES;
   }
 }
 
-void RemoteData::program(uint8_t begin, uint8_t end, eButton e) {
+void RemoteData::program(uint8_t begin, uint8_t end, uint8_t position) {
   for (uint8_t i = begin; i <= end; ++i) {
-    _layout._index[i] = e;
+    _layout._index[i] = position;
   }
 }
 
-uint32_t
+IRNode*
 RemoteData::at(uint8_t t) const {
   if (t >= CONFIG::NUM_INDEX) {
-    return 0xFFFFFF;
+    return nullptr;
   }
   uint8_t hexIndex = _layout._index[t];
-  if (hexIndex >= CONFIG::NUM_HEX) {
-    return 0xFFFFFF;
+  if (hexIndex >= _layout._numHex) {
+    return nullptr;
   }
-  return _layout._hexCodes[hexIndex];
+  return &(_layout._hexCodes[hexIndex]);
 }
 
-void RemoteData::serialPrint() const {
-  const char* NAMES[] = { "POWER", "ONE", "TWO", "THREE", "FOUR", "FIVE", "BOOST", "UNKNOWN" };
-  char buffer[75];
-  char* name = nullptr;
-  for (uint8_t i = 0; i < CONFIG::NUM_INDEX; ++i) {
-    uint32_t val = at(i);
-    char* name = NAMES[_layout._index[i]];
-
-    sprintf(buffer, "Temperature: %dC : Mode: %s : Hex: 0x", i, name);
-    SerialPrint(buffer);
-    SerialPrintln(val, HEX);
-  }
-}
+// Should not be used
+//void RemoteData::serialPrint() const {
+//  const char* NAMES[] = { "POWER", "ONE", "TWO", "THREE", "FOUR", "FIVE", "BOOST", "UNKNOWN" };
+//  char buffer[75];
+//  char* name = nullptr;
+//  for (uint8_t i = 0; i < CONFIG::NUM_INDEX; ++i) {
+//    uint32_t val = at(i);
+//    char* name = NAMES[_layout._index[i]];
+//
+//    sprintf(buffer, "Temperature: %dC : Mode: %s : Hex: 0x", i, name);
+//    SerialPrint(buffer);
+//    SerialPrintln(val, HEX);
+//  }
+//}
 
 /*
 RemoteData remote;
@@ -95,3 +101,4 @@ void setup() {
 
 } */
 
+#endif

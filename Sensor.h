@@ -9,6 +9,7 @@ public:
     bool        set(const Value& val) { return _s.set(val); }
     const char* error() const         { return _s.error(); }
     void        setup()               { _s.setup(); }
+    void        close()               { _s.close(); }
 private:
     SensorModule _s;
 };
