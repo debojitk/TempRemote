@@ -5,10 +5,10 @@
  *      Author: debojitk
  */
 #include <Arduino.h>
-#include <TimerOne.h>
 #include "CommonItems.h"
 #include "EventManager.h"
 #include "AbstractMenuEntity.h"
+#include <MSTimer2.h>
 
 EventManager::EventManager(IEventSourceObserver *observer){
 	eventReceiver = nullptr;
@@ -104,21 +104,24 @@ ButtonInputObserver::ButtonInputObserver(int pin, int interval){
 void ButtonInputObserver::initialize(){
 	if (hasInitialized) return;
 	pinMode(buttonPin, INPUT_PULLUP);// by default the value is high, need to be shorted with ground to generate a low input
-	Timer1.initialize(100000);
+	//Timer1.initialize(100000);
 	//Timer1.attachInterrupt(ButtonInputObserver::timerInterruptInvoker);
+	MsTimer2::set(10, ButtonInputObserver::timerInterruptInvoker);
 	hasInitialized = true;
 }
 void ButtonInputObserver::disable(){
 	if(enabled) {
 		AbsEventSourceObserver::disable();
-		Timer1.detachInterrupt();
+		//Timer1.detachInterrupt();
+		MsTimer2::stop();
 		SerialPrintln(F("ButtonInputObserver disabled"));
 	}
 }
 void ButtonInputObserver::enable() {
 	if (!enabled) {
 		AbsEventSourceObserver::enable();
-		Timer1.attachInterrupt(ButtonInputObserver::timerInterruptInvoker);
+		//Timer1.attachInterrupt(ButtonInputObserver::timerInterruptInvoker);
+		MsTimer2::start();
 		SerialPrintln(F("ButtonInputObserver enabled"));
 	}
 }
