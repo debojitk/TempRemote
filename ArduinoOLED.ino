@@ -54,14 +54,21 @@ AbstractMenuEntity *homeMenu = new HomeMenu(renderer, "TempRemote V1.0", mainMen
 
 IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_PIN, 500);
 // creating eventManager
-SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 5000);
+SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 10000, 20);
 EventManager *eventManager = new EventManager(buttonObserver);
+
+void autoWakeupCallback() {
+	SerialPrint(F("Waked up from WDT interrupt event-"));
+	SerialPrintlnWithDelay(millis());
+}
 
 void sleepCallback() {
 	display.clear();
 	buttonObserver->disable();
 }
 void wakeupCallback() {
+	SerialPrint(F("Waked up from button interrupt event-"));
+	SerialPrintlnWithDelay(millis());
 	if (eventManager->geteventReceiver()) {
 		AbstractMenuEntity *currentMenu = reinterpret_cast<AbstractMenuEntity *>(eventManager->geteventReceiver());
 		currentMenu->render();
@@ -73,6 +80,7 @@ void wakeupCallback() {
 void setupSleepWakeupHandler() {
 	interruptHandler->setSleepCallback(sleepCallback);
 	interruptHandler->setWakeupCallback(wakeupCallback);
+	interruptHandler->setAutoWakeupCallback(autoWakeupCallback);
 }
 
 void receiveEvent(EventType event) {

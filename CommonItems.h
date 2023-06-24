@@ -33,10 +33,14 @@ class IRenderable { // @suppress("Class has a virtual method and non-virtual des
 
 
 #ifdef DISABLE_SERIAL_PRINT
-  #define SerialPrint(...)
-  #define SerialPrintln(...)
+	#define SerialPrint(...)
+	#define SerialPrintln(...)
+	#define SerialPrintWithDelay(...)
+	#define SerialPrintlnWithDelay(...)
 #else
-  #define SerialPrint(...) Serial.print(__VA_ARGS__)
-  #define SerialPrintln(...) Serial.println(__VA_ARGS__)
+	#define SerialPrint(...) Serial.print(__VA_ARGS__)
+	#define SerialPrintln(...) Serial.println(__VA_ARGS__)
+	#define SerialPrintWithDelay(...) Serial.print(__VA_ARGS__); delay(10)
+	#define SerialPrintlnWithDelay(...) Serial.println(__VA_ARGS__); delay(10)
 #endif
 #endif /* COMMONITEMS_H_ */

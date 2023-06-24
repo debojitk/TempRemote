@@ -183,15 +183,21 @@ ButtonInputObserver * ButtonInputObserver::getInstance(int pin, int interval){
 
 SleepWakeupInterruptHandler *SleepWakeupInterruptHandler::_instance = nullptr;
 
-SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(): SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(2,5000){
+SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(): SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(2,5000, 30){
 	//default private constructor
 }
 
-SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(uint8_t pin,
-		uint16_t disableDelay) {
+SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(uint8_t pin, uint16_t disableDelay, uint8_t autoWakeupDelay) {
 	this->pin = pin;
 	this->disableDelay = disableDelay;
+	setAutoWakeupDelay(autoWakeupDelay);
+
 	AbsEventSourceObserver::disable();
+}
+
+void SleepWakeupInterruptHandler::setAutoWakeupDelay(uint8_t autoWakeupDelay){
+	this->autoWakeupDelay = autoWakeupDelay;
+	sleepCounterLimit = ceil(autoWakeupDelay*1.0 / 8.0f);
 }
 
 void SleepWakeupInterruptHandler::enable() {
@@ -199,6 +205,10 @@ void SleepWakeupInterruptHandler::enable() {
 	AbsEventSourceObserver::enable();
 	SerialPrintln(F("SleepWakeupInterruptHandler enabled"));
 	attachInterrupt(digitalPinToInterrupt(pin), SleepWakeupInterruptHandler::interruptHandlerInvoker, LOW);
+	// real sleep code
+	SerialPrintln(F("WDInterrupt enabled"));
+	enableWDInterrupt();
+
 }
 
 void SleepWakeupInterruptHandler::disable() {
@@ -206,17 +216,25 @@ void SleepWakeupInterruptHandler::disable() {
 	AbsEventSourceObserver::disable();
 	SerialPrintln(F("SleepWakeupInterruptHandler disabled"));
 	detachInterrupt(digitalPinToInterrupt(pin));
+	// real wakeup code
+	SerialPrintln(F("WDInterrupt disabled"));
+	disableWDInterrupt();
+
 }
 
 void SleepWakeupInterruptHandler::initialize() {
 	if(hasInitialized) return;
+	// button
 	pinMode(pin, INPUT_PULLUP);// by default the value is high, need to be shorted with ground to generate a low input
+	setupSleep();
+	setupWDTimer();
+	//disableWDInterrupt();
 	hasInitialized = true;
 }
 
-SleepWakeupInterruptHandler* SleepWakeupInterruptHandler::getInstance(uint8_t pin, uint16_t interval) {
+SleepWakeupInterruptHandler* SleepWakeupInterruptHandler::getInstance(uint8_t pin, uint16_t interval, uint8_t autoWakeupDelay) {
 	if(SleepWakeupInterruptHandler::_instance == nullptr){
-		SleepWakeupInterruptHandler::_instance = new SleepWakeupInterruptHandler(pin, interval);
+		SleepWakeupInterruptHandler::_instance = new SleepWakeupInterruptHandler(pin, interval, autoWakeupDelay);
 		SleepWakeupInterruptHandler::_instance->initialize();
 	}
 	return SleepWakeupInterruptHandler::_instance;
@@ -227,13 +245,16 @@ void SleepWakeupInterruptHandler::interruptHandlerInvoker() {
 }
 
 void SleepWakeupInterruptHandler::sleep() {
-	enable();
 	if (_sleepCallback) {
 		_sleepCallback();
 	}
+
+	enable();
+	goToSleep();
 }
 
 void SleepWakeupInterruptHandler::wakeup() {
+
 	disable();
 	if (_wakeupCallback) {
 		_wakeupCallback();
@@ -242,11 +263,12 @@ void SleepWakeupInterruptHandler::wakeup() {
 
 void SleepWakeupInterruptHandler::interruptHandler() {
 	SerialPrintln(F("interruptHandler executed"));
-	wakeup();
 	clearLastEvent();
+	wakeup();
 }
 
 void SleepWakeupInterruptHandler::clearLastEvent() {
+	SerialPrintln(F("lastEventInstant reset"));
 	lastEventInstant = millis();
 }
 
@@ -254,8 +276,14 @@ void SleepWakeupInterruptHandler::observeEvents() {
 	if (!enabled) {
 		if (millis()<lastEventInstant) lastEventInstant = millis();
 		if ((millis() - lastEventInstant) > disableDelay) {
+			// sleeping due to timeout
 			sleep();
 		}
+	}
+	if (autoWakedUp) {
+		SerialPrintln(F("Should go to sleep"));
+		autoWakedUp = false;
+		goToSleep();
 	}
 }
 
@@ -265,4 +293,90 @@ void SleepWakeupInterruptHandler::setSleepCallback(void (*cb)()){
 void SleepWakeupInterruptHandler::setWakeupCallback(void (*cb)()){
 	this->_wakeupCallback = cb;
 }
+void SleepWakeupInterruptHandler::setAutoWakeupCallback(void (*cb)()){
+	this->_autoWakeupCallback = cb;
+}
 
+
+// arduino low power code
+/**
+ * Disables WD timer interrupt
+ */
+void SleepWakeupInterruptHandler::disableWDInterrupt(){
+	  cli(); // Disable interrupts during register update
+	  WDTCSR &= ~(1 << WDIE); // Disable watchdog timer interrupt
+	  sei(); // Enable interrupts after register update
+	  // reset the conuter so that while enabled it can sleep to full time
+	  sleepCounter = 0;
+	  autoWakedUp = false;
+}
+/**
+ * Enables watchdog timer interrupt
+ */
+void SleepWakeupInterruptHandler::enableWDInterrupt(){
+	  cli(); // Disable interrupts during register update
+	  WDTCSR |= (1 << WDIE); // Enable watchdog timer interrupt
+	  sei(); // Enable interrupts after register update
+}
+/**
+ * Configures watchdog timer to invoke WD ISR every 8 secs
+ */
+void SleepWakeupInterruptHandler::setupWDTimer(uint8_t delay){
+	//enable Timer to generate interrupt every 8 seconds
+	WDTCSR = (1 << WDCE) | (1 << WDE); // enable configuration changes
+	WDTCSR = (1 << WDP3) | (1 << WDP0); // set prescaler bits for 8-second timeout
+	//WDTCSR |= (1 << WDIE); // enable watchdog interrupt
+	disableWDInterrupt();
+}
+void SleepWakeupInterruptHandler::WDInterruptHandlerInvoker(){
+	_instance->WDInterruptHandler();
+}
+
+/**
+ * Configures sleep mode to go to power down mode
+ */
+void SleepWakeupInterruptHandler::setupSleep(){
+	//ENABLE SLEEP - this enables the sleep mode
+	SMCR |= (1 << 2); //power down mode
+	SMCR |= 1;//enable sleep
+}
+/**
+ * Goes to sleep for 8 sec, if wd interrupt awakes it
+ */
+void SleepWakeupInterruptHandler::goToSleep(){
+	SerialPrint(F("Going to sleep - "));
+	SerialPrintlnWithDelay(millis());
+	disableADC();
+	//BOD DISABLE - this must be called right before the __asm__ sleep instruction
+	MCUCR |= (3 << 5); //set both BODS and BODSE at the same time
+	MCUCR = (MCUCR & ~(1 << 5)) | (1 << 6); //then set the BODS bit and clear the BODSE bit at the same time
+	__asm__  __volatile__("sleep");//in line assembler to go to sleep
+
+}
+void SleepWakeupInterruptHandler::disableADC(){
+	//Disable ADC - don't forget to flip back after waking up if using ADC in your application ADCSRA |= (1 << 7);
+	ADCSRA &= ~(1 << 7);
+}
+void SleepWakeupInterruptHandler::enableADC(){
+	ADCSRA |= (1 << 7);
+}
+
+ISR(WDT_vect){
+	//DON'T FORGET THIS!  Needed for the watch dog timer.  This is called after a watch dog timer timeout - this is the interrupt function called after waking up
+	 SleepWakeupInterruptHandler::WDInterruptHandlerInvoker();
+}
+
+
+void SleepWakeupInterruptHandler::WDInterruptHandler(){
+	SerialPrint(F("Waking up from WD interrupt, counter = "));
+	SerialPrintlnWithDelay(sleepCounter);
+	enableADC();
+	// check if enough slept
+	if (sleepCounter > sleepCounterLimit) {
+		// perform necessary activity
+		_autoWakeupCallback();
+		sleepCounter = 0;
+	}
+	sleepCounter ++;
+	autoWakedUp = true;
+}

@@ -12,7 +12,7 @@ enum EventType: unsigned int;
 class IEventReceiver;
 class SleepWakeupInterruptHandler;
 
-class IEventSourceObserver{
+class IEventSourceObserver{ // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	virtual EventType getLastEvent() = 0;
 	virtual void clearLastEvent() = 0;
@@ -38,7 +38,7 @@ private:
 
 };
 
-class AbsEventSourceObserver: public IEventSourceObserver {
+class AbsEventSourceObserver: public IEventSourceObserver { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	EventType getLastEvent();
 	void clearLastEvent();
@@ -100,19 +100,37 @@ public:
 	void observeEvents();
 	void setSleepCallback(void (*cb)());
 	void setWakeupCallback(void (*cb)());
-	static SleepWakeupInterruptHandler *getInstance(uint8_t pin, uint16_t interval);
+	void setAutoWakeupCallback(void (*cb)());
+	void setAutoWakeupDelay(uint8_t autoWakeupDelay);
+	static SleepWakeupInterruptHandler *getInstance(uint8_t pin, uint16_t interval, uint8_t autoWakeupDelay);
+	static void WDInterruptHandlerInvoker();
 private:
 	SleepWakeupInterruptHandler();
-	SleepWakeupInterruptHandler(uint8_t pin, uint16_t interval);
+	SleepWakeupInterruptHandler(uint8_t pin, uint16_t interval, uint8_t autoWakeupDelay);
 	uint8_t pin;
 	uint16_t disableDelay;
 	uint32_t lastEventInstant = 0;
+	uint8_t autoWakeupDelay = 30; // in sec
+	uint8_t sleepCounterLimit = 0;
+	uint8_t sleepCounter = 0;
+	bool autoWakedUp = false;
+
 	bool hasInitialized = false;
 	void (*_sleepCallback)() = nullptr;
 	void (*_wakeupCallback)() = nullptr;
+	void (*_autoWakeupCallback)() = nullptr;
 	static SleepWakeupInterruptHandler *_instance;
 	static void interruptHandlerInvoker();
 	void interruptHandler();
+
+	void disableWDInterrupt();
+	void enableWDInterrupt();
+	void setupWDTimer(uint8_t delay = 8);
+	void WDInterruptHandler();
+	void setupSleep();
+	void goToSleep();
+	void disableADC();
+	void enableADC();
 };
 
 #endif /* EVENTMANAGER_H_ */
