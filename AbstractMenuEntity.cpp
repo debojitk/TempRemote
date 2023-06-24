@@ -11,6 +11,7 @@
 #include "MenuItemRenderer.h"
 #include <Arduino.h>
 #include "IMenuRenderer.h"
+#include <TimerOne.h>
 
 // define the stack
 CustomStack<AbstractMenuEntity *, 10> AbstractMenuEntity::menuStack;
@@ -70,6 +71,7 @@ void AbstractMenuEntity::activate() {
 		eventManager->registereventReceiver(this);
 	}
 	this->setActive(true);
+	this->renderer->clear();
 	render();
 }
 
@@ -154,11 +156,36 @@ MenuItem::MenuItem(const char *name, IMenuRenderer *renderer): AbstractMenuEntit
 }
 
 // Definition for HomeMenu
+HomeMenu *HomeMenu::_instance = nullptr;
+
+void HomeMenu::timerInterruptInvoker(){
+	_instance->timerInterrupt();
+}
+
+void HomeMenu::timerInterrupt(){
+	SerialPrintln(F("Updating Time via interrupt"));
+	render();
+}
+
+void HomeMenu::activate(){
+	AbstractMenuEntity::activate();
+	SerialPrintln(F("HomeMenu attachInterrupt"));
+	if (!initialized) {
+		cli(); //disabling interrupts
+		initialized = true;
+		Timer1.initialize(); // initializing Timer1 for 1 sec interval
+		sei(); //enabling interrupts
+	}
+	Timer1.attachInterrupt(HomeMenu::timerInterruptInvoker);
+}
+
+
 
 HomeMenu::HomeMenu(HomeMenuItemRenderer *renderer, const char *name, AbstractMenuEntity *child):MenuItem(name, renderer) {
 	this->child = child;
 	this->setTime(12, 15, 17);
 	this->temperature = 30;
+	_instance = this;
 }
 
 void HomeMenu::handleClick(){
@@ -169,6 +196,8 @@ void HomeMenu::handleDoubleClick(){
 		AbstractMenuEntity::menuStack.push(this);
 		this->child->setEventManager(eventManager);
 		this->child->activate();
+		SerialPrintln(F("HomeMenu detachInterrupt"));
+		Timer1.detachInterrupt();
 	}
 }
 

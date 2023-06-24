@@ -13,7 +13,6 @@ HomeMenuItemRenderer::HomeMenuItemRenderer(SSD1306AsciiAvrI2c& displayObject):di
 }
 void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	this->menu = reinterpret_cast<HomeMenu *>(menu);
-	display.clear();
 	display.setCursor(0, 0);
 	display.print(menu->getName());
 	display.setCursor(0, 2);

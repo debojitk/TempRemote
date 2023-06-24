@@ -78,11 +78,17 @@ public:
 	void back();
 	double getTemperature();
 	struct CurrentTime getTime();
+	void activate();
 private:
 	double temperature = 30;
 	int humidity = 70;
 	struct CurrentTime cTime;
 	AbstractMenuEntity *child = nullptr;
+	static HomeMenu *_instance;
+	static void timerInterruptInvoker();
+	void timerInterrupt();
+	bool initialized = false;
+
 };
 
 class SingleFieldMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
