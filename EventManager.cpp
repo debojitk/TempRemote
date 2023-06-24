@@ -227,11 +227,9 @@ void SleepWakeupInterruptHandler::disable() {
 
 void SleepWakeupInterruptHandler::initialize() {
 	if(hasInitialized) return;
-	// button
 	pinMode(pin, INPUT_PULLUP);// by default the value is high, need to be shorted with ground to generate a low input
 	setupSleep();
 	setupWDTimer();
-	//disableWDInterrupt();
 	hasInitialized = true;
 }
 
@@ -375,7 +373,7 @@ void SleepWakeupInterruptHandler::WDInterruptHandler(){
 	SerialPrintlnWithDelay(sleepCounter);
 	enableADC();
 	// check if enough slept
-	if (sleepCounter > sleepCounterLimit) {
+	if ((sleepCounter + 1) >= sleepCounterLimit) {
 		// perform necessary activity
 		_autoWakeupCallback();
 		sleepCounter = 0;
