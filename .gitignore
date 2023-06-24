@@ -32,3 +32,4 @@ core.a
 # Other generated files
 *.class
 
+cscope.out
