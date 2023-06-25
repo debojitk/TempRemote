@@ -22,11 +22,9 @@ void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	display.print(this->menu->getTemperature());
 	display.print(F(" C"));
 	display.setCursor(0, 4);
-	display.print(t._hour);
-	display.print(F(":"));
-	display.print(t._min);
-	display.print(F(":"));
-	display.print(t._sec);
+	display.print(t.formatDate());
+	display.setCursor(0, 6);
+	display.print(t.formatTime());
 
 }
 
