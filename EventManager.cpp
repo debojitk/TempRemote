@@ -369,8 +369,6 @@ ISR(WDT_vect){
 
 
 void SleepWakeupInterruptHandler::WDInterruptHandler(){
-	SerialPrint(F("Waking up from WD interrupt, counter = "));
-	SerialPrintlnWithDelay(sleepCounter);
 	enableADC();
 	// check if enough slept
 	if ((sleepCounter + 1) >= sleepCounterLimit) {

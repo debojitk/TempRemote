@@ -11,10 +11,20 @@
 #include "CustomStack.h"
 #include "CommonItems.h"
 #include <Arduino.h>
+
+template <typename SensorModule, typename Value>
+class Sensor;
+class TimeModuleDS3231;
+class TemperatureModule;
+struct TimeValue;
+using TemperatureValue = float;
 enum EventType: unsigned int;
 class IMenuRenderer;
 class EventManager;
 class HomeMenuItemRenderer;
+
+using TimeSensor = Sensor<TimeModuleDS3231, TimeValue>;
+using TempSensor = Sensor<TemperatureModule, TemperatureValue>;
 
 class AbstractMenuEntity: public IEventReceiver, public IRenderable { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
@@ -32,12 +42,14 @@ public:
 	virtual void setActive(bool active);
 	virtual void setEventManager(EventManager *manager);
 	virtual void activate();
+	virtual void deactivate();
 	virtual void handleClick() = 0;
 	virtual void handleDoubleClick() = 0;
 	virtual void back();
 	// declare the stack
-	static CustomStack<AbstractMenuEntity *, 10> menuStack;
+	static AbstractMenuEntity *CurrentMenu;
 protected:
+	static CustomStack<AbstractMenuEntity *, 10> menuStack;
 	const char *name;
 	int currentIndex = -1;
 	int backIndex = 0;
@@ -71,23 +83,21 @@ public:
 
 class HomeMenu: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	HomeMenu(HomeMenuItemRenderer *renderer, const char *name, AbstractMenuEntity *child);
+	HomeMenu(HomeMenuItemRenderer *renderer, const char *name, AbstractMenuEntity *child, TimeSensor &timeSensor);
 	void setTime(uint8_t hour, uint8_t min, uint8_t sec);
 	void handleClick();
 	void handleDoubleClick();
 	void back();
 	double getTemperature();
-	struct CurrentTime getTime();
+	struct TimeValue getTime();
 	void activate();
+	void update();
 private:
 	double temperature = 30;
 	int humidity = 70;
-	struct CurrentTime cTime;
 	AbstractMenuEntity *child = nullptr;
-	static HomeMenu *_instance;
-	static void timerInterruptInvoker();
-	void timerInterrupt();
-	bool initialized = false;
+	TimeSensor &_timeSensorModule;
+	uint32_t lastUpdateTime = 0;
 
 };
 

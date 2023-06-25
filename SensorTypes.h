@@ -9,6 +9,7 @@
 class IRrecv;
 class IRsend;
 class decode_results;
+class IRNode;
 
 struct TimeValue {
 	uint8_t  _month;

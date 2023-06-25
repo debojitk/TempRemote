@@ -4,17 +4,20 @@
  *  Created on: 20-May-2023
  *      Author: debojitk
  */
+#include <Arduino.h>
+#include <TimerOne.h>
 #include "CommonItems.h"
 #include "CustomStack.h"
 #include "AbstractMenuEntity.h"
 #include "EventManager.h"
 #include "MenuItemRenderer.h"
-#include <Arduino.h>
 #include "IMenuRenderer.h"
-#include <TimerOne.h>
+#include "Sensor.h"
+#include "SensorTypes.h"
 
 // define the stack
 CustomStack<AbstractMenuEntity *, 10> AbstractMenuEntity::menuStack;
+AbstractMenuEntity *AbstractMenuEntity::CurrentMenu = nullptr;
 
 // Definition for AbstractMenuEntity
 AbstractMenuEntity::AbstractMenuEntity(const char *name, IMenuRenderer *renderer) {
@@ -65,14 +68,27 @@ void AbstractMenuEntity::setEventManager(EventManager *manager){
 
 
 void AbstractMenuEntity::activate() {
-	SerialPrint(F("menu is not active, activating ->"));
+	if (isActive()) return;
+	SerialPrint(F("Activating ->"));
 	SerialPrintln(getName());
 	if(eventManager != nullptr){
 		eventManager->registereventReceiver(this);
 	}
 	this->setActive(true);
+	CurrentMenu = this;
 	this->renderer->clear();
 	render();
+}
+
+void AbstractMenuEntity::deactivate() {
+	if (!isActive()) return;
+	SerialPrint(F("Deactivating ->"));
+	SerialPrintln(getName());
+	setActive(false);
+	if(eventManager != nullptr){
+		eventManager->unregisterEventReceiver();
+	}
+	this->renderer->clear();
 }
 
 void AbstractMenuEntity::render(){
@@ -80,11 +96,9 @@ void AbstractMenuEntity::render(){
 }
 
 void AbstractMenuEntity::back(){
-	SerialPrint(F("menu is deactivated ->"));
-	SerialPrintln(getName());
-	this->setActive(false);
 	AbstractMenuEntity *prevMenu = AbstractMenuEntity::menuStack.pop();
 	if (prevMenu != nullptr) {
+		deactivate();
 		SerialPrint(F("Popped menu->"));
 		SerialPrintln(prevMenu->getName());
 		prevMenu->activate();
@@ -137,7 +151,7 @@ void MenuEntity::handleDoubleClick(){
 		} else {
 			AbstractMenuEntity *item = getItem(currentIndex);
 			if (item != nullptr){
-				this->setActive(false);
+				deactivate();
 				AbstractMenuEntity::menuStack.push(this);
 				SerialPrint(F("Pushing menu->"));
 				SerialPrintln(this->getName());
@@ -156,36 +170,18 @@ MenuItem::MenuItem(const char *name, IMenuRenderer *renderer): AbstractMenuEntit
 }
 
 // Definition for HomeMenu
-HomeMenu *HomeMenu::_instance = nullptr;
-
-void HomeMenu::timerInterruptInvoker(){
-	_instance->timerInterrupt();
-}
-
-void HomeMenu::timerInterrupt(){
-	SerialPrintln(F("Updating Time via interrupt"));
-	render();
-}
 
 void HomeMenu::activate(){
 	AbstractMenuEntity::activate();
-	SerialPrintln(F("HomeMenu attachInterrupt"));
-	if (!initialized) {
-		cli(); //disabling interrupts
-		initialized = true;
-		Timer1.initialize(); // initializing Timer1 for 1 sec interval
-		sei(); //enabling interrupts
-	}
-	Timer1.attachInterrupt(HomeMenu::timerInterruptInvoker);
 }
 
 
 
-HomeMenu::HomeMenu(HomeMenuItemRenderer *renderer, const char *name, AbstractMenuEntity *child):MenuItem(name, renderer) {
+HomeMenu::HomeMenu(HomeMenuItemRenderer *renderer,
+		const char *name, AbstractMenuEntity *child,
+		TimeSensor &timeSensor):MenuItem(name, renderer), _timeSensorModule(timeSensor) {
 	this->child = child;
-	this->setTime(12, 15, 17);
 	this->temperature = 30;
-	_instance = this;
 }
 
 void HomeMenu::handleClick(){
@@ -193,6 +189,7 @@ void HomeMenu::handleClick(){
 }
 void HomeMenu::handleDoubleClick(){
 	if (this->child && !this->child->isActive()){
+		deactivate();
 		AbstractMenuEntity::menuStack.push(this);
 		this->child->setEventManager(eventManager);
 		this->child->activate();
@@ -206,16 +203,27 @@ void HomeMenu::back(){
 }
 
 void HomeMenu::setTime(uint8_t hour, uint8_t min, uint8_t sec){
-	cTime.hours = hour;
-	cTime.minutes = min;
-	cTime.seconds = sec;
+
 }
 
 double HomeMenu::getTemperature(){
 	return temperature;
 }
-struct CurrentTime HomeMenu::getTime(){
-	return cTime;
+struct TimeValue HomeMenu::getTime(){
+	return _timeSensorModule.get();
+}
+
+void HomeMenu::update(){
+	if (isActive()) {
+		uint32_t currentTime = millis();
+		if (lastUpdateTime > currentTime) {
+			// handling millis overflow
+			lastUpdateTime = currentTime;
+		} else if ((currentTime - lastUpdateTime) > 1000) {
+			lastUpdateTime = currentTime;
+			render();
+		}
+	}
 }
 
 // Definition for SingleFieldMenuItem
