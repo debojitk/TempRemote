@@ -8,15 +8,13 @@
 #ifndef ABSTRACTMENUENTITY_H_
 #define ABSTRACTMENUENTITY_H_
 
+#include <Arduino.h>
 #include "CustomStack.h"
 #include "CommonItems.h"
-#include <Arduino.h>
+#include "SensorTypes.h"
 
 template <typename SensorModule, typename Value>
 class Sensor;
-class TimeModuleDS3231;
-class TemperatureModule;
-struct TimeValue;
 using TemperatureValue = float;
 enum EventType: unsigned int;
 class IMenuRenderer;
@@ -79,6 +77,9 @@ public:
 	virtual void handleClick() = 0;
 	virtual void handleDoubleClick() = 0;
 	virtual void back() = 0;
+	virtual int getValue(uint8_t index){return 0;}
+	virtual const char *getLabel(uint8_t index){return nullptr;}
+	virtual uint8_t getFieldCount(){return 0;}
 };
 
 class HomeMenu: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
@@ -119,6 +120,33 @@ private:
 	uint8_t value;
 	uint8_t maxValue;
 	bool changeData = false;
+};
+
+class TimeMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	TimeMenuItem(IMenuRenderer *renderer, const char* name, TimeSensor &timeModule);
+	void handleClick();
+	void handleDoubleClick();
+	struct TimeValue getTime();
+	void save();
+	void back();
+	void activate();
+
+	int getValue(uint8_t index);
+	const char *getLabel(uint8_t index);
+	uint8_t getFieldCount();
+
+	static constexpr uint8_t HOUR_INDEX  = 0;
+    static constexpr uint8_t MIN_INDEX  = 1;
+    static constexpr uint8_t SEC_INDEX  = 2;
+    static constexpr uint8_t SAVE_INDEX = 3;
+    static constexpr uint8_t BACK_INDEX  = 4;
+    static constexpr uint8_t STATES  = 5;
+private:
+	TimeSensor &_timeModule;
+	bool changeData = false;
+	TimeValue _timeValue;
+    static const char *labels[];
 };
 
 

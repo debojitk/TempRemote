@@ -284,3 +284,92 @@ void SingleFieldMenuItem::save() {
 void SingleFieldMenuItem::back() {
 	AbstractMenuEntity::back();
 }
+
+
+const char* TimeMenuItem::labels[] = {"Hour", "Minutes", "Seconds"};
+TimeMenuItem::TimeMenuItem(IMenuRenderer *renderer, const char *name,
+		TimeSensor &timeModule): MenuItem(name, renderer),_timeModule(timeModule) {
+	this->name = name;
+}
+
+void TimeMenuItem::handleClick() {
+	if (!this->isActive())
+		return;
+	if(changeData){
+		switch(currentIndex){
+		case TimeMenuItem::HOUR_INDEX:
+			_timeValue._hour = (_timeValue._hour + 1)%24;
+			break;
+		case TimeMenuItem::MIN_INDEX:
+			_timeValue._min = (_timeValue._min + 1)%60;
+			break;
+		case TimeMenuItem::SEC_INDEX:
+			_timeValue._sec = (_timeValue._sec + 1)%60;
+			break;
+		}
+	} else {
+		currentIndex = (currentIndex + 1)%TimeMenuItem::STATES;
+	}
+	render();
+}
+
+void TimeMenuItem::handleDoubleClick() {
+	switch(currentIndex){
+	case TimeMenuItem::BACK_INDEX:
+		back();
+		break;
+	case TimeMenuItem::SAVE_INDEX:
+		save();
+		break;
+	case TimeMenuItem::HOUR_INDEX:
+	case TimeMenuItem::MIN_INDEX:
+	case TimeMenuItem::SEC_INDEX:
+		changeData = !changeData;
+		break;
+	default:
+		break;
+	}
+}
+
+struct TimeValue TimeMenuItem::getTime() {
+	return _timeValue;
+}
+
+void TimeMenuItem::save() {
+	_timeModule.set(_timeValue);
+}
+
+void TimeMenuItem::back() {
+	AbstractMenuEntity::back();
+}
+
+void TimeMenuItem::activate() {
+	_timeValue = _timeModule.get();
+	AbstractMenuEntity::activate();
+}
+
+int TimeMenuItem::getValue(uint8_t index) {
+	uint8_t retval = 0;
+	if (index > getFieldCount() - 1) return retval;
+	switch(index){
+	case TimeMenuItem::HOUR_INDEX:
+		retval = _timeValue._hour;
+		break;
+	case TimeMenuItem::MIN_INDEX:
+		retval = _timeValue._min;
+		break;
+	case TimeMenuItem::SEC_INDEX:
+		retval = _timeValue._sec;
+		break;
+	}
+	return retval;
+}
+
+const char* TimeMenuItem::getLabel(uint8_t index) {
+	if (index > getFieldCount() - 1) return nullptr;
+	return TimeMenuItem::labels[index];
+}
+
+uint8_t TimeMenuItem::getFieldCount() {
+	return sizeof(TimeMenuItem::labels)/ sizeof(char *);
+}

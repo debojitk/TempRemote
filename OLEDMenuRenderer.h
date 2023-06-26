@@ -22,21 +22,21 @@ private:
 	SSD1306AsciiAvrI2c& display;
 	MenuEntity* menu = nullptr;
 	void renderMenuHeader(const char *menuHeader);
-	void setupOled();
 	void selectMenu(int index);
 	int startRange = 0;
 	int endRange = 0;
 
 };
 
-class OLEDSingleFieldMenuItemRenderer: public IMenuRenderer {
+class OLEDHorizontalMenuItemRenderer: public IMenuRenderer {
 public:
-	OLEDSingleFieldMenuItemRenderer(SSD1306AsciiAvrI2c& display);
+	OLEDHorizontalMenuItemRenderer(SSD1306AsciiAvrI2c& display);
 	void renderMenu(AbstractMenuEntity* menu);
 	void clear();
 private:
 	SSD1306AsciiAvrI2c& display;
-	SingleFieldMenuItem *menu = nullptr;
+	MenuItem *_menu = nullptr;
 };
+
 
 #endif /* OLEDMENURENDERER_H_ */

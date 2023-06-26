@@ -32,16 +32,11 @@ SSD1306AsciiAvrI2c display;
 TimeSensor timeSensorModule;
 // creating renderer
 IMenuRenderer *oledMenuRenderer = new OLEDMenuRenderer(display);
-IMenuRenderer *oledSingleFieldMenuRenderer = new OLEDSingleFieldMenuItemRenderer(display);
+IMenuRenderer *oledFieldMenuRenderer = new OLEDHorizontalMenuItemRenderer(display);
 
 //// creating main menu
 
-MenuItem *hourMenu = new SingleFieldMenuItem(oledSingleFieldMenuRenderer, "Set Hour", "", 23);
-MenuItem *minuteMenu = new SingleFieldMenuItem(oledSingleFieldMenuRenderer, "Set Minute", "", 59);
-MenuItem *secondMenu = new SingleFieldMenuItem(oledSingleFieldMenuRenderer, "Set Second", "", 59);
-AbstractMenuEntity *clockMenu[] = {hourMenu, minuteMenu, secondMenu};
-
-AbstractMenuEntity *menu1 = new MenuEntity(oledMenuRenderer, "Set Time", clockMenu, 3);
+AbstractMenuEntity *menu1 = new TimeMenuItem(oledFieldMenuRenderer, "Set Time", timeSensorModule);
 AbstractMenuEntity *menu2 = new MenuEntity(oledMenuRenderer, "Set Schedule", nullptr, 0);
 AbstractMenuEntity *menu3 = new MenuEntity(oledMenuRenderer, "Train Remote", nullptr, 0);
 AbstractMenuEntity *mainMenus[] = {menu1, menu2, menu3};

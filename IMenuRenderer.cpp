@@ -52,18 +52,6 @@ void OLEDMenuRenderer::renderMenu(AbstractMenuEntity* _menu) {
 	selectMenu(this->menu->getCurrentIndex());
 }
 
-void OLEDMenuRenderer::setupOled() {
-#if RST_PIN >= 0
-	display.begin(&Adafruit128x64, I2C_ADDRESS, RST_PIN);
-#else // RST_PIN >= 0
-	display.begin(&Adafruit128x64, I2C_ADDRESS);
-#endif // RST_PIN >= 0
-	// Call oled.setI2cClock(frequency) to change from the default frequency.
-
-	display.setFont(font8x8);
-}
-
-
 void OLEDMenuRenderer::renderMenuHeader(const char *menuHeader) {
 	display.setCursor(0, 0);
 	display.clearToEOL();
@@ -96,65 +84,68 @@ void OLEDMenuRenderer::selectMenu(int index) {
 		display.setInvertMode(false);
 	}
 }
-
-//OLEDSingleFieldMenuItemRenderer definition
-
-OLEDSingleFieldMenuItemRenderer::OLEDSingleFieldMenuItemRenderer(SSD1306AsciiAvrI2c &displayObject):display(displayObject) {
-}
-
-void OLEDSingleFieldMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
-	this->menu = reinterpret_cast<SingleFieldMenuItem *>(menu);
-	display.clear();
-	display.setInvertMode(false);
-	display.setCursor(0, 0);
-	display.print(this->menu->getName());
-
-	display.setCursor(52, 3);
-	display.setFont(lcdnums12x16);
-	if(this->menu->getValue() < 10){
-		display.print(F("0"));
-		display.setCol(64);
-	}
-	display.print(this->menu->getValue());
-	display.setFont(Verdana12_bold);
-	display.setCursor(0, 6);
-	display.print(F("Save"));
-	display.setCursor(OLED_COLUMNS/2, 6);
-	display.print(F("Back"));
-	display.setInvertMode(true);
-
-	switch(this->menu->getCurrentIndex()){
-	case SingleFieldMenuItem::DATA_INDEX://value
-		display.setCursor(52, 3);
-		display.setFont(lcdnums12x16);
-		if(this->menu->getValue() < 10){
-			display.print(F("0"));
-			display.setCol(64);
-		}
-		display.print(this->menu->getValue());
-		display.setFont(Verdana12_bold);
-		break;
-	case SingleFieldMenuItem::SAVE_INDEX://save
-		display.setCursor(0, 6);
-		display.print(F("Save"));
-		break;
-	case SingleFieldMenuItem::BACK_INDEX:
-		display.setCursor(OLED_COLUMNS/2, 6);
-		display.print(F("Back"));
-		break;
-	default:
-		break;
-	}
-	display.setInvertMode(false);
-}
-
 void OLEDMenuRenderer::clear() {
 	display.clear();
 }
 
-void OLEDSingleFieldMenuItemRenderer::clear() {
-	display.clear();
-}
 
 void SerialMenuRenderer::clear() {
 }
+
+OLEDHorizontalMenuItemRenderer::OLEDHorizontalMenuItemRenderer(
+		SSD1306AsciiAvrI2c &displayObject): display(displayObject) {
+}
+
+void OLEDHorizontalMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
+	this->_menu = reinterpret_cast<MenuItem *>(menu);
+
+	display.clear();
+	display.setInvertMode(false);
+	display.setCursor(0, 0);
+	display.print(this->_menu->getName());
+
+	// on form field line
+	display.setCursor(0, 3);
+	display.setFont(Arial_bold_14);
+	// print label
+	display.clearToEOL();
+	if (_menu->getCurrentIndex() > -1 && _menu->getCurrentIndex() < (int)_menu->getFieldCount()) {
+		display.print(_menu->getLabel(_menu->getCurrentIndex()));
+		display.print(F(":"));
+		display.setCol(OLED_COLUMNS/2);
+		display.setInvertMode(true);
+		display.print(_menu->getValue(_menu->getCurrentIndex()));
+		display.setInvertMode(false);
+	} else {
+		uint8_t index = _menu->getFieldCount() - 1;
+		if (menu->getCurrentIndex() == -1) index = 0;
+		display.print(_menu->getLabel(index));
+		display.print(F(":"));
+		display.setCol(OLED_COLUMNS/2);
+		display.print(_menu->getValue(index));
+	}
+	// reverting to main font
+	display.setFont(Verdana12_bold);
+	display.setCursor(0, 6);
+	if (_menu->getCurrentIndex() == _menu->getFieldCount()){
+		display.setInvertMode(true);
+		display.print(F("Save"));
+		display.setInvertMode(false);
+	} else {
+		display.print(F("Save"));
+	}
+	display.setCursor(OLED_COLUMNS/2, 6);
+	if (_menu->getCurrentIndex() == _menu->getFieldCount() + 1){
+		display.setInvertMode(true);
+		display.print(F("Back"));
+		display.setInvertMode(false);
+	} else {
+		display.print(F("Back"));
+	}
+	display.setInvertMode(false);
+}
+
+void OLEDHorizontalMenuItemRenderer::clear() {
+	display.clear();
+}
+
