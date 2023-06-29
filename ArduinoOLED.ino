@@ -110,10 +110,19 @@ void setupOled() {
 //	Serial.println(y);
 //}
 
+using TXSensor = Sensor<RemoteRXModule, RemoteRXValue>;
+using RXSensor = Sensor<RemoteTXModule, RemoteRXValue>;
+namespace TEST {
+
+void testTxRxSetup() {
+
+}
+
+};
 
 //------------------------------------------------------------------------------
 void setup() {
-	Serial.begin(115200);
+	Serial.begin(CONFIG::BAUD_RATE);
 	setupOled();
 	SerialPrint(F("Hello World!"));
 	SerialPrintln(freeMemory());
