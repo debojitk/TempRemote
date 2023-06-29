@@ -9,6 +9,7 @@
 class IRrecv;
 class IRsend;
 class decode_results;
+class IRNode;
 
 struct TimeValue {
 	uint8_t  _month;
@@ -24,8 +25,8 @@ struct TimeValue {
 		snprintf_P(timeStore,
 				sizeof(timeStore),
 				PSTR("%02u/%02u/%04u"),
-				_month,
 				_day,
+				_month,
 				_year
 		);
 		return timeStore;

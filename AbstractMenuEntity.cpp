@@ -4,17 +4,20 @@
  *  Created on: 20-May-2023
  *      Author: debojitk
  */
+#include <Arduino.h>
+#include <TimerOne.h>
 #include "CommonItems.h"
 #include "CustomStack.h"
 #include "AbstractMenuEntity.h"
 #include "EventManager.h"
 #include "MenuItemRenderer.h"
-#include <Arduino.h>
 #include "IMenuRenderer.h"
-#include <TimerOne.h>
+#include "Sensor.h"
+#include "SensorTypes.h"
 
 // define the stack
 CustomStack<AbstractMenuEntity *, 10> AbstractMenuEntity::menuStack;
+AbstractMenuEntity *AbstractMenuEntity::CurrentMenu = nullptr;
 
 // Definition for AbstractMenuEntity
 AbstractMenuEntity::AbstractMenuEntity(const char *name, IMenuRenderer *renderer) {
@@ -65,14 +68,27 @@ void AbstractMenuEntity::setEventManager(EventManager *manager){
 
 
 void AbstractMenuEntity::activate() {
-	SerialPrint(F("menu is not active, activating ->"));
+	if (isActive()) return;
+	SerialPrint(F("Activating ->"));
 	SerialPrintln(getName());
 	if(eventManager != nullptr){
 		eventManager->registereventReceiver(this);
 	}
 	this->setActive(true);
+	CurrentMenu = this;
 	this->renderer->clear();
 	render();
+}
+
+void AbstractMenuEntity::deactivate() {
+	if (!isActive()) return;
+	SerialPrint(F("Deactivating ->"));
+	SerialPrintln(getName());
+	setActive(false);
+	if(eventManager != nullptr){
+		eventManager->unregisterEventReceiver();
+	}
+	this->renderer->clear();
 }
 
 void AbstractMenuEntity::render(){
@@ -80,11 +96,9 @@ void AbstractMenuEntity::render(){
 }
 
 void AbstractMenuEntity::back(){
-	SerialPrint(F("menu is deactivated ->"));
-	SerialPrintln(getName());
-	this->setActive(false);
 	AbstractMenuEntity *prevMenu = AbstractMenuEntity::menuStack.pop();
 	if (prevMenu != nullptr) {
+		deactivate();
 		SerialPrint(F("Popped menu->"));
 		SerialPrintln(prevMenu->getName());
 		prevMenu->activate();
@@ -137,7 +151,7 @@ void MenuEntity::handleDoubleClick(){
 		} else {
 			AbstractMenuEntity *item = getItem(currentIndex);
 			if (item != nullptr){
-				this->setActive(false);
+				deactivate();
 				AbstractMenuEntity::menuStack.push(this);
 				SerialPrint(F("Pushing menu->"));
 				SerialPrintln(this->getName());
@@ -156,36 +170,18 @@ MenuItem::MenuItem(const char *name, IMenuRenderer *renderer): AbstractMenuEntit
 }
 
 // Definition for HomeMenu
-HomeMenu *HomeMenu::_instance = nullptr;
-
-void HomeMenu::timerInterruptInvoker(){
-	_instance->timerInterrupt();
-}
-
-void HomeMenu::timerInterrupt(){
-	SerialPrintln(F("Updating Time via interrupt"));
-	render();
-}
 
 void HomeMenu::activate(){
 	AbstractMenuEntity::activate();
-	SerialPrintln(F("HomeMenu attachInterrupt"));
-	if (!initialized) {
-		cli(); //disabling interrupts
-		initialized = true;
-		Timer1.initialize(); // initializing Timer1 for 1 sec interval
-		sei(); //enabling interrupts
-	}
-	Timer1.attachInterrupt(HomeMenu::timerInterruptInvoker);
 }
 
 
 
-HomeMenu::HomeMenu(HomeMenuItemRenderer *renderer, const char *name, AbstractMenuEntity *child):MenuItem(name, renderer) {
+HomeMenu::HomeMenu(HomeMenuItemRenderer *renderer,
+		const char *name, AbstractMenuEntity *child,
+		TimeSensor &timeSensor):MenuItem(name, renderer), _timeSensorModule(timeSensor) {
 	this->child = child;
-	this->setTime(12, 15, 17);
 	this->temperature = 30;
-	_instance = this;
 }
 
 void HomeMenu::handleClick(){
@@ -193,6 +189,7 @@ void HomeMenu::handleClick(){
 }
 void HomeMenu::handleDoubleClick(){
 	if (this->child && !this->child->isActive()){
+		deactivate();
 		AbstractMenuEntity::menuStack.push(this);
 		this->child->setEventManager(eventManager);
 		this->child->activate();
@@ -206,16 +203,27 @@ void HomeMenu::back(){
 }
 
 void HomeMenu::setTime(uint8_t hour, uint8_t min, uint8_t sec){
-	cTime.hours = hour;
-	cTime.minutes = min;
-	cTime.seconds = sec;
+
 }
 
 double HomeMenu::getTemperature(){
 	return temperature;
 }
-struct CurrentTime HomeMenu::getTime(){
-	return cTime;
+struct TimeValue HomeMenu::getTime(){
+	return _timeSensorModule.get();
+}
+
+void HomeMenu::update(){
+	if (isActive()) {
+		uint32_t currentTime = millis();
+		if (lastUpdateTime > currentTime) {
+			// handling millis overflow
+			lastUpdateTime = currentTime;
+		} else if ((currentTime - lastUpdateTime) > 1000) {
+			lastUpdateTime = currentTime;
+			render();
+		}
+	}
 }
 
 // Definition for SingleFieldMenuItem
@@ -275,4 +283,93 @@ void SingleFieldMenuItem::save() {
 
 void SingleFieldMenuItem::back() {
 	AbstractMenuEntity::back();
+}
+
+
+const char* TimeMenuItem::labels[] = {"Hour", "Minutes", "Seconds"};
+TimeMenuItem::TimeMenuItem(IMenuRenderer *renderer, const char *name,
+		TimeSensor &timeModule): MenuItem(name, renderer),_timeModule(timeModule) {
+	this->name = name;
+}
+
+void TimeMenuItem::handleClick() {
+	if (!this->isActive())
+		return;
+	if(changeData){
+		switch(currentIndex){
+		case TimeMenuItem::HOUR_INDEX:
+			_timeValue._hour = (_timeValue._hour + 1)%24;
+			break;
+		case TimeMenuItem::MIN_INDEX:
+			_timeValue._min = (_timeValue._min + 1)%60;
+			break;
+		case TimeMenuItem::SEC_INDEX:
+			_timeValue._sec = (_timeValue._sec + 1)%60;
+			break;
+		}
+	} else {
+		currentIndex = (currentIndex + 1)%TimeMenuItem::STATES;
+	}
+	render();
+}
+
+void TimeMenuItem::handleDoubleClick() {
+	switch(currentIndex){
+	case TimeMenuItem::BACK_INDEX:
+		back();
+		break;
+	case TimeMenuItem::SAVE_INDEX:
+		save();
+		break;
+	case TimeMenuItem::HOUR_INDEX:
+	case TimeMenuItem::MIN_INDEX:
+	case TimeMenuItem::SEC_INDEX:
+		changeData = !changeData;
+		break;
+	default:
+		break;
+	}
+}
+
+struct TimeValue TimeMenuItem::getTime() {
+	return _timeValue;
+}
+
+void TimeMenuItem::save() {
+	_timeModule.set(_timeValue);
+}
+
+void TimeMenuItem::back() {
+	AbstractMenuEntity::back();
+}
+
+void TimeMenuItem::activate() {
+	_timeValue = _timeModule.get();
+	AbstractMenuEntity::activate();
+}
+
+int TimeMenuItem::getValue(uint8_t index) {
+	uint8_t retval = 0;
+	if (index > getFieldCount() - 1) return retval;
+	switch(index){
+	case TimeMenuItem::HOUR_INDEX:
+		retval = _timeValue._hour;
+		break;
+	case TimeMenuItem::MIN_INDEX:
+		retval = _timeValue._min;
+		break;
+	case TimeMenuItem::SEC_INDEX:
+		retval = _timeValue._sec;
+		break;
+	}
+	return retval;
+}
+
+const char* TimeMenuItem::getLabel(uint8_t index) {
+	if (index > getFieldCount() - 1) return nullptr;
+	return TimeMenuItem::labels[index];
+}
+
+uint8_t TimeMenuItem::getFieldCount() {
+	return sizeof(TimeMenuItem::labels)/ sizeof(char *);
 }

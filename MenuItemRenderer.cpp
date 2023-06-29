@@ -7,12 +7,14 @@
 
 #include "AbstractMenuEntity.h"
 #include "MenuItemRenderer.h"
+#include "SensorTypes.h"
 #include <Arduino.h>
 
 HomeMenuItemRenderer::HomeMenuItemRenderer(SSD1306AsciiAvrI2c& displayObject):display(displayObject){
 }
 void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	this->menu = reinterpret_cast<HomeMenu *>(menu);
+	TimeValue t = this->menu->getTime();
 	display.setCursor(0, 0);
 	display.print(menu->getName());
 	display.setCursor(0, 2);
@@ -20,11 +22,9 @@ void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	display.print(this->menu->getTemperature());
 	display.print(F(" C"));
 	display.setCursor(0, 4);
-	display.print(this->menu->getTime().hours);
-	display.print(F(":"));
-	display.print(this->menu->getTime().minutes);
-	display.print(F(":"));
-	display.print(this->menu->getTime().seconds);
+	display.print(t.formatDate());
+	display.setCursor(0, 6);
+	display.print(t.formatTime());
 
 }
 
