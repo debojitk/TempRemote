@@ -27,7 +27,7 @@ using TempSensor = Sensor<TemperatureModule, TemperatureValue>;
 class AbstractMenuEntity: public IEventReceiver, public IRenderable { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	AbstractMenuEntity(const char *name, IMenuRenderer *renderer);
-	const char* getName();
+	virtual const char* getName();
 	int getBackIndex();
 	void setCurrentIndex(int index);
 	int getCurrentIndex();
@@ -57,6 +57,12 @@ protected:
 
 };
 
+class IDynamicMenuItemProvider { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	virtual AbstractMenuEntity** getValues() = 0;
+	virtual uint8_t getSize() = 0;
+};
+
 class MenuEntity: public AbstractMenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	MenuEntity(IMenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], uint8_t numitems);
@@ -66,9 +72,18 @@ public:
 	void handleClick();
 	void goToNextItem();
 	void handleDoubleClick();
-private:
+protected:
 	AbstractMenuEntity** items;
 	uint8_t numItems = 0;
+};
+
+class DynamicMenuEntity: public MenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	DynamicMenuEntity(IMenuRenderer *renderer, const char *name, IDynamicMenuItemProvider &valueProvider);
+	void activate();
+private:
+	void setItems(AbstractMenuEntity* items[],uint8_t numitems);
+	IDynamicMenuItemProvider &_valueProvider;
 };
 
 class MenuItem: public AbstractMenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
@@ -147,6 +162,37 @@ private:
 	bool changeData = false;
 	TimeValue _timeValue;
     static const char *labels[];
+};
+
+class RemoteProgramMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	RemoteProgramMenuItem(IMenuRenderer *renderer);
+	void handleClick();
+	void handleDoubleClick();
+	void test();
+	void save();
+	void back();
+	void activate();
+	uint8_t getRangeEnd() const;
+	void setRangeEnd(uint8_t rangeEnd = 0);
+	uint8_t getRangeStart() const;
+	void setRangeStart(uint8_t rangeStart = 0);
+	bool isTestMode() const;
+	void setTestMode(bool testMode = true);
+	const char * getName();
+
+	static constexpr uint8_t START_RANGE_INDEX  = 0;
+    static constexpr uint8_t END_RANGE_INDEX  = 1;
+    static constexpr uint8_t CODE_INDEX  = 2;
+    static constexpr uint8_t SAVE_TEST_INDEX = 3;
+    static constexpr uint8_t BACK_INDEX  = 4;
+    uint8_t STATES  = 5;
+
+private:
+	bool changeData = false;
+	bool testMode = true;
+	uint8_t rangeStart = 0;
+	uint8_t rangeEnd = 0;
 };
 
 

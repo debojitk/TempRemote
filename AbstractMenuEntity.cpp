@@ -163,6 +163,7 @@ void MenuEntity::handleDoubleClick(){
 }
 
 
+
 // Definition for MenuItem
 
 MenuItem::MenuItem(const char *name, IMenuRenderer *renderer): AbstractMenuEntity(name, renderer){
@@ -372,4 +373,127 @@ const char* TimeMenuItem::getLabel(uint8_t index) {
 
 uint8_t TimeMenuItem::getFieldCount() {
 	return sizeof(TimeMenuItem::labels)/ sizeof(char *);
+}
+
+/**
+ *  DynamicMenuEntity definition
+ */
+
+DynamicMenuEntity::DynamicMenuEntity(
+		IMenuRenderer *renderer,
+		const char *name,
+		IDynamicMenuItemProvider &valueProvider
+	): MenuEntity(renderer, name, nullptr, 0), _valueProvider(valueProvider) {
+
+}
+
+void DynamicMenuEntity::activate() {
+	setItems(_valueProvider.getValues(), _valueProvider.getSize());
+	AbstractMenuEntity::activate();
+}
+
+void DynamicMenuEntity::setItems(AbstractMenuEntity *incomingItems[], uint8_t incomingNumItems) {
+	if (this->items != incomingItems) {
+		// need to modify, delete the existing array first
+		for (int i = 0; i<numItems; i++) {
+			delete this->items[i];
+		}
+		delete[] this->items;
+		numItems = incomingNumItems;
+		this->items = incomingItems;
+	}
+}
+
+
+/**
+ * RemoteProgramMenuItem definition
+ */
+RemoteProgramMenuItem::RemoteProgramMenuItem(IMenuRenderer *renderer): MenuItem(nullptr, renderer) {
+}
+
+void RemoteProgramMenuItem::handleClick() {
+	if (!isActive()) return;
+	if (testMode) {
+		currentIndex = (currentIndex + 1)%STATES;
+	} else {
+		if (!testMode && changeData) {
+			switch (currentIndex) {
+			case START_RANGE_INDEX:
+				rangeStart = (rangeStart + 1)%30;
+				break;
+			case END_RANGE_INDEX:
+				rangeEnd = (rangeEnd + 1)%30;
+				break;
+			case CODE_INDEX:
+				//TODO: handle Remote code
+				break;
+			default:
+				break;
+			}
+		} else {
+			currentIndex = (currentIndex + 1)%STATES;
+		}
+	}
+	render();
+}
+
+void RemoteProgramMenuItem::handleDoubleClick() {
+	if (!isActive()) return;
+
+	if ( currentIndex ==  STATES - 2) {
+		testMode? test(): save();
+	} else if (currentIndex == STATES - 1) {
+		back();
+	} else if (currentIndex != -1){
+		if (!testMode)	changeData = !changeData;
+	}
+}
+
+void RemoteProgramMenuItem::test() {
+}
+
+void RemoteProgramMenuItem::back() {
+	AbstractMenuEntity:: back();
+}
+
+void RemoteProgramMenuItem::activate() {
+	AbstractMenuEntity:: activate();
+}
+
+uint8_t RemoteProgramMenuItem::getRangeEnd() const {
+	return rangeEnd;
+}
+
+void RemoteProgramMenuItem::setRangeEnd(uint8_t rangeEnd = 0) {
+	this->rangeEnd = rangeEnd;
+}
+
+uint8_t RemoteProgramMenuItem::getRangeStart() const {
+	return rangeStart;
+}
+
+void RemoteProgramMenuItem::setRangeStart(uint8_t rangeStart = 0) {
+	this->rangeStart = rangeStart;
+}
+
+bool RemoteProgramMenuItem::isTestMode() const {
+	return testMode;
+}
+
+void RemoteProgramMenuItem::save() {
+}
+
+void RemoteProgramMenuItem::setTestMode(bool testMode = true) {
+	this->testMode = testMode;
+	if (testMode == true) {
+		STATES = 2; //TEST and BACK
+	} else {
+		STATES = 5;
+	}
+}
+
+const char* RemoteProgramMenuItem::getName() {
+	static char buffer[6];
+	sprintf(buffer, "%2d-%2d", rangeStart, rangeEnd);
+	return buffer;
 }

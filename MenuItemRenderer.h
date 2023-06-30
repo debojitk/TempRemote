@@ -15,7 +15,7 @@
 class AbstractMenuEntity;
 class HomeMenu;
 
-class HomeMenuItemRenderer: public IMenuRenderer {
+class HomeMenuItemRenderer: public IMenuRenderer { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	HomeMenuItemRenderer(SSD1306AsciiAvrI2c& display);
 	void renderMenu(AbstractMenuEntity* menu);
@@ -24,6 +24,17 @@ private:
 	SSD1306AsciiAvrI2c& display;
 	HomeMenu *menu;
 };
+
+class RemoteMenuItemRenderer: public IMenuRenderer { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	RemoteMenuItemRenderer(SSD1306AsciiAvrI2c& display);
+	void renderMenu(AbstractMenuEntity* menu);
+	void clear();
+private:
+	SSD1306AsciiAvrI2c& display;
+};
+
+
 
 
 #endif /* MENUITEMRENDERER_H_ */
