@@ -31,3 +31,14 @@ void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 void HomeMenuItemRenderer::clear() {
 	display.clear();
 }
+
+RemoteMenuItemRenderer::RemoteMenuItemRenderer(SSD1306AsciiAvrI2c &displayObject): display(displayObject) {
+}
+
+void RemoteMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
+	RemoteProgramMenuItem *thisMenu = reinterpret_cast<RemoteProgramMenuItem *>(menu);
+}
+
+void RemoteMenuItemRenderer::clear() {
+	display.clear();
+}
