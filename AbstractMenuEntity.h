@@ -20,6 +20,7 @@ enum EventType: unsigned int;
 class IMenuRenderer;
 class EventManager;
 class HomeMenuItemRenderer;
+class RemoteData;
 
 using TimeSensor = Sensor<TimeModuleDS3231, TimeValue>;
 using TempSensor = Sensor<TemperatureModule, TemperatureValue>;
@@ -61,6 +62,27 @@ class IDynamicMenuItemProvider { // @suppress("Class has a virtual method and no
 public:
 	virtual AbstractMenuEntity** getValues() = 0;
 	virtual uint8_t getSize() = 0;
+	virtual ~IDynamicMenuItemProvider() {}
+};
+
+class RemoteMenuItemProvider : public IDynamicMenuItemProvider {
+	RemoteMenuItemProvider(RemoteData& rd) : _rd(rd) {}
+	virtual ~RemoteMenuItemProvider() {
+		free();
+	}
+	void free() {
+		for(unsigned i = 0; i < _size; ++i){
+			delete _values[i];
+		}
+		memset(_values, 0, CONFIG::NUM_INDEX);
+	}
+	AbstractMenuEntity** getValues();
+	uint8_t getSize() { return _size; }
+
+private:
+	const RemoteData& _rd;
+	size_t            _size = 0;
+	AbstractMenuEntity* _values[CONFIG::NUM_INDEX];
 };
 
 class MenuEntity: public AbstractMenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")

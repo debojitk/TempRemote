@@ -14,6 +14,7 @@
 #include "IMenuRenderer.h"
 #include "Sensor.h"
 #include "SensorTypes.h"
+#include "HexProgrammer.h"
 
 // define the stack
 CustomStack<AbstractMenuEntity *, 10> AbstractMenuEntity::menuStack;
@@ -497,3 +498,20 @@ const char* RemoteProgramMenuItem::getName() {
 	sprintf(buffer, "%2d-%2d", rangeStart, rangeEnd);
 	return buffer;
 }
+
+AbstractMenuEntity**
+RemoteMenuItemProvider::getValues() {
+	free();
+	_size = 0;
+	for(auto it = _rd.beginRange(), itEnd = _rd.endRange();
+	        it != itEnd; ++it) {
+	    TemperatureRange tr = *it;
+	    RemoteProgramMenuItem* ptr = new RemoteProgramMenuItem(nullptr);
+	    ptr->setRangeStart(tr._start);
+	    ptr->setRangeEnd(tr._end);
+	    _values[_size] = ptr;
+	    ++_size;
+	}
+	return _values;
+}
+
