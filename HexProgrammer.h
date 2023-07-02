@@ -3,15 +3,18 @@
 #pragma once
 
 #include <stdint.h>
-//class IRData;
+
+class RemoteData;
 
 namespace CONFIG {
-    constexpr uint32_t NUM_INDEX = 50;
-    constexpr uint32_t NUM_SCHEDULE = 4;
-    constexpr uint32_t MAX_HEX_CODES = 20;
-    constexpr uint32_t BAUD_RATE = 9600;
-    constexpr uint32_t HEX_BUFFER_LENGTH = 112;
+    constexpr uint32_t NUM_INDEX         = 35;              // starting from START_TEMPERATURE
+    constexpr uint32_t NUM_SCHEDULE      = 4;
+    constexpr uint32_t MAX_HEX_CODES     = 10;
+    constexpr uint32_t BAUD_RATE         = 115200;
+    constexpr uint32_t START_TEMPERATURE = 15;
+    constexpr uint32_t MAX_TEMPERATURE   = 1000;
 };
+
 struct SchedulerTime {
 	uint8_t _hr = 0;
 	uint8_t _min = 0;
@@ -21,18 +24,45 @@ struct Schedule {
 	SchedulerTime _end;
 };
 
-struct IRNode {                        // extensions for sendRaw
-  uint8_t _rawCode[CONFIG::HEX_BUFFER_LENGTH]; // The durations if raw
-  uint8_t _rawCodeLength;              // The length of the code
+// 5 bytes per IR
+struct IRNode {
+    uint8_t  _protocol;
+    uint16_t _address;
+    uint16_t _command;
+    bool operator ==(const IRNode& n) {
+    	return ((n._protocol == _protocol) && (n._address == _address) && (n._command == _command));
+    }
 };
+constexpr IRNode NullIRNode {0,0,0};
 
 struct MemoryLayout {
   uint8_t   _index[CONFIG::NUM_INDEX];            // temperature index
-  uint8_t   _numHex = 0;
   IRNode    _hexCodes[CONFIG::MAX_HEX_CODES];     // hexCode index
-  Schedule  _schedules[CONFIG::NUM_SCHEDULE];
+//  Schedule  _schedules[CONFIG::NUM_SCHEDULE];
 };
 
+struct TemperatureRange {
+    uint8_t       _start;
+    uint8_t       _end;
+    IRNode        _hex;
+};
+constexpr TemperatureRange NullTemperatureRange{CONFIG::MAX_TEMPERATURE, CONFIG::MAX_TEMPERATURE, NullIRNode};
+
+class RangeIterator {
+public:
+    RangeIterator(uint8_t posBegin, uint8_t posEnd, const RemoteData& rt) :
+                _posBegin(posBegin), _posEnd(posEnd), _rt(rt) {}
+    RangeIterator(const RemoteData& rt) : _rt(rt) {}
+    TemperatureRange operator *() const;
+    RangeIterator operator ++();
+    bool operator ==(const RangeIterator& ri) const;
+    bool operator !=(const RangeIterator& ri) const;
+private:
+    uint8_t _posBegin = CONFIG::NUM_INDEX;
+    uint8_t _posEnd = CONFIG::NUM_INDEX;
+    const RemoteData& _rt;
+    friend class RemoteData;
+};
 
 class RemoteData {
 public:
@@ -40,14 +70,21 @@ public:
   // EPROM has limited write cycles
   void save() const;
   void restore();
+  uint8_t atIndex(uint8_t val) const;
   // 0xFFFFFF or correct value
-  IRNode* at(uint8_t t) const;
-  void program(uint8_t begin, uint8_t end, uint8_t position);
-  uint8_t addHex(const IRNode* node);
-  // The API runs after wakeup
-  void run();
-//  void serialPrint() const; // only for debug
+  IRNode at(uint8_t t) const;
+  IRNode atTemperature(uint8_t t) const;
+  bool addRange(TemperatureRange& r);
+
+  RangeIterator beginRange();
+  RangeIterator endRange();
+
+private:
+  uint8_t findHex(const IRNode& node, uint32_t& pos) const;
+  bool program(uint8_t beginTemp, uint8_t endTemp, uint8_t position);
+  uint8_t addHex(const IRNode& node);
 
 private:
   MemoryLayout _layout;
 };
+

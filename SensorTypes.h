@@ -2,9 +2,9 @@
 
 #include <DHT22.h>
 #include <RtcDS1302.h>
-//#elif defined(__RTC_DS_3231__)
 #include <RtcDS3231.h>
-#include <Wire.h> // must be included here so that Arduino library object file references work
+#include <Wire.h>
+#include "HexProgrammer.h";
 
 class IRrecv;
 class IRsend;
@@ -75,7 +75,7 @@ private:
 	RtcDS3231<TwoWire> _rtc;
 };
 
-//#endif
+
 using TemperatureValue = float;
 using HumidityValue = float;
 
@@ -101,8 +101,8 @@ private:
 	DHT22 _dht22;
 };
 
-using RemoteRXValue = IRNode*;
-constexpr RemoteRXValue NullRemoteRXValue = nullptr;
+using RemoteRXValue = IRNode;
+constexpr RemoteRXValue NullRemoteRXValue = NullIRNode;
 
 class RemoteRXModule {
 public:
@@ -114,19 +114,19 @@ public:
 	void setup();
 private:
 	static constexpr uint8_t PIN = 11;
-	IRrecv* _rx;
-	decode_results* _results;
+	IRrecv& _rx;
 };
 
 class RemoteTXModule {
 public:
 	RemoteTXModule();
-	~RemoteTXModule();
+	~RemoteTXModule(){}
 
 	void set(RemoteRXValue val);
 	void setup();
 private:
-	static constexpr uint8_t PIN = 11;
+	static constexpr uint8_t PIN = 5;
+	static constexpr uint8_t REPEATS = 5;
 	IRsend& _tx;
 };
 

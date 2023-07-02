@@ -4,7 +4,6 @@
 //
 #include "SSD1306Ascii.h"
 #include "SSD1306AsciiAvrI2c.h"
-#include <MemoryFree.h>
 #include <avr/pgmspace.h>
 #include "AbstractMenuEntity.h"
 #include "CommonItems.h"
@@ -101,22 +100,50 @@ void setupOled() {
 //	Serial.println(y);
 //}
 
-using TXSensor = Sensor<RemoteRXModule, RemoteRXValue>;
-using RXSensor = Sensor<RemoteTXModule, RemoteRXValue>;
+using RXSensor = Sensor<RemoteRXModule, RemoteRXValue>;
+using TXSensor = Sensor<RemoteTXModule, RemoteRXValue>;
+TXSensor TX;
+RXSensor RX;
+
 namespace TEST {
 
 void testTxRxSetup() {
+	TX.setup();
+	SerialPrintln(F("TX Setup complete"));
+	RX.setup();
+	SerialPrintln(F("RX Setup complete"));
+}
+
+void testRegister() {
+	IRNode node = RX.get();
 
 }
 
-};
+void testMemory() {
+  for(size_t i = 0; i < 100000; ++i) {
+	  void* ptr = malloc(sizeof(uint8_t) * i);
+	  if(ptr) {
+		  SerialPrint(F("Allocated Bytes:"));
+		  SerialPrintln(i);
+	  }
+	  else {
+		  SerialPrint(F("Could not Allocate Bytes:"));
+		  SerialPrintln(i);
+		  break;
+	  }
+	  free(ptr);
+  }
+}
+
+};  // namespace TEST
+
+
 
 //------------------------------------------------------------------------------
 void setup() {
 	Serial.begin(CONFIG::BAUD_RATE);
+	SerialPrint(F("Hello from SmartRemote!"));
 	setupOled();
-	SerialPrint(F("Hello World!"));
-	SerialPrintln(freeMemory());
 	setupSleepWakeupHandler();
 	buttonObserver->enable();
 
@@ -127,13 +154,13 @@ void setup() {
 	eventManager->setEventCallback(receiveEvent);
 	homeMenu->activate();
 	//tempMod.get();
+//	TEST::testTxRxSetup();
 }
 //------------------------------------------------------------------------------
 void loop() {
 	eventManager->processEvents();
 	interruptHandler->observeEvents();
 	homeMenu->update();
-	//Serial.println(freeMemory());
-	//delay(100);
+//	TEST::testRegister();
 }
 
