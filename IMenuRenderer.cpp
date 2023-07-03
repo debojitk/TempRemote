@@ -93,15 +93,10 @@ void OLEDMenuRenderer::clear() {
 void SerialMenuRenderer::clear() {
 }
 
-OLEDHorizontalMenuItemRenderer::OLEDHorizontalMenuItemRenderer(
-		SSD1306AsciiAvrI2c &displayObject): OLEDBaseFormMenuItemRenderer(displayObject) {
-}
 
 void OLEDHorizontalMenuItemRenderer::renderContent(FormMenuItem *_menu) {
-	// on form field line
 	display.setCursor(0, 3);
 	display.setFont(Arial_bold_14);
-	// print label
 	display.clearToEOL();
 	if (_menu->getCurrentIndex() > -1 && _menu->getCurrentIndex() < (int)_menu->getFieldCount()) {
 		display.print(_menu->getLabel(_menu->getCurrentIndex()));
@@ -122,42 +117,57 @@ void OLEDHorizontalMenuItemRenderer::renderContent(FormMenuItem *_menu) {
 }
 
 
-OLEDBaseFormMenuItemRenderer::OLEDBaseFormMenuItemRenderer(
-		SSD1306AsciiAvrI2c &displayObject):display(displayObject) {
-}
-
 void OLEDBaseFormMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	FormMenuItem *_menu = (FormMenuItem*)menu;
-	display.setFont(Verdana12_bold);
+	display.setFont(Arial_bold_14);
 	clear();
 	renderHeader(_menu);
 	renderContent(_menu);
 	renderFooter(_menu);
 }
 
-void OLEDBaseFormMenuItemRenderer::renderHeader(FormMenuItem *_menu) {
+void OLEDBaseFormMenuItemRenderer::renderHeader(FormMenuItem *menu) {
 	display.setInvertMode(false);
 	display.setCursor(0, 0);
-	display.print(_menu->getName());
+	display.print(menu->getName());
 }
 
-void OLEDBaseFormMenuItemRenderer::renderFooter(FormMenuItem *_menu) {
-	display.setFont(Verdana12_bold);
+void OLEDBaseFormMenuItemRenderer::renderFooter(FormMenuItem *menu) {
+	// display ok
 	display.setCursor(0, 6);
-	if (_menu->getCurrentIndex() == _menu->getOkIndex()){
+	if (menu->getCurrentIndex() == menu->getOkIndex()){
 		display.setInvertMode(true);
-		display.print(_menu->getLabel(_menu->getOkIndex()));
-		display.setInvertMode(false);
-	} else {
-		display.print(_menu->getLabel(_menu->getOkIndex()));
 	}
-	display.setCursor(OLED_COLUMNS/2, 6);
-	if (_menu->getCurrentIndex() == _menu->getBackIndex()) {
-		display.setInvertMode(true);
-		display.print(_menu->getLabel(_menu->getBackIndex()));
-		display.setInvertMode(false);
-	} else {
-		display.print(_menu->getLabel(_menu->getBackIndex()));
-	}
+	display.print(menu->getLabel(menu->getOkIndex()));
 	display.setInvertMode(false);
+
+	// display back
+	display.setCursor(OLED_COLUMNS/2, 6);
+	if (menu->getCurrentIndex() == menu->getBackIndex()) {
+		display.setInvertMode(true);
+	}
+	display.print(menu->getLabel(menu->getBackIndex()));
+	display.setInvertMode(false);
+}
+
+
+void OLEDCompactMenuItemRenderer::renderContent(FormMenuItem *menu) {
+	display.setRow(2);
+	display.clearToEOL();
+	display.setRow(4);
+	display.clearToEOL();
+	for (uint8_t i = 0, col = 0; i < menu->getFieldCount(); i++, col = col + COL_WIDTH) {
+		display.setCursor(col, 2);
+		uint8_t charCount = COL_WIDTH / 8;
+		char trimmedString[charCount + 1];
+		strlcpy_P(trimmedString, (const char *)menu->getLabel(i), charCount + 1);
+
+		display.print(trimmedString);
+		display.setCursor(col, 4);
+		if ( !menu->isReadOnly(i) && i == menu->getCurrentIndex()) {
+			display.setInvertMode(true);
+		}
+		display.print(menu->getValue(i));
+		display.setInvertMode(false);
+	}
 }

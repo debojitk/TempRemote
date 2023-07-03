@@ -158,6 +158,7 @@ public:
 	virtual uint8_t getOkIndex() {
 		return getFieldCount();
 	}
+	virtual boolean isReadOnly(uint8_t index);
 protected:
 	virtual void updateData(int currentIndex) = 0;
 	uint8_t states;

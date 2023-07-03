@@ -30,7 +30,7 @@ private:
 
 class OLEDBaseFormMenuItemRenderer: public IMenuRenderer {
 public:
-	OLEDBaseFormMenuItemRenderer(SSD1306AsciiAvrI2c& display);
+	OLEDBaseFormMenuItemRenderer(SSD1306AsciiAvrI2c& displayObject):display(displayObject){}
 	virtual void renderMenu(AbstractMenuEntity* menu);
 	virtual void renderContent(FormMenuItem* menu) = 0;
 	virtual void renderHeader(FormMenuItem* menu);
@@ -46,11 +46,17 @@ protected:
 
 class OLEDHorizontalMenuItemRenderer: public OLEDBaseFormMenuItemRenderer {
 public:
-	OLEDHorizontalMenuItemRenderer(SSD1306AsciiAvrI2c& display);
+	OLEDHorizontalMenuItemRenderer(SSD1306AsciiAvrI2c& display):OLEDBaseFormMenuItemRenderer(display){}
 	void renderContent(FormMenuItem* menu);
-private:
 };
 
+class OLEDCompactMenuItemRenderer: public OLEDBaseFormMenuItemRenderer {
+public:
+	OLEDCompactMenuItemRenderer(SSD1306AsciiAvrI2c& display):OLEDBaseFormMenuItemRenderer(display){}
+	void renderContent(FormMenuItem* menu);
+private:
+	static constexpr uint8_t COL_WIDTH = 40;
+};
 
 
 #endif /* OLEDMENURENDERER_H_ */

@@ -31,7 +31,7 @@ SSD1306AsciiAvrI2c display;
 TimeSensor timeSensorModule;
 // creating renderer
 IMenuRenderer *oledMenuRenderer = new OLEDMenuRenderer(display);
-IMenuRenderer *oledFieldMenuRenderer = new OLEDHorizontalMenuItemRenderer(display);
+IMenuRenderer *oledFieldMenuRenderer = new OLEDCompactMenuItemRenderer(display);
 
 //// creating main menu
 

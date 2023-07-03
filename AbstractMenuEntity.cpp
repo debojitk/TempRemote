@@ -228,6 +228,14 @@ void HomeMenu::update(){
 	}
 }
 
+uint32_t HomeMenu::getValue(uint8_t index) {
+	return 0;
+}
+
+const __FlashStringHelper* HomeMenu::getLabel(uint8_t index) {
+	return nullptr;
+}
+
 // Definition for SingleFieldMenuItem
 
 
@@ -335,13 +343,13 @@ void FormMenuItem::handleDoubleClick() {
 	}
 }
 
-uint32_t HomeMenu::getValue(uint8_t index) {
-	return 0;
+boolean FormMenuItem::isReadOnly(uint8_t index) {
+	if (index > -1 && index < getFieldCount()) {
+		return false;
+	}
+	return true;
 }
 
-const __FlashStringHelper* HomeMenu::getLabel(uint8_t index) {
-	return nullptr;
-}
 
 
 /**
