@@ -28,15 +28,29 @@ private:
 
 };
 
-class OLEDHorizontalMenuItemRenderer: public IMenuRenderer {
+class OLEDBaseFormMenuItemRenderer: public IMenuRenderer {
+public:
+	OLEDBaseFormMenuItemRenderer(SSD1306AsciiAvrI2c& display);
+	virtual void renderMenu(AbstractMenuEntity* menu);
+	virtual void renderContent(FormMenuItem* menu) = 0;
+	virtual void renderHeader(FormMenuItem* menu);
+	virtual void renderFooter(FormMenuItem* menu);
+	void clear() {
+		display.clear();
+	}
+protected:
+	SSD1306AsciiAvrI2c& display;
+};
+
+
+
+class OLEDHorizontalMenuItemRenderer: public OLEDBaseFormMenuItemRenderer {
 public:
 	OLEDHorizontalMenuItemRenderer(SSD1306AsciiAvrI2c& display);
-	void renderMenu(AbstractMenuEntity* menu);
-	void clear();
+	void renderContent(FormMenuItem* menu);
 private:
-	SSD1306AsciiAvrI2c& display;
-	MenuItem *_menu = nullptr;
 };
+
 
 
 #endif /* OLEDMENURENDERER_H_ */

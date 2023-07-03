@@ -94,24 +94,17 @@ void SerialMenuRenderer::clear() {
 }
 
 OLEDHorizontalMenuItemRenderer::OLEDHorizontalMenuItemRenderer(
-		SSD1306AsciiAvrI2c &displayObject): display(displayObject) {
+		SSD1306AsciiAvrI2c &displayObject): OLEDBaseFormMenuItemRenderer(displayObject) {
 }
 
-void OLEDHorizontalMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
-	TimeMenuItem * _menu = (TimeMenuItem *)menu;
-
-	display.clear();
-	display.setInvertMode(false);
-	display.setCursor(0, 0);
-	display.print(_menu->getName());
-
+void OLEDHorizontalMenuItemRenderer::renderContent(FormMenuItem *_menu) {
 	// on form field line
 	display.setCursor(0, 3);
 	display.setFont(Arial_bold_14);
 	// print label
 	display.clearToEOL();
 	if (_menu->getCurrentIndex() > -1 && _menu->getCurrentIndex() < (int)_menu->getFieldCount()) {
-		display.print((const __FlashStringHelper *)_menu->getLabel(_menu->getCurrentIndex()));
+		display.print(_menu->getLabel(_menu->getCurrentIndex()));
 		display.print(F(":"));
 		display.setCol(OLED_COLUMNS/2);
 		display.setInvertMode(true);
@@ -119,13 +112,36 @@ void OLEDHorizontalMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 		display.setInvertMode(false);
 	} else {
 		uint8_t index = _menu->getFieldCount() - 1;
-		if (menu->getCurrentIndex() == -1) index = 0;
+		if (_menu->getCurrentIndex() == -1) index = 0;
 		display.print(_menu->getLabel(index));
 		display.print(F(":"));
 		display.setCol(OLED_COLUMNS/2);
 		display.print(_menu->getValue(index));
 	}
-	// reverting to main font
+
+}
+
+
+OLEDBaseFormMenuItemRenderer::OLEDBaseFormMenuItemRenderer(
+		SSD1306AsciiAvrI2c &displayObject):display(displayObject) {
+}
+
+void OLEDBaseFormMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
+	FormMenuItem *_menu = (FormMenuItem*)menu;
+	display.setFont(Verdana12_bold);
+	clear();
+	renderHeader(_menu);
+	renderContent(_menu);
+	renderFooter(_menu);
+}
+
+void OLEDBaseFormMenuItemRenderer::renderHeader(FormMenuItem *_menu) {
+	display.setInvertMode(false);
+	display.setCursor(0, 0);
+	display.print(_menu->getName());
+}
+
+void OLEDBaseFormMenuItemRenderer::renderFooter(FormMenuItem *_menu) {
 	display.setFont(Verdana12_bold);
 	display.setCursor(0, 6);
 	if (_menu->getCurrentIndex() == _menu->getOkIndex()){
@@ -145,8 +161,3 @@ void OLEDHorizontalMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	}
 	display.setInvertMode(false);
 }
-
-void OLEDHorizontalMenuItemRenderer::clear() {
-	display.clear();
-}
-
