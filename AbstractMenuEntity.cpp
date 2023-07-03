@@ -230,119 +230,29 @@ void HomeMenu::update(){
 
 // Definition for SingleFieldMenuItem
 
-SingleFieldMenuItem::SingleFieldMenuItem(IMenuRenderer *renderer,const char *name, const char *label, uint8_t maxValue):MenuItem(name, renderer) {
-	this->label = label;
-	this->value = 0;
-	this->backIndex = SingleFieldMenuItem::BACK_INDEX;
-	this->maxValue = maxValue;
-}
 
-int SingleFieldMenuItem::getValue() {
-	return this->value;
-}
-
-void SingleFieldMenuItem::setValue(int value) {
-	this->value = value;
-}
-
-const char* SingleFieldMenuItem::getLabel() {
-	return this->label;
-}
-
-void SingleFieldMenuItem::handleClick() {
-	if (!this->isActive())
-		return;
-	if(changeData){
-		value = (value + 1)%(maxValue+1);
-	} else {
-		currentIndex = (currentIndex + 1)%3;
-	}
-	SerialPrint(F("Rendering on click:"));
-	SerialPrintln(currentIndex);
-	render();
-}
-
-void SingleFieldMenuItem::handleDoubleClick() {
-
-	switch(currentIndex){
-	case SingleFieldMenuItem::BACK_INDEX:
-		back();
-		break;
-	case SingleFieldMenuItem::DATA_INDEX:
-		changeData = !changeData;
-		break;
-	case SingleFieldMenuItem::SAVE_INDEX:
-		save();
-		break;
-	default:
-		break;
-	}
-}
-
-void SingleFieldMenuItem::save() {
-	//TODO: Need to implement a IKeyValuePairRepository
-}
-
-void SingleFieldMenuItem::back() {
-	AbstractMenuEntity::back();
-}
-
-
-const char* TimeMenuItem::labels[] = {"Hour", "Minutes", "Seconds"};
 TimeMenuItem::TimeMenuItem(IMenuRenderer *renderer, const char *name,
-		TimeSensor &timeModule): MenuItem(name, renderer),_timeModule(timeModule) {
+		TimeSensor &timeModule): FormMenuItem(name, renderer),_timeModule(timeModule) {
 	this->name = name;
+	states = 5;
 }
 
-void TimeMenuItem::handleClick() {
-	if (!this->isActive())
-		return;
-	if(changeData){
-		switch(currentIndex){
-		case TimeMenuItem::HOUR_INDEX:
-			_timeValue._hour = (_timeValue._hour + 1)%24;
-			break;
-		case TimeMenuItem::MIN_INDEX:
-			_timeValue._min = (_timeValue._min + 1)%60;
-			break;
-		case TimeMenuItem::SEC_INDEX:
-			_timeValue._sec = (_timeValue._sec + 1)%60;
-			break;
-		}
-	} else {
-		currentIndex = (currentIndex + 1)%TimeMenuItem::STATES;
-	}
-	render();
-}
-
-void TimeMenuItem::handleDoubleClick() {
-	switch(currentIndex){
-	case TimeMenuItem::BACK_INDEX:
-		back();
-		break;
-	case TimeMenuItem::SAVE_INDEX:
-		save();
-		break;
+void TimeMenuItem::updateData(int currentIndex) {
+	switch(currentIndex) {
 	case TimeMenuItem::HOUR_INDEX:
-	case TimeMenuItem::MIN_INDEX:
-	case TimeMenuItem::SEC_INDEX:
-		changeData = !changeData;
+		_timeValue._hour = (_timeValue._hour + 1)%24;
 		break;
-	default:
+	case TimeMenuItem::MIN_INDEX:
+		_timeValue._min = (_timeValue._min + 1)%60;
+		break;
+	case TimeMenuItem::SEC_INDEX:
+		_timeValue._sec = (_timeValue._sec + 1)%60;
 		break;
 	}
 }
 
-struct TimeValue TimeMenuItem::getTime() {
-	return _timeValue;
-}
-
-void TimeMenuItem::save() {
+void TimeMenuItem::ok() {
 	_timeModule.set(_timeValue);
-}
-
-void TimeMenuItem::back() {
-	AbstractMenuEntity::back();
 }
 
 void TimeMenuItem::activate() {
@@ -350,7 +260,7 @@ void TimeMenuItem::activate() {
 	AbstractMenuEntity::activate();
 }
 
-int TimeMenuItem::getValue(uint8_t index) {
+uint32_t TimeMenuItem::getValue(uint8_t index) {
 	uint8_t retval = 0;
 	if (index > getFieldCount() - 1) return retval;
 	switch(index){
@@ -367,13 +277,9 @@ int TimeMenuItem::getValue(uint8_t index) {
 	return retval;
 }
 
-const char* TimeMenuItem::getLabel(uint8_t index) {
-	if (index > getFieldCount() - 1) return nullptr;
-	return TimeMenuItem::labels[index];
-}
-
-uint8_t TimeMenuItem::getFieldCount() {
-	return sizeof(TimeMenuItem::labels)/ sizeof(char *);
+const char *TimeMenuItem::getLabel(uint8_t index) {
+	if (index > states - 1) return nullptr;
+	return (const char *)TimeMenuLabels[index];
 }
 
 /**
@@ -384,7 +290,7 @@ DynamicMenuEntity::DynamicMenuEntity(
 		IMenuRenderer *renderer,
 		const char *name,
 		IDynamicMenuItemProvider &valueProvider
-	): MenuEntity(renderer, name, nullptr, 0), _valueProvider(valueProvider) {
+): MenuEntity(renderer, name, nullptr, 0), _valueProvider(valueProvider) {
 
 }
 
@@ -405,113 +311,135 @@ void DynamicMenuEntity::setItems(AbstractMenuEntity *incomingItems[], uint8_t in
 	}
 }
 
+void FormMenuItem::handleClick() {
+	if (!this->isActive())
+		return;
+	if(changeData){
+		updateData(currentIndex);
+	} else {
+		currentIndex = (currentIndex + 1) % states;
+	}
+	render();
+
+}
+
+void FormMenuItem::handleDoubleClick() {
+	if (currentIndex < 0 || currentIndex > states - 1) return;
+	if (currentIndex ==  states - 1 ){
+		back();
+	} else if (currentIndex ==  states - 2 ) {
+		ok();
+	} else {
+		changeData = !changeData;
+	}
+}
+
+uint32_t HomeMenu::getValue(uint8_t index) {
+	return 0;
+}
+
+const char* HomeMenu::getLabel(uint8_t index) {
+	return nullptr;
+}
+
 
 /**
  * RemoteProgramMenuItem definition
  */
-RemoteProgramMenuItem::RemoteProgramMenuItem(IMenuRenderer *renderer): MenuItem(nullptr, renderer) {
+/*RemoteTestMenuItem::RemoteTestMenuItem(IMenuRenderer *renderer): MenuItem(nullptr, renderer) {
 }
 
-void RemoteProgramMenuItem::handleClick() {
+void RemoteTestMenuItem::handleClick() {
 	if (!isActive()) return;
-	if (testMode) {
-		currentIndex = (currentIndex + 1)%STATES;
-	} else {
-		if (!testMode && changeData) {
-			switch (currentIndex) {
-			case START_RANGE_INDEX:
-				rangeStart = (rangeStart + 1)%30;
-				break;
-			case END_RANGE_INDEX:
-				rangeEnd = (rangeEnd + 1)%30;
-				break;
-			case CODE_INDEX:
-				//TODO: handle Remote code
-				break;
-			default:
-				break;
-			}
-		} else {
-			currentIndex = (currentIndex + 1)%STATES;
-		}
-	}
+	currentIndex = (currentIndex + 1)%STATES;
 	render();
 }
 
-void RemoteProgramMenuItem::handleDoubleClick() {
+void RemoteTestMenuItem::handleDoubleClick() {
 	if (!isActive()) return;
 
 	if ( currentIndex ==  STATES - 2) {
-		testMode? test(): save();
+		ok();
 	} else if (currentIndex == STATES - 1) {
 		back();
-	} else if (currentIndex != -1){
-		if (!testMode)	changeData = !changeData;
 	}
 }
 
-void RemoteProgramMenuItem::test() {
-}
-
-void RemoteProgramMenuItem::back() {
+void RemoteTestMenuItem::back() {
 	AbstractMenuEntity:: back();
 }
 
-void RemoteProgramMenuItem::activate() {
+void RemoteTestMenuItem::activate() {
 	AbstractMenuEntity:: activate();
 }
 
-uint8_t RemoteProgramMenuItem::getRangeEnd() const {
+uint8_t RemoteTestMenuItem::getRangeEnd() const {
 	return rangeEnd;
 }
 
-void RemoteProgramMenuItem::setRangeEnd(uint8_t rangeEnd = 0) {
+void RemoteTestMenuItem::setRangeEnd(uint8_t rangeEnd = 0) {
 	this->rangeEnd = rangeEnd;
 }
 
-uint8_t RemoteProgramMenuItem::getRangeStart() const {
+uint8_t RemoteTestMenuItem::getRangeStart() const {
 	return rangeStart;
 }
 
-void RemoteProgramMenuItem::setRangeStart(uint8_t rangeStart = 0) {
+void RemoteTestMenuItem::setRangeStart(uint8_t rangeStart = 0) {
 	this->rangeStart = rangeStart;
 }
 
-bool RemoteProgramMenuItem::isTestMode() const {
-	return testMode;
-}
 
-void RemoteProgramMenuItem::save() {
-}
-
-void RemoteProgramMenuItem::setTestMode(bool testMode = true) {
-	this->testMode = testMode;
-	if (testMode == true) {
-		STATES = 2; //TEST and BACK
-	} else {
-		STATES = 5;
-	}
-}
-
-const char* RemoteProgramMenuItem::getName() {
+const char* RemoteTestMenuItem::getName() {
 	static char buffer[6];
 	sprintf(buffer, "%2d-%2d", rangeStart, rangeEnd);
 	return buffer;
 }
 
-AbstractMenuEntity**
-RemoteMenuItemProvider::getValues() {
-	free();
-	_size = 0;
-	for(auto it = _rd.beginRange(), itEnd = _rd.endRange();
-	        it != itEnd; ++it) {
-	    TemperatureRange tr = *it;
-	    RemoteProgramMenuItem* ptr = new RemoteProgramMenuItem(nullptr);
-	    ptr->setRangeStart(tr._start);
-	    ptr->setRangeEnd(tr._end);
-	    _values[_size] = ptr;
-	    ++_size;
-	}
-	return _values;
+uint8_t RemoteTestMenuItem::getFieldCount(){
+	return STATES - 2;
 }
 
+void RemoteTestMenuItem::ok() {
+}
+
+RemoteProgramMenuItem::RemoteProgramMenuItem(IMenuRenderer *renderer) {
+}
+
+void RemoteProgramMenuItem::handleClick() {
+	if (changeData) {
+		switch (currentIndex) {
+		case START_RANGE_INDEX:
+			rangeStart = (rangeStart + 1)%30;
+			break;
+		case END_RANGE_INDEX:
+			rangeEnd = (rangeEnd + 1)%30;
+			break;
+		case CODE_INDEX:
+			//TODO: handle Remote code
+			break;
+		default:
+			break;
+		}
+	} else {
+		currentIndex = (currentIndex + 1)%STATES;
+	}
+
+}
+
+void RemoteProgramMenuItem::handleDoubleClick() {
+	RemoteTestMenuItem::handleDoubleClick();
+	if (currentIndex != -1){
+		changeData = !changeData;
+	}
+}
+
+void RemoteProgramMenuItem::activate() {
+}
+
+const char* RemoteProgramMenuItem::getName() {
+}
+
+void RemoteProgramMenuItem::ok() {
+	// call save
+}*/

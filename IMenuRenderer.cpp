@@ -16,10 +16,21 @@
 
 
 #define CHAR_HEIGHT 2
-#define VIEWPORT_MENU_COUNT 1
+#define VIEWPORT_MENU_COUNT 3
 #define OLED_COLUMNS 128
 #define I2C_ADDRESS 0x3C
 #define RST_PIN -1
+
+void displayString (const char* str, SSD1306AsciiAvrI2c& display)
+{
+  char c;
+  if (!str)
+    return;
+  while ((c = pgm_read_byte(str++)))
+    display.print(c);
+}
+
+
 
 void IMenuRenderer::renderMenu(AbstractMenuEntity* menu) {
 	SerialPrintln(F("MenuRenderer::rendermenu called"));
@@ -97,12 +108,12 @@ OLEDHorizontalMenuItemRenderer::OLEDHorizontalMenuItemRenderer(
 }
 
 void OLEDHorizontalMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
-	this->_menu = reinterpret_cast<MenuItem *>(menu);
+	TimeMenuItem * _menu = (TimeMenuItem *)menu;
 
 	display.clear();
 	display.setInvertMode(false);
 	display.setCursor(0, 0);
-	display.print(this->_menu->getName());
+	display.print(_menu->getName());
 
 	// on form field line
 	display.setCursor(0, 3);
@@ -110,7 +121,7 @@ void OLEDHorizontalMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	// print label
 	display.clearToEOL();
 	if (_menu->getCurrentIndex() > -1 && _menu->getCurrentIndex() < (int)_menu->getFieldCount()) {
-		display.print(_menu->getLabel(_menu->getCurrentIndex()));
+		display.print((const __FlashStringHelper *)_menu->getLabel(_menu->getCurrentIndex()));
 		display.print(F(":"));
 		display.setCol(OLED_COLUMNS/2);
 		display.setInvertMode(true);
@@ -119,7 +130,8 @@ void OLEDHorizontalMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	} else {
 		uint8_t index = _menu->getFieldCount() - 1;
 		if (menu->getCurrentIndex() == -1) index = 0;
-		display.print(_menu->getLabel(index));
+		//display.print(_menu->getLabel(index));
+		displayString(_menu->getLabel(index), display);
 		display.print(F(":"));
 		display.setCol(OLED_COLUMNS/2);
 		display.print(_menu->getValue(index));
@@ -129,18 +141,22 @@ void OLEDHorizontalMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	display.setCursor(0, 6);
 	if (_menu->getCurrentIndex() == _menu->getFieldCount()){
 		display.setInvertMode(true);
-		display.print(F("Save"));
+		//display.print(_menu->getLabel(menu->getCurrentIndex()));
+		displayString(_menu->getLabel(_menu->getFieldCount()), display);
 		display.setInvertMode(false);
 	} else {
-		display.print(F("Save"));
+		//display.print(_menu->getLabel(menu->getCurrentIndex()));
+		displayString(_menu->getLabel(_menu->getFieldCount()), display);
 	}
 	display.setCursor(OLED_COLUMNS/2, 6);
-	if (_menu->getCurrentIndex() == _menu->getFieldCount() + 1){
+	if (_menu->getCurrentIndex() == _menu->getFieldCount() + 1) {
 		display.setInvertMode(true);
-		display.print(F("Back"));
+//		display.print(_menu->getLabel(menu->getCurrentIndex()));
+		displayString(_menu->getLabel(_menu->getFieldCount() + 1), display);
 		display.setInvertMode(false);
 	} else {
-		display.print(F("Back"));
+		//display.print(_menu->getLabel(menu->getCurrentIndex()));
+		displayString(_menu->getLabel(_menu->getFieldCount() + 1), display);
 	}
 	display.setInvertMode(false);
 }

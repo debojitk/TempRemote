@@ -55,6 +55,7 @@ protected:
 	bool active = false;
 	EventManager *eventManager = nullptr;
 	IMenuRenderer *renderer;
+	static char stringBuffer[];
 
 };
 
@@ -111,12 +112,8 @@ private:
 class MenuItem: public AbstractMenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	MenuItem(const char *name, IMenuRenderer *renderer);
-	virtual void handleClick() = 0;
-	virtual void handleDoubleClick() = 0;
-	virtual void back() = 0;
-	virtual int getValue(uint8_t index){return 0;}
-	virtual const char *getLabel(uint8_t index){return nullptr;}
-	virtual uint8_t getFieldCount(){return 0;}
+	virtual uint32_t getValue(uint8_t index) = 0;
+	virtual const char*getLabel(uint8_t index) = 0;
 };
 
 class HomeMenu: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
@@ -130,92 +127,95 @@ public:
 	struct TimeValue getTime();
 	void activate();
 	void update();
+	uint32_t getValue(uint8_t index);
+	const char*getLabel(uint8_t index);
 private:
 	double temperature = 30;
 	int humidity = 70;
 	AbstractMenuEntity *child = nullptr;
 	TimeSensor &_timeSensorModule;
 	uint32_t lastUpdateTime = 0;
-
 };
 
-class SingleFieldMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
+
+class FormMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	SingleFieldMenuItem(IMenuRenderer *renderer, const char* name, const char *label, uint8_t maxValue);
-	int getValue();
-	void setValue(int value);
-	const char *getLabel();
-	void handleClick();
-	void handleDoubleClick();
-	void save();
-	void back();
-    static constexpr uint8_t DATA_INDEX  = 0;
-    static constexpr uint8_t SAVE_INDEX = 1;
-    static constexpr uint8_t BACK_INDEX  = 2;
-private:
-	const char *label;
-	uint8_t value;
-	uint8_t maxValue;
+	FormMenuItem(const char *name, IMenuRenderer *renderer):MenuItem(name, renderer){}
+	virtual uint32_t getValue(uint8_t index) = 0;
+	virtual const char*getLabel(uint8_t index) = 0;
+	virtual void handleClick();
+	virtual void handleDoubleClick();
+	virtual void ok() = 0;
+	virtual uint8_t getFieldCount() {
+		return states - 2;
+	}
+	uint8_t getStates() {
+		return states;
+	}
+protected:
+	virtual void updateData(int currentIndex) = 0;
+	uint8_t states = 2;
 	bool changeData = false;
 };
 
-class TimeMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
+
+class TimeMenuItem: public FormMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	TimeMenuItem(IMenuRenderer *renderer, const char* name, TimeSensor &timeModule);
-	void handleClick();
-	void handleDoubleClick();
-	struct TimeValue getTime();
-	void save();
-	void back();
+	void ok();
 	void activate();
 
-	int getValue(uint8_t index);
-	const char *getLabel(uint8_t index);
-	uint8_t getFieldCount();
-
+	uint32_t getValue(uint8_t index);
+	const char* getLabel(uint8_t index);
+	void updateData(int currentIndex);
 	static constexpr uint8_t HOUR_INDEX  = 0;
     static constexpr uint8_t MIN_INDEX  = 1;
     static constexpr uint8_t SEC_INDEX  = 2;
-    static constexpr uint8_t SAVE_INDEX = 3;
-    static constexpr uint8_t BACK_INDEX  = 4;
-    static constexpr uint8_t STATES  = 5;
 private:
 	TimeSensor &_timeModule;
-	bool changeData = false;
 	TimeValue _timeValue;
-    static const char *labels[];
 };
 
-class RemoteProgramMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
+/*class RemoteTestMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	RemoteProgramMenuItem(IMenuRenderer *renderer);
-	void handleClick();
-	void handleDoubleClick();
-	void test();
-	void save();
+	RemoteTestMenuItem(IMenuRenderer *renderer);
+	virtual void handleClick();
+	virtual void handleDoubleClick();
+	virtual void ok();
 	void back();
-	void activate();
 	uint8_t getRangeEnd() const;
 	void setRangeEnd(uint8_t rangeEnd = 0);
 	uint8_t getRangeStart() const;
 	void setRangeStart(uint8_t rangeStart = 0);
-	bool isTestMode() const;
-	void setTestMode(bool testMode = true);
 	const char * getName();
+	uint8_t getFieldCount();
+
+    static constexpr uint8_t STATES  = 2;
+protected:
+	uint8_t rangeStart = 0;
+	uint8_t rangeEnd = 0;
+private:
+	uint32_t code = 0;
+};
+
+class RemoteProgramMenuItem: public RemoteTestMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	RemoteProgramMenuItem(IMenuRenderer *renderer);
+	void handleClick();
+	void handleDoubleClick();
+	void ok();
+	void activate();
+	const char * getName();
+	uint8_t getFieldCount();
 
 	static constexpr uint8_t START_RANGE_INDEX  = 0;
     static constexpr uint8_t END_RANGE_INDEX  = 1;
     static constexpr uint8_t CODE_INDEX  = 2;
-    static constexpr uint8_t SAVE_TEST_INDEX = 3;
-    static constexpr uint8_t BACK_INDEX  = 4;
-    uint8_t STATES  = 5;
-
+    static constexpr uint8_t STATES  = 5;
 private:
 	bool changeData = false;
-	bool testMode = true;
-	uint8_t rangeStart = 0;
-	uint8_t rangeEnd = 0;
-};
+};*/
+
 
 
 #endif /* ABSTRACTMENUENTITY_H_ */
