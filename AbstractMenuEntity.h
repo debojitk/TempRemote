@@ -172,15 +172,29 @@ public:
 	void ok();
 	void activate();
 
-	uint32_t getValue(uint8_t index);
-	const __FlashStringHelper* getLabel(uint8_t index);
-	void updateData(int currentIndex);
+	virtual uint32_t getValue(uint8_t index);
+	virtual const __FlashStringHelper* getLabel(uint8_t index);
+	virtual void updateData(int currentIndex);
+
 	static constexpr uint8_t HOUR_INDEX  = 0;
     static constexpr uint8_t MIN_INDEX  = 1;
     static constexpr uint8_t SEC_INDEX  = 2;
-private:
+protected:
 	TimeSensor &_timeModule;
 	TimeValue _timeValue;
+};
+
+class DateMenuItem: public TimeMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	DateMenuItem(IMenuRenderer *renderer, const char* name, TimeSensor &timeModule): TimeMenuItem(renderer, name, timeModule){}
+	uint32_t getValue(uint8_t index);
+	const __FlashStringHelper* getLabel(uint8_t index);
+	void updateData(int currentIndex);
+
+	static constexpr uint8_t DAY_INDEX  = 0;
+    static constexpr uint8_t MON_INDEX  = 1;
+    static constexpr uint8_t YEAR_INDEX  = 2;
+
 };
 
 /*class RemoteTestMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")

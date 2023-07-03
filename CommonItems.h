@@ -55,6 +55,14 @@ const char TimeMenuLabels [5] [7] PROGMEM = {
 		{ "Back" }
 };
 
+const char DateMenuLabels [5] [6] PROGMEM = {
+		{ "Day" },
+		{ "Month" },
+		{ "Year" },
+		{ "Save" },
+		{ "Back" }
+};
+
 
 	#ifdef DISABLE_SERIAL_PRINT
 		#define SerialPrint(...)

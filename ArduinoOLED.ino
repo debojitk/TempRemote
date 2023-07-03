@@ -36,10 +36,11 @@ IMenuRenderer *oledFieldMenuRenderer = new OLEDCompactMenuItemRenderer(display);
 //// creating main menu
 
 AbstractMenuEntity *menu1 = new TimeMenuItem(oledFieldMenuRenderer, "Set Time", timeSensorModule);
+AbstractMenuEntity *menu4 = new DateMenuItem(oledFieldMenuRenderer, "Set Date", timeSensorModule);
 AbstractMenuEntity *menu2 = new MenuEntity(oledMenuRenderer, "Set Schedule", nullptr, 0);
 AbstractMenuEntity *menu3 = new MenuEntity(oledMenuRenderer, "Train Remote", nullptr, 0);
-AbstractMenuEntity *mainMenus[] = {menu1, menu2, menu3};
-AbstractMenuEntity *mainMenu = new MenuEntity(oledMenuRenderer, "Main Menu", mainMenus, 3);
+AbstractMenuEntity *mainMenus[] = {menu1, menu4, menu2, menu3};
+AbstractMenuEntity *mainMenu = new MenuEntity(oledMenuRenderer, "Main Menu", mainMenus, 4);
 
 HomeMenuItemRenderer *renderer = new HomeMenuItemRenderer(display);
 HomeMenu *homeMenu = new HomeMenu(renderer, "TempRemote V1.0", mainMenu, timeSensorModule);

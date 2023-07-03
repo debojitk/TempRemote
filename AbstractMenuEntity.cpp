@@ -350,8 +350,41 @@ boolean FormMenuItem::isReadOnly(uint8_t index) {
 	return true;
 }
 
+uint32_t DateMenuItem::getValue(uint8_t index) {
+	uint32_t retval = 0;
+	if (index > getFieldCount() - 1) return retval;
+	switch(index){
+	case DAY_INDEX:
+		retval = _timeValue._day;
+		break;
+	case MON_INDEX:
+		retval = _timeValue._month;
+		break;
+	case YEAR_INDEX:
+		retval = _timeValue._year;
+		break;
+	}
+	return retval;
+}
 
+const __FlashStringHelper* DateMenuItem::getLabel(uint8_t index) {
+	if (index > states - 1) return nullptr;
+	return (const __FlashStringHelper *)DateMenuLabels[index];
+}
 
+void DateMenuItem::updateData(int currentIndex) {
+	switch(currentIndex) {
+	case DAY_INDEX:
+		_timeValue._day = (_timeValue._day)%31 + 1;
+		break;
+	case MON_INDEX:
+		_timeValue._month = (_timeValue._month)%12 + 1;
+		break;
+	case YEAR_INDEX:
+		_timeValue._year = (_timeValue._year + 1);
+		break;
+	}
+}
 /**
  * RemoteProgramMenuItem definition
  */
