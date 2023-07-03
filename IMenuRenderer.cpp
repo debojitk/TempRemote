@@ -21,16 +21,6 @@
 #define I2C_ADDRESS 0x3C
 #define RST_PIN -1
 
-void displayString (const char* str, SSD1306AsciiAvrI2c& display)
-{
-  char c;
-  if (!str)
-    return;
-  while ((c = pgm_read_byte(str++)))
-    display.print(c);
-}
-
-
 
 void IMenuRenderer::renderMenu(AbstractMenuEntity* menu) {
 	SerialPrintln(F("MenuRenderer::rendermenu called"));
@@ -130,8 +120,7 @@ void OLEDHorizontalMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	} else {
 		uint8_t index = _menu->getFieldCount() - 1;
 		if (menu->getCurrentIndex() == -1) index = 0;
-		//display.print(_menu->getLabel(index));
-		displayString(_menu->getLabel(index), display);
+		display.print(_menu->getLabel(index));
 		display.print(F(":"));
 		display.setCol(OLED_COLUMNS/2);
 		display.print(_menu->getValue(index));
@@ -139,24 +128,20 @@ void OLEDHorizontalMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	// reverting to main font
 	display.setFont(Verdana12_bold);
 	display.setCursor(0, 6);
-	if (_menu->getCurrentIndex() == _menu->getFieldCount()){
+	if (_menu->getCurrentIndex() == _menu->getOkIndex()){
 		display.setInvertMode(true);
-		//display.print(_menu->getLabel(menu->getCurrentIndex()));
-		displayString(_menu->getLabel(_menu->getFieldCount()), display);
+		display.print(_menu->getLabel(_menu->getOkIndex()));
 		display.setInvertMode(false);
 	} else {
-		//display.print(_menu->getLabel(menu->getCurrentIndex()));
-		displayString(_menu->getLabel(_menu->getFieldCount()), display);
+		display.print(_menu->getLabel(_menu->getOkIndex()));
 	}
 	display.setCursor(OLED_COLUMNS/2, 6);
-	if (_menu->getCurrentIndex() == _menu->getFieldCount() + 1) {
+	if (_menu->getCurrentIndex() == _menu->getBackIndex()) {
 		display.setInvertMode(true);
-//		display.print(_menu->getLabel(menu->getCurrentIndex()));
-		displayString(_menu->getLabel(_menu->getFieldCount() + 1), display);
+		display.print(_menu->getLabel(_menu->getBackIndex()));
 		display.setInvertMode(false);
 	} else {
-		//display.print(_menu->getLabel(menu->getCurrentIndex()));
-		displayString(_menu->getLabel(_menu->getFieldCount() + 1), display);
+		display.print(_menu->getLabel(_menu->getBackIndex()));
 	}
 	display.setInvertMode(false);
 }

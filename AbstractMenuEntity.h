@@ -113,7 +113,7 @@ class MenuItem: public AbstractMenuEntity { // @suppress("Class has a virtual me
 public:
 	MenuItem(const char *name, IMenuRenderer *renderer);
 	virtual uint32_t getValue(uint8_t index) = 0;
-	virtual const char*getLabel(uint8_t index) = 0;
+	virtual const __FlashStringHelper* getLabel(uint8_t index) = 0;
 };
 
 class HomeMenu: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
@@ -128,7 +128,7 @@ public:
 	void activate();
 	void update();
 	uint32_t getValue(uint8_t index);
-	const char*getLabel(uint8_t index);
+	const __FlashStringHelper* getLabel(uint8_t index);
 private:
 	double temperature = 30;
 	int humidity = 70;
@@ -140,9 +140,12 @@ private:
 
 class FormMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	FormMenuItem(const char *name, IMenuRenderer *renderer):MenuItem(name, renderer){}
+	FormMenuItem(const char *name, IMenuRenderer *renderer):MenuItem(name, renderer){
+		states = 2;
+		backIndex = 1;
+	}
 	virtual uint32_t getValue(uint8_t index) = 0;
-	virtual const char*getLabel(uint8_t index) = 0;
+	virtual const __FlashStringHelper* getLabel(uint8_t index) = 0;
 	virtual void handleClick();
 	virtual void handleDoubleClick();
 	virtual void ok() = 0;
@@ -152,9 +155,12 @@ public:
 	uint8_t getStates() {
 		return states;
 	}
+	virtual uint8_t getOkIndex() {
+		return getFieldCount();
+	}
 protected:
 	virtual void updateData(int currentIndex) = 0;
-	uint8_t states = 2;
+	uint8_t states;
 	bool changeData = false;
 };
 
@@ -166,7 +172,7 @@ public:
 	void activate();
 
 	uint32_t getValue(uint8_t index);
-	const char* getLabel(uint8_t index);
+	const __FlashStringHelper* getLabel(uint8_t index);
 	void updateData(int currentIndex);
 	static constexpr uint8_t HOUR_INDEX  = 0;
     static constexpr uint8_t MIN_INDEX  = 1;

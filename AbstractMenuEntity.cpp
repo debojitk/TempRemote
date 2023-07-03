@@ -235,6 +235,7 @@ TimeMenuItem::TimeMenuItem(IMenuRenderer *renderer, const char *name,
 		TimeSensor &timeModule): FormMenuItem(name, renderer),_timeModule(timeModule) {
 	this->name = name;
 	states = 5;
+	backIndex = states - 1;
 }
 
 void TimeMenuItem::updateData(int currentIndex) {
@@ -277,9 +278,9 @@ uint32_t TimeMenuItem::getValue(uint8_t index) {
 	return retval;
 }
 
-const char *TimeMenuItem::getLabel(uint8_t index) {
+const __FlashStringHelper* TimeMenuItem::getLabel(uint8_t index) {
 	if (index > states - 1) return nullptr;
-	return (const char *)TimeMenuLabels[index];
+	return (const __FlashStringHelper *)TimeMenuLabels[index];
 }
 
 /**
@@ -338,7 +339,7 @@ uint32_t HomeMenu::getValue(uint8_t index) {
 	return 0;
 }
 
-const char* HomeMenu::getLabel(uint8_t index) {
+const __FlashStringHelper* HomeMenu::getLabel(uint8_t index) {
 	return nullptr;
 }
 
