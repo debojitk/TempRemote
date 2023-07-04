@@ -455,4 +455,22 @@ void RemoteProgramMenuItem::updateData(int currentIndex) {
 	}
 }
 
+void RemoteProgramMenuItem::read() {
+	if(!isActive()) return;
+	RemoteRXValue remoteValue =  _rx.get();
+	if (remoteValue == NullRemoteRXValue) return;
+	if (currentIndex == CODE_INDEX && changeData == true) {
+		if (_code != remoteValue._command) {
+			_code = remoteValue._command;
+			SerialPrint(F("Received code: "));
+			SerialPrintln(_code, HEX);
+			render();
+		}
+	}
 
+}
+
+const __FlashStringHelper* RemoteProgramMenuItem::getLabel(uint8_t index) {
+	if (index > states - 1) return nullptr;
+	return (const __FlashStringHelper *)RemoteProgramMenuLabels[index];
+}

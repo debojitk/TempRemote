@@ -26,16 +26,19 @@
 #define RST_PIN -1
 #define BUTTON_PIN 2
 
-
+// Creating input and output devices
 SSD1306AsciiAvrI2c display;
 TimeSensor timeSensorModule;
+TXSensor TX;
+RXSensor RX;
+
 // creating renderer
 IMenuRenderer *oledMenuRenderer = new OLEDMenuRenderer(display);
 IMenuRenderer *oledFieldMenuRenderer = new OLEDCompactMenuItemRenderer(display);
 
 //Create remote menu
 
-AbstractMenuEntity *remoteProgramMenu = new RemoteProgramMenuItem(oledFieldMenuRenderer, "Program");
+RemoteProgramMenuItem *remoteProgramMenu = new RemoteProgramMenuItem(oledFieldMenuRenderer, "Program", RX);
 AbstractMenuEntity *remoteMenus[] = {remoteProgramMenu};
 // creating main menu
 AbstractMenuEntity *menu1 = new TimeMenuItem(oledFieldMenuRenderer, "Set Time", timeSensorModule);
@@ -104,10 +107,7 @@ void setupOled() {
 //	Serial.println(y);
 //}
 
-using RXSensor = Sensor<RemoteRXModule, RemoteRXValue>;
-using TXSensor = Sensor<RemoteTXModule, RemoteRXValue>;
-TXSensor TX;
-RXSensor RX;
+
 
 namespace TEST {
 
@@ -147,24 +147,24 @@ void testMemory() {
 void setup() {
 	Serial.begin(CONFIG::BAUD_RATE);
 	SerialPrint(F("Hello from SmartRemote!"));
+	TEST::testTxRxSetup();
+
 	setupOled();
 	setupSleepWakeupHandler();
-	buttonObserver->enable();
 
+	buttonObserver->enable();
 	homeMenu->setEventManager(eventManager);
 	mainMenu->setEventManager(eventManager);
 	menu1->setEventManager(eventManager);
 	eventManager->registereventReceiver(mainMenu);
 	eventManager->setEventCallback(receiveEvent);
 	homeMenu->activate();
-	//tempMod.get();
-//	TEST::testTxRxSetup();
 }
 //------------------------------------------------------------------------------
 void loop() {
 	eventManager->processEvents();
 	interruptHandler->observeEvents();
 	homeMenu->update();
-//	TEST::testRegister();
+	remoteProgramMenu->read();
 }
 

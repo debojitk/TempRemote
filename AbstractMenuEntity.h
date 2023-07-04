@@ -13,17 +13,11 @@
 #include "CommonItems.h"
 #include "SensorTypes.h"
 
-template <typename SensorModule, typename Value>
-class Sensor;
-using TemperatureValue = float;
 enum EventType: unsigned int;
 class IMenuRenderer;
 class EventManager;
 class HomeMenuItemRenderer;
 class RemoteData;
-
-using TimeSensor = Sensor<TimeModuleDS3231, TimeValue>;
-using TempSensor = Sensor<TemperatureModule, TemperatureValue>;
 
 class AbstractMenuEntity: public IEventReceiver, public IRenderable { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
@@ -229,8 +223,8 @@ protected:
 
 class RemoteProgramMenuItem: public RemoteTestMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	RemoteProgramMenuItem(IMenuRenderer *renderer, const char* name):
-		RemoteTestMenuItem(renderer, CONFIG::START_TEMPERATURE, CONFIG::START_TEMPERATURE, 0)
+	RemoteProgramMenuItem(IMenuRenderer *renderer, const char* name, RXSensor &rx):
+		RemoteTestMenuItem(renderer, CONFIG::START_TEMPERATURE, CONFIG::START_TEMPERATURE, 0), _rx(rx)
 	{
 		this->name = name;
 		states = 5;
@@ -240,6 +234,10 @@ public:
 	const char * getName() {return AbstractMenuEntity::getName();}
 	virtual void updateData(int currentIndex);
 	virtual boolean isReadOnly(uint8_t index){return false;}
+	virtual const __FlashStringHelper* getLabel(uint8_t index);
+	void read();
+private:
+	RXSensor &_rx;
 };
 
 

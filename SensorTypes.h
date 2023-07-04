@@ -113,7 +113,7 @@ public:
 	RemoteRXValue get();
 	void setup();
 private:
-	static constexpr uint8_t PIN = 11;
+	static constexpr uint8_t PIN = 4;
 	IRrecv& _rx;
 };
 
@@ -130,3 +130,12 @@ private:
 	IRsend& _tx;
 };
 
+
+template <typename SensorModule, typename Value>
+class Sensor;
+
+using TemperatureValue = float;
+using TimeSensor = Sensor<TimeModuleDS3231, TimeValue>;
+using TempSensor = Sensor<TemperatureModule, TemperatureValue>;
+using RXSensor = Sensor<RemoteRXModule, RemoteRXValue>;
+using TXSensor = Sensor<RemoteTXModule, RemoteRXValue>;
