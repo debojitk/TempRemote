@@ -159,6 +159,10 @@ public:
 		return getFieldCount();
 	}
 	virtual boolean isReadOnly(uint8_t index);
+	void activate(){
+		changeData = false;
+		AbstractMenuEntity::activate();
+	}
 protected:
 	virtual void updateData(int currentIndex) = 0;
 	uint8_t states;
@@ -197,45 +201,46 @@ public:
 
 };
 
-/*class RemoteTestMenuItem: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
+class RemoteTestMenuItem: public FormMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	RemoteTestMenuItem(IMenuRenderer *renderer);
-	virtual void handleClick();
-	virtual void handleDoubleClick();
+	RemoteTestMenuItem(IMenuRenderer *renderer, uint8_t rangeStart, uint8_t rangeEnd, uint32_t code):
+		FormMenuItem(nullptr, renderer),
+		_rangeStart(rangeStart),
+		_rangeEnd(rangeEnd),
+		_code(code)	{
+		states = 5;
+	}
 	virtual void ok();
-	void back();
-	uint8_t getRangeEnd() const;
-	void setRangeEnd(uint8_t rangeEnd = 0);
-	uint8_t getRangeStart() const;
-	void setRangeStart(uint8_t rangeStart = 0);
-	const char * getName();
-	uint8_t getFieldCount();
+	virtual const char * getName();
+	virtual void updateData(int currentIndex);
+	virtual uint32_t getValue(uint8_t index);
+	virtual const __FlashStringHelper* getLabel(uint8_t index);
+	virtual boolean isReadOnly(uint8_t index){return true;}
 
-    static constexpr uint8_t STATES  = 2;
 protected:
-	uint8_t rangeStart = 0;
-	uint8_t rangeEnd = 0;
-private:
-	uint32_t code = 0;
+	uint8_t _rangeStart = 0;
+	uint8_t _rangeEnd = 0;
+	uint32_t _code = 0;
+	static constexpr uint8_t START_RANGE_INDEX  = 0;
+    static constexpr uint8_t END_RANGE_INDEX  = 1;
+    static constexpr uint8_t CODE_INDEX  = 2;
+
 };
 
 class RemoteProgramMenuItem: public RemoteTestMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	RemoteProgramMenuItem(IMenuRenderer *renderer);
-	void handleClick();
-	void handleDoubleClick();
+	RemoteProgramMenuItem(IMenuRenderer *renderer, const char* name):
+		RemoteTestMenuItem(renderer, CONFIG::START_TEMPERATURE, CONFIG::START_TEMPERATURE, 0)
+	{
+		this->name = name;
+		states = 5;
+		backIndex = states - 1;
+	}
 	void ok();
-	void activate();
-	const char * getName();
-	uint8_t getFieldCount();
-
-	static constexpr uint8_t START_RANGE_INDEX  = 0;
-    static constexpr uint8_t END_RANGE_INDEX  = 1;
-    static constexpr uint8_t CODE_INDEX  = 2;
-    static constexpr uint8_t STATES  = 5;
-private:
-	bool changeData = false;
-};*/
+	const char * getName() {return AbstractMenuEntity::getName();}
+	virtual void updateData(int currentIndex);
+	virtual boolean isReadOnly(uint8_t index){return false;}
+};
 
 
 

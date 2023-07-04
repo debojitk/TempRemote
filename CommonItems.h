@@ -31,21 +31,21 @@ class IRenderable { // @suppress("Class has a virtual method and non-virtual des
 	virtual void render() = 0;
 };
 
-static const char hourLabel[] PROGMEM = "Hour";
-static const char minLabel[]  PROGMEM = "Minute";
-static const char secLabel[]  PROGMEM = "Second";
-static const char dayLabel[] PROGMEM = "Day";
-static const char monLabel[]  PROGMEM = "Month";
-static const char yearLabel[]  PROGMEM = "year";
-static const char saveLabel[] PROGMEM = "Save";
-static const char backLabel[] PROGMEM = "Back";
-static const char testLabel[] PROGMEM = "Test";
-static const char okLabel[]   PROGMEM = "OK";
-static const char remoteCodeLabel[]   PROGMEM = "Code";
-static const char timeLabel[]   PROGMEM = "Time";
-static const char DateLabel[]   PROGMEM = "Date";
-static const char tempLabel[]   PROGMEM = "Temperature";
-static const char humidityLabel[]   PROGMEM = "Humidity";
+const char hourLabel[] PROGMEM = "Hour";
+const char minLabel[]  PROGMEM = "Minute";
+const char secLabel[]  PROGMEM = "Second";
+const char dayLabel[] PROGMEM = "Day";
+const char monLabel[]  PROGMEM = "Month";
+const char yearLabel[]  PROGMEM = "year";
+const char saveLabel[] PROGMEM = "Save";
+const char backLabel[] PROGMEM = "Back";
+const char testLabel[] PROGMEM = "Test";
+const char okLabel[]   PROGMEM = "OK";
+const char remoteCodeLabel[]   PROGMEM = "Code";
+const char timeLabel[]   PROGMEM = "Time";
+const char DateLabel[]   PROGMEM = "Date";
+const char tempLabel[]   PROGMEM = "Temperature";
+const char humidityLabel[]   PROGMEM = "Humidity";
 
 const char TimeMenuLabels [5] [7] PROGMEM = {
 		{ "Hour" },
@@ -59,6 +59,22 @@ const char DateMenuLabels [5] [6] PROGMEM = {
 		{ "Day" },
 		{ "Month" },
 		{ "Year" },
+		{ "Save" },
+		{ "Back" }
+};
+
+const char RemoteTestMenuLabels [5] [6] PROGMEM = {
+		{ "Start" },
+		{ "End" },
+		{ "Code" },
+		{ "Test" },
+		{ "Back" }
+};
+
+const char RemoteProgramMenuLabels [5] [6] PROGMEM = {
+		{ "Start" },
+		{ "End" },
+		{ "Code" },
 		{ "Save" },
 		{ "Back" }
 };

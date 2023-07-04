@@ -20,6 +20,7 @@
 CustomStack<AbstractMenuEntity *, 10> AbstractMenuEntity::menuStack;
 AbstractMenuEntity *AbstractMenuEntity::CurrentMenu = nullptr;
 
+char AbstractMenuEntity::stringBuffer[10];
 // Definition for AbstractMenuEntity
 AbstractMenuEntity::AbstractMenuEntity(const char *name, IMenuRenderer *renderer) {
 	this->name = name;
@@ -195,8 +196,6 @@ void HomeMenu::handleDoubleClick(){
 		AbstractMenuEntity::menuStack.push(this);
 		this->child->setEventManager(eventManager);
 		this->child->activate();
-		SerialPrintln(F("HomeMenu detachInterrupt"));
-		Timer1.detachInterrupt();
 	}
 }
 
@@ -333,10 +332,10 @@ void FormMenuItem::handleClick() {
 }
 
 void FormMenuItem::handleDoubleClick() {
-	if (currentIndex < 0 || currentIndex > states - 1) return;
-	if (currentIndex ==  states - 1 ){
+	if (currentIndex < 0 || currentIndex >= states || (currentIndex < getFieldCount() && isReadOnly(currentIndex))) return;
+	if (currentIndex ==  getBackIndex()){
 		back();
-	} else if (currentIndex ==  states - 2 ) {
+	} else if (currentIndex ==  getOkIndex()) {
 		ok();
 	} else {
 		changeData = !changeData;
@@ -385,103 +384,75 @@ void DateMenuItem::updateData(int currentIndex) {
 		break;
 	}
 }
+
+/**
+ * RemoteTestMenuItem definition
+ */
+void RemoteTestMenuItem::ok() {
+	//TODO:
+}
+
+const char* RemoteTestMenuItem::getName() {
+	sprintf(stringBuffer, "%2d-%2d", _rangeStart, _rangeEnd);
+	return stringBuffer;
+}
+
+void RemoteTestMenuItem::updateData(int currentIndex) {
+	//nothing to update
+}
+
+uint32_t RemoteTestMenuItem::getValue(uint8_t index) {
+	uint32_t retval;
+	if (index > 0 || index > getFieldCount())
+		retval = 0;
+	switch(index){
+	case START_RANGE_INDEX:
+		retval = _rangeStart;
+		break;
+	case END_RANGE_INDEX:
+		retval = _rangeEnd;
+		break;
+	case CODE_INDEX:
+		retval = _code;
+		break;
+	}
+	return retval;
+}
+
+const __FlashStringHelper* RemoteTestMenuItem::getLabel(uint8_t index) {
+	if (index > states - 1) return nullptr;
+	return (const __FlashStringHelper *)RemoteTestMenuLabels[index];
+}
+
 /**
  * RemoteProgramMenuItem definition
  */
-/*RemoteTestMenuItem::RemoteTestMenuItem(IMenuRenderer *renderer): MenuItem(nullptr, renderer) {
-}
-
-void RemoteTestMenuItem::handleClick() {
-	if (!isActive()) return;
-	currentIndex = (currentIndex + 1)%STATES;
-	render();
-}
-
-void RemoteTestMenuItem::handleDoubleClick() {
-	if (!isActive()) return;
-
-	if ( currentIndex ==  STATES - 2) {
-		ok();
-	} else if (currentIndex == STATES - 1) {
-		back();
-	}
-}
-
-void RemoteTestMenuItem::back() {
-	AbstractMenuEntity:: back();
-}
-
-void RemoteTestMenuItem::activate() {
-	AbstractMenuEntity:: activate();
-}
-
-uint8_t RemoteTestMenuItem::getRangeEnd() const {
-	return rangeEnd;
-}
-
-void RemoteTestMenuItem::setRangeEnd(uint8_t rangeEnd = 0) {
-	this->rangeEnd = rangeEnd;
-}
-
-uint8_t RemoteTestMenuItem::getRangeStart() const {
-	return rangeStart;
-}
-
-void RemoteTestMenuItem::setRangeStart(uint8_t rangeStart = 0) {
-	this->rangeStart = rangeStart;
-}
-
-
-const char* RemoteTestMenuItem::getName() {
-	static char buffer[6];
-	sprintf(buffer, "%2d-%2d", rangeStart, rangeEnd);
-	return buffer;
-}
-
-uint8_t RemoteTestMenuItem::getFieldCount(){
-	return STATES - 2;
-}
-
-void RemoteTestMenuItem::ok() {
-}
-
-RemoteProgramMenuItem::RemoteProgramMenuItem(IMenuRenderer *renderer) {
-}
-
-void RemoteProgramMenuItem::handleClick() {
-	if (changeData) {
-		switch (currentIndex) {
-		case START_RANGE_INDEX:
-			rangeStart = (rangeStart + 1)%30;
-			break;
-		case END_RANGE_INDEX:
-			rangeEnd = (rangeEnd + 1)%30;
-			break;
-		case CODE_INDEX:
-			//TODO: handle Remote code
-			break;
-		default:
-			break;
-		}
-	} else {
-		currentIndex = (currentIndex + 1)%STATES;
-	}
-
-}
-
-void RemoteProgramMenuItem::handleDoubleClick() {
-	RemoteTestMenuItem::handleDoubleClick();
-	if (currentIndex != -1){
-		changeData = !changeData;
-	}
-}
-
-void RemoteProgramMenuItem::activate() {
-}
-
-const char* RemoteProgramMenuItem::getName() {
-}
 
 void RemoteProgramMenuItem::ok() {
-	// call save
-}*/
+	// TODO:
+}
+
+void RemoteProgramMenuItem::updateData(int currentIndex) {
+	switch(currentIndex) {
+	case START_RANGE_INDEX:
+		if (_rangeStart > CONFIG::MAX_TEMPERATURE){
+			_rangeStart = CONFIG::START_TEMPERATURE;
+		} else {
+			_rangeStart ++;
+		}
+		if (_rangeStart >= _rangeEnd) _rangeEnd = _rangeStart;
+		break;
+	case END_RANGE_INDEX:
+		if (_rangeEnd > CONFIG::MAX_TEMPERATURE){
+			_rangeEnd = min(_rangeStart + 1, CONFIG::MAX_TEMPERATURE);
+		} else {
+			_rangeEnd ++;
+		}
+		break;
+	case CODE_INDEX:
+		// TODO: update code
+		break;
+	}
+}
+
+

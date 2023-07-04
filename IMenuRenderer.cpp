@@ -164,7 +164,7 @@ void OLEDCompactMenuItemRenderer::renderContent(FormMenuItem *menu) {
 
 		display.print(trimmedString);
 		display.setCursor(col, 4);
-		if ( !menu->isReadOnly(i) && i == menu->getCurrentIndex()) {
+		if (i == menu->getCurrentIndex()) {
 			display.setInvertMode(true);
 		}
 		display.print(menu->getValue(i));
