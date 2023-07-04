@@ -8,7 +8,8 @@
 #include "CommonItems.h"
 #include "EventManager.h"
 #include "AbstractMenuEntity.h"
-#include <MSTimer2.h>
+//#include <MSTimer2.h>
+#include <TimerOne.h>
 
 EventManager::EventManager(IEventSourceObserver *observer){
 	eventReceiver = nullptr;
@@ -104,24 +105,25 @@ ButtonInputObserver::ButtonInputObserver(int pin, int interval){
 void ButtonInputObserver::initialize(){
 	if (hasInitialized) return;
 	pinMode(buttonPin, INPUT_PULLUP);// by default the value is high, need to be shorted with ground to generate a low input
-	//Timer1.initialize(100000);
+	Timer1.initialize(10000);
 	//Timer1.attachInterrupt(ButtonInputObserver::timerInterruptInvoker);
-	MsTimer2::set(10, ButtonInputObserver::timerInterruptInvoker);
+	//MsTimer2::set(10, ButtonInputObserver::timerInterruptInvoker);
 	hasInitialized = true;
 }
 void ButtonInputObserver::disable(){
 	if(enabled) {
 		AbsEventSourceObserver::disable();
-		//Timer1.detachInterrupt();
-		MsTimer2::stop();
+		Timer1.detachInterrupt();
+		//MsTimer2::stop();
 		SerialPrintln(F("ButtonInputObserver disabled"));
 	}
 }
 void ButtonInputObserver::enable() {
+	initialize();
 	if (!enabled) {
 		AbsEventSourceObserver::enable();
-		//Timer1.attachInterrupt(ButtonInputObserver::timerInterruptInvoker);
-		MsTimer2::start();
+		Timer1.attachInterrupt(ButtonInputObserver::timerInterruptInvoker);
+		//MsTimer2::start();
 		SerialPrintln(F("ButtonInputObserver enabled"));
 	}
 }
@@ -178,7 +180,6 @@ void ButtonInputObserver::timerInterruptInvoker(){
 ButtonInputObserver * ButtonInputObserver::getInstance(int pin, int interval){
 	if(ButtonInputObserver::instance == nullptr){
 		ButtonInputObserver::instance = new ButtonInputObserver(pin, interval);
-		ButtonInputObserver::instance->initialize();
 	}
 	return ButtonInputObserver::instance;
 }
