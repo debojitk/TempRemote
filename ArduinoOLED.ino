@@ -17,6 +17,7 @@
 #include "HexProgrammer.h"
 #include "Sensor.h"
 #include "SensorTypes.h"
+#include "SmartRemoteTests.h"
 
 // 0X3C+SA0 - 0x3C or 0x3D
 #define I2C_ADDRESS 0x3C

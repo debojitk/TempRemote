@@ -176,7 +176,7 @@ RemoteData::endRange() {
 }
 
 bool
-RemoteData::addRange(TemperatureRange& r) {
+RemoteData::addRange(const TemperatureRange& r) {
 	uint8_t pos = addHex(r._hex);
 	if(pos == CONFIG::MAX_HEX_CODES) {
 		return false;

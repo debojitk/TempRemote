@@ -45,6 +45,10 @@ struct TemperatureRange {
     uint8_t       _start;
     uint8_t       _end;
     IRNode        _hex;
+    bool operator==(const TemperatureRange& r) {
+    	return ((_start == r._start) && (_end == r._end) && (_hex == r._hex));
+    }
+
 };
 constexpr TemperatureRange NullTemperatureRange{CONFIG::MAX_TEMPERATURE, CONFIG::MAX_TEMPERATURE, NullIRNode};
 
@@ -74,7 +78,7 @@ public:
   // 0xFFFFFF or correct value
   IRNode at(uint8_t t) const;
   IRNode atTemperature(uint8_t t) const;
-  bool addRange(TemperatureRange& r);
+  bool addRange(const TemperatureRange& r);
 
   RangeIterator beginRange();
   RangeIterator endRange();
