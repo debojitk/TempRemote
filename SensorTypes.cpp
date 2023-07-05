@@ -11,8 +11,6 @@
 #include "CommonItems.h"
 #include <IRremote.hpp>
 
-
-
 TimeModuleDS3231::TimeModuleDS3231():_rtc(Wire) {
 }
 

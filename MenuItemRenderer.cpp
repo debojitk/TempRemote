@@ -15,6 +15,7 @@ HomeMenuItemRenderer::HomeMenuItemRenderer(SSD1306AsciiAvrI2c& displayObject):di
 void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	this->menu = reinterpret_cast<HomeMenu *>(menu);
 	TimeValue t = this->menu->getTime();
+	char buffer[12];
 	display.setCursor(0, 0);
 	display.print(menu->getName());
 	display.setCursor(0, 2);
@@ -22,9 +23,9 @@ void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	display.print(this->menu->getTemperature());
 	display.print(F(" C"));
 	display.setCursor(0, 4);
-	display.print(t.formatDate());
+	display.print(t.formatDate(buffer));
 	display.setCursor(0, 6);
-	display.print(t.formatTime());
+	display.print(t.formatTime(buffer));
 
 }
 

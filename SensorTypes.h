@@ -20,30 +20,24 @@ struct TimeValue {
 	uint8_t  _min;
 	uint8_t  _sec;
 
-	const char* formatDate() {
-		static char timeStore[12];
-		snprintf_P(timeStore,
-				sizeof(timeStore),
+	const char* formatDate(char *buffer) {
+		sprintf_P(buffer,
 				PSTR("%02u/%02u/%04u"),
 				_day,
 				_month,
 				_year
 		);
-		return timeStore;
+		return buffer;
 	}
-	const char* formatTime() {
-		static char timeStore[10];
-		snprintf_P(timeStore,
-				sizeof(timeStore),
+	const char* formatTime(char * buffer) {
+		sprintf_P(buffer,
 				PSTR("%02u:%02u:%02u"),
 				_hour,
 				_min,
 				_sec );
-		return timeStore;
+		return buffer;
 	}
 };
-
-
 
 class TimeModuleDS1302 {
 public:
