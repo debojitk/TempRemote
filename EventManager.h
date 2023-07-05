@@ -71,20 +71,20 @@ private:
 	void timerInterrupt();
 	bool hasClicked();
 
-	int buttonPin;
+	uint8_t buttonPin;
 	unsigned long doubleClickInterval;
 	static ButtonInputObserver *instance;
 	bool hasInitialized = false;
 
-	int counter = 0;
-	int buttonState = 0;
-	int lastButtonState = 0;
-	int lastClickCount = 0;
-	int currentButtonState = 0;
+	uint8_t counter = 0;
+	uint8_t buttonState = 0;
+	uint8_t lastButtonState = 0;
+	uint8_t lastClickCount = 0;
+	uint8_t currentButtonState = 0;
+	static constexpr int debounceDelay = 25;
+	uint8_t clickCount = 0;
 	unsigned long lastDebounceTime = 0;
-	int debounceDelay = 25;
-	int clickCount = 0;
-	unsigned long clickInstant =0;
+	unsigned long clickInstant = 0;
 
 
 };

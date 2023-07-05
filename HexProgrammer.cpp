@@ -15,7 +15,8 @@ BOOST: 0xCFF10E : 13627662
 
 static_assert(sizeof(MemoryLayout) ==
 		                   ((sizeof(uint8_t) * CONFIG::NUM_INDEX) +
-		                   (sizeof(IRNode) * CONFIG::MAX_HEX_CODES))
+		                   (sizeof(IRNode) * CONFIG::MAX_HEX_CODES) +
+						    (sizeof(Schedule) * CONFIG::NUM_SCHEDULE))
 						   );
 
 static_assert(sizeof(IRNode) == (sizeof(uint8_t) * 5));

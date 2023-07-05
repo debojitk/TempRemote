@@ -54,7 +54,7 @@ IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_P
 // creating eventManager
 SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 10000, 20);
 EventManager *eventManager = new EventManager(buttonObserver);
-
+RemoteData remote;
 
 void autoWakeupCallback() {
 	SerialPrint(F("Waked up from WDT interrupt event-"));
@@ -106,6 +106,9 @@ void setupOled() {
 //	Serial.println(y);
 //}
 
+// TODO: 1. EEPROM reset
+// TODO: 2. Remote Test menu
+// TODO: 3. Schedule Menu
 
 
 namespace TEST {
@@ -124,15 +127,15 @@ void testRegister() {
 
 void testMemory() {
 	uint16_t bytesLeft;
-	for(size_t i = 0; i < 2048; ++i) {
+	for(size_t i = 1; i < 2048; ++i) {
 		void* ptr = malloc(sizeof(uint8_t) * i);
 		if(!ptr) {
-			bytesLeft = i-1;
+			bytesLeft = i;
 			break;
 		}
 		free(ptr);
 	}
-	SerialPrint(F("Allocable chuck size -> "));
+	SerialPrint(F("Allocable chunk size -> "));
 	SerialPrintln(bytesLeft);
 	// end of freeRam
 }

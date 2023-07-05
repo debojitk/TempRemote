@@ -8,8 +8,8 @@ class RemoteData;
 
 namespace CONFIG {
     constexpr uint32_t NUM_INDEX         = 35;              // starting from START_TEMPERATURE
-    constexpr uint32_t NUM_SCHEDULE      = 4;
-    constexpr uint32_t MAX_HEX_CODES     = 10;
+    constexpr uint32_t NUM_SCHEDULE      = 2;
+    constexpr uint32_t MAX_HEX_CODES     = 7;
     constexpr uint32_t BAUD_RATE         = 115200;
     constexpr uint32_t START_TEMPERATURE = 15;
     constexpr uint32_t MAX_TEMPERATURE   = 1000;
@@ -38,7 +38,7 @@ constexpr IRNode NullIRNode {0,0,0};
 struct MemoryLayout {
   uint8_t   _index[CONFIG::NUM_INDEX];            // temperature index
   IRNode    _hexCodes[CONFIG::MAX_HEX_CODES];     // hexCode index
-//  Schedule  _schedules[CONFIG::NUM_SCHEDULE];
+  Schedule  _schedules[CONFIG::NUM_SCHEDULE];
 };
 
 struct TemperatureRange {
