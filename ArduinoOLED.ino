@@ -13,11 +13,9 @@
 #include "MenuItemRenderer.h"
 #include <EEPROM.h>
 #include "IMenuRenderer.h"
-#include "KeyValueStore.h"
 #include "HexProgrammer.h"
 #include "Sensor.h"
 #include "SensorTypes.h"
-#include "SmartRemoteTests.h"
 
 // 0X3C+SA0 - 0x3C or 0x3D
 #define I2C_ADDRESS 0x3C
@@ -31,23 +29,34 @@ SSD1306AsciiAvrI2c display;
 TimeSensor timeSensorModule;
 TXSensor TX;
 RXSensor RX;
+RemoteData RD;
 
 // creating renderer
 IMenuRenderer *oledMenuRenderer = new OLEDMenuRenderer(display);
 IMenuRenderer *oledFieldMenuRenderer = new OLEDCompactMenuItemRenderer(display);
 
-//Create remote menu
+//Create Remote Program menu
+RemoteProgramMenuItem *remoteProgramMenu = new RemoteProgramMenuItem(oledFieldMenuRenderer, "Program", RX, RD, DefaultTemperatureRange);
 
-RemoteProgramMenuItem *remoteProgramMenu = new RemoteProgramMenuItem(oledFieldMenuRenderer, "Program", RX);
-AbstractMenuEntity *remoteMenus[] = {remoteProgramMenu};
+//Remote Test menu items
+RemoteMenuItemProvider remoteTestMenuItemProvider(oledFieldMenuRenderer, RD);
+AbstractMenuEntity *remoteTestMenu = new DynamicMenuEntity(oledMenuRenderer, "Test", remoteTestMenuItemProvider);
+
+//AbstractMenuEntity *remoteMenus[] = {remoteTestMenu};
+// if these two are enabled then due to lack of memory system is non-functioning.
+AbstractMenuEntity *remoteMenus[] = {remoteTestMenu, remoteProgramMenu};
+
+
+
 // creating main menu
 AbstractMenuEntity *menu1 = new TimeMenuItem(oledFieldMenuRenderer, "Set Time", timeSensorModule);
 AbstractMenuEntity *menu4 = new DateMenuItem(oledFieldMenuRenderer, "Set Date", timeSensorModule);
 AbstractMenuEntity *menu2 = new MenuEntity(oledMenuRenderer, "Set Schedule", nullptr, 0);
-AbstractMenuEntity *menu3 = new MenuEntity(oledMenuRenderer, "Train Remote", remoteMenus, 1);
+AbstractMenuEntity *menu3 = new MenuEntity(oledMenuRenderer, "Train Remote", remoteMenus, 2);
 AbstractMenuEntity *mainMenus[] = {menu1, menu4, menu2, menu3};
 AbstractMenuEntity *mainMenu = new MenuEntity(oledMenuRenderer, "Main Menu", mainMenus, 4);
 
+// creating home menu
 HomeMenuItemRenderer *renderer = new HomeMenuItemRenderer(display);
 HomeMenu *homeMenu = new HomeMenu(renderer, "TempRemote V1.0", mainMenu, timeSensorModule);
 
@@ -55,7 +64,6 @@ IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_P
 // creating eventManager
 SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 10000, 20);
 EventManager *eventManager = new EventManager(buttonObserver);
-RemoteData remote;
 
 void autoWakeupCallback() {
 	SerialPrint(F("Waked up from WDT interrupt event-"));
@@ -92,25 +100,8 @@ void setupOled() {
 	display.begin(&Adafruit128x64, I2C_ADDRESS);
 #endif // RST_PIN >= 0
 	// Call oled.setI2cClock(frequency) to change from the default frequency.
-
-	display.setFont(Verdana12_bold);
+	display.setFont(Arial_bold_14);
 }
-
-//TempSensor tempMod;
-//TimeModule t;
-
-//void keyvaluestoreTest(){
-//	int x=50;
-//	KeyValueStore.set(IntType, "testKey", x);
-//	int y = 20;
-//	KeyValueStore.get(IntType, "testKey", y);
-//	Serial.println(y);
-//}
-
-// TODO: 1. EEPROM reset
-// TODO: 2. Remote Test menu
-// TODO: 3. Schedule Menu
-
 
 namespace TEST {
 
@@ -138,6 +129,11 @@ void testMemory() {
 	}
 	SerialPrint(F("Allocable chunk size -> "));
 	SerialPrintln(bytesLeft);
+#ifdef DISABLE_SERIAL_PRINT
+	display.setCursor(0, 0);
+	display.print(F("Mem : "));
+	display.print(bytesLeft);
+#endif
 	// end of freeRam
 }
 
@@ -173,10 +169,10 @@ void sizeTest() {
 
 //------------------------------------------------------------------------------
 void setup() {
+#ifndef DISABLE_SERIAL_PRINT
 	Serial.begin(CONFIG::BAUD_RATE);
+#endif
 	SerialPrintln(F("Hello from SmartRemote!"));
-	TEST::sizeTest();
-	TEST::testTxRxSetup();
 
 	setupOled();
 	setupSleepWakeupHandler();
@@ -188,6 +184,8 @@ void setup() {
 	eventManager->registereventReceiver(mainMenu);
 	eventManager->setEventCallback(receiveEvent);
 	homeMenu->activate();
+	TEST::sizeTest();
+	TEST::testTxRxSetup();
 }
 //------------------------------------------------------------------------------
 void loop() {

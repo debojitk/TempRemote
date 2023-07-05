@@ -119,7 +119,7 @@ void OLEDHorizontalMenuItemRenderer::renderContent(FormMenuItem *_menu) {
 
 void OLEDBaseFormMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	FormMenuItem *_menu = (FormMenuItem*)menu;
-	display.setFont(Arial_bold_14);
+	//display.setFont(Arial_bold_14);
 	clear();
 	renderHeader(_menu);
 	renderContent(_menu);

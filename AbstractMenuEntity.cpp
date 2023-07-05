@@ -298,7 +298,8 @@ DynamicMenuEntity::DynamicMenuEntity(
 		IMenuRenderer *renderer,
 		const char *name,
 		IDynamicMenuItemProvider &valueProvider
-): MenuEntity(renderer, name, nullptr, 0), _valueProvider(valueProvider) {
+): MenuEntity(renderer, name, nullptr, 0),
+		_valueProvider(valueProvider) {
 
 }
 
@@ -393,7 +394,7 @@ void RemoteTestMenuItem::ok() {
 }
 
 const char* RemoteTestMenuItem::getName() {
-	sprintf(stringBuffer, "%2d-%2d", _rangeStart, _rangeEnd);
+	sprintf(stringBuffer, "%2d-%2d", _tr._start, _tr._end);
 	return stringBuffer;
 }
 
@@ -407,13 +408,13 @@ uint16_t RemoteTestMenuItem::getValue(uint8_t index) {
 		retval = 0;
 	switch(index){
 	case START_RANGE_INDEX:
-		retval = _rangeStart;
+		retval = _tr._start;
 		break;
 	case END_RANGE_INDEX:
-		retval = _rangeEnd;
+		retval = _tr._end;
 		break;
 	case CODE_INDEX:
-		retval = _code;
+		retval = _tr._hex._command;
 		break;
 	}
 	return retval;
@@ -429,24 +430,30 @@ const __FlashStringHelper* RemoteTestMenuItem::getLabel(uint8_t index) {
  */
 
 void RemoteProgramMenuItem::ok() {
-	// TODO:
+	if (_tr == DefaultTemperatureRange) return;
+	_rd.addRange(_tr);
+	SerialPrintln(_tr._start);
+	SerialPrintln(_tr._end);
+	SerialPrintln(_tr._hex._command);
+	SerialPrintln(F("Saved"));
+	//_rd.save();
 }
 
 void RemoteProgramMenuItem::updateData(int8_t currentIndex) {
 	switch(currentIndex) {
 	case START_RANGE_INDEX:
-		if (_rangeStart > CONFIG::MAX_TEMPERATURE){
-			_rangeStart = CONFIG::START_TEMPERATURE;
+		if (_tr._start > CONFIG::MAX_TEMPERATURE){
+			_tr._start = CONFIG::START_TEMPERATURE;
 		} else {
-			_rangeStart ++;
+			_tr._start ++;
 		}
-		if (_rangeStart >= _rangeEnd) _rangeEnd = _rangeStart;
+		if (_tr._start >= _tr._end) _tr._end = _tr._start;
 		break;
 	case END_RANGE_INDEX:
-		if (_rangeEnd > CONFIG::MAX_TEMPERATURE){
-			_rangeEnd = min(_rangeStart + 1, CONFIG::MAX_TEMPERATURE);
+		if (_tr._end > CONFIG::MAX_TEMPERATURE){
+			_tr._end = min(_tr._start + 1, CONFIG::MAX_TEMPERATURE);
 		} else {
-			_rangeEnd ++;
+			_tr._end ++;
 		}
 		break;
 	case CODE_INDEX:
@@ -459,18 +466,32 @@ void RemoteProgramMenuItem::read() {
 	if(!isActive()) return;
 	RemoteRXValue remoteValue =  _rx.get();
 	if (remoteValue == NullRemoteRXValue) return;
+	SerialPrint(F("Received code: "));
+	SerialPrintln(remoteValue._command, HEX);
+
 	if (currentIndex == CODE_INDEX && changeData == true) {
-		if (_code != remoteValue._command) {
-			_code = remoteValue._command;
-			SerialPrint(F("Received code: "));
-			SerialPrintln(_code, HEX);
+		if (_tr._hex._command != remoteValue._command) {
+			_tr._hex._command = remoteValue._command;
+			_tr._hex._address = remoteValue._address;
+			_tr._hex._protocol = remoteValue._protocol;
 			render();
 		}
 	}
-
 }
 
 const __FlashStringHelper* RemoteProgramMenuItem::getLabel(uint8_t index) {
 	if (index > states - 1) return nullptr;
 	return (const __FlashStringHelper *)RemoteProgramMenuLabels[index];
+}
+
+AbstractMenuEntity** RemoteMenuItemProvider::getValues() {
+    free();
+    _size = 0;
+    for(auto it = _rd.beginRange(), itEnd = _rd.endRange(); it != itEnd; ++it) {
+        TemperatureRange tr = *it;
+        RemoteTestMenuItem* ptr = new RemoteTestMenuItem(_subMenuRenderer, tr);
+        _values[_size] = ptr;
+        ++_size;
+    }
+    return _values;
 }

@@ -61,12 +61,13 @@ public:
 };
 
 class RemoteMenuItemProvider : public IDynamicMenuItemProvider {
-	RemoteMenuItemProvider(RemoteData& rd) : _rd(rd) {}
+public:
+	RemoteMenuItemProvider(IMenuRenderer *renderer, RemoteData& rd) : _rd(rd), _subMenuRenderer(renderer) {}
 	virtual ~RemoteMenuItemProvider() {
 		free();
 	}
 	void free() {
-		for(unsigned i = 0; i < _size; ++i){
+		for(unsigned i = 0; i < _size; ++i) {
 			delete _values[i];
 		}
 		memset(_values, 0, CONFIG::NUM_INDEX);
@@ -78,6 +79,7 @@ private:
 	const RemoteData& _rd;
 	size_t            _size = 0;
 	AbstractMenuEntity* _values[CONFIG::NUM_INDEX];
+	IMenuRenderer *_subMenuRenderer;
 };
 
 class MenuEntity: public AbstractMenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
@@ -96,7 +98,10 @@ protected:
 
 class DynamicMenuEntity: public MenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	DynamicMenuEntity(IMenuRenderer *renderer, const char *name, IDynamicMenuItemProvider &valueProvider);
+	DynamicMenuEntity(
+			IMenuRenderer *renderer,
+			const char *name,
+			IDynamicMenuItemProvider &valueProvider);
 	void activate();
 private:
 	void setItems(AbstractMenuEntity* items[],uint8_t numitems);
@@ -197,11 +202,10 @@ public:
 
 class RemoteTestMenuItem: public FormMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	RemoteTestMenuItem(IMenuRenderer *renderer, uint8_t rangeStart, uint8_t rangeEnd, uint16_t code):
+	RemoteTestMenuItem(IMenuRenderer *renderer, TemperatureRange tr):
 		FormMenuItem(nullptr, renderer),
-		_rangeStart(rangeStart),
-		_rangeEnd(rangeEnd),
-		_code(code)	{
+		_tr(tr)
+	{
 		states = 5;
 	}
 	virtual void ok();
@@ -212,9 +216,7 @@ public:
 	virtual boolean isReadOnly(uint8_t index){return true;}
 
 protected:
-	uint8_t _rangeStart = 0;
-	uint8_t _rangeEnd = 0;
-	uint16_t _code = 0;
+	TemperatureRange _tr;
 	static constexpr uint8_t START_RANGE_INDEX  = 0;
     static constexpr uint8_t END_RANGE_INDEX  = 1;
     static constexpr uint8_t CODE_INDEX  = 2;
@@ -223,8 +225,8 @@ protected:
 
 class RemoteProgramMenuItem: public RemoteTestMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	RemoteProgramMenuItem(IMenuRenderer *renderer, const char* name, RXSensor &rx):
-		RemoteTestMenuItem(renderer, CONFIG::START_TEMPERATURE, CONFIG::START_TEMPERATURE, 0), _rx(rx)
+	RemoteProgramMenuItem(IMenuRenderer *renderer, const char* name, RXSensor &rx, RemoteData &rd, TemperatureRange tr):
+		RemoteTestMenuItem(renderer, tr), _rx(rx), _rd(rd)
 	{
 		this->name = name;
 		states = 5;
@@ -238,6 +240,7 @@ public:
 	void read();
 private:
 	RXSensor &_rx;
+	RemoteData &_rd;
 };
 
 
