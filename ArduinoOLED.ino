@@ -18,7 +18,6 @@
 #include "Sensor.h"
 #include "SensorTypes.h"
 
-
 // 0X3C+SA0 - 0x3C or 0x3D
 #define I2C_ADDRESS 0x3C
 #define CHAR_HEIGHT 12
@@ -124,20 +123,45 @@ void testRegister() {
 }
 
 void testMemory() {
-  for(size_t i = 0; i < 100000; ++i) {
-	  void* ptr = malloc(sizeof(uint8_t) * i);
-	  if(ptr) {
-		  SerialPrint(F("Allocated Bytes:"));
-		  SerialPrintln(i);
-	  }
-	  else {
-		  SerialPrint(F("Could not Allocate Bytes:"));
-		  SerialPrintln(i);
-		  break;
-	  }
-	  free(ptr);
-  }
+	uint16_t bytesLeft;
+	for(size_t i = 0; i < 2048; ++i) {
+		void* ptr = malloc(sizeof(uint8_t) * i);
+		if(!ptr) {
+			bytesLeft = i-1;
+			break;
+		}
+		free(ptr);
+	}
+	SerialPrint(F("Allocable chuck size -> "));
+	SerialPrintln(bytesLeft);
+	// end of freeRam
 }
+
+
+void testMemoryV2 ()
+{
+	SerialPrint(F("MemoryLeft->")); SerialPrintln(RAMEND - size_t (__malloc_heap_start));
+}
+
+void sizeTest() {
+	SerialPrint(F("Serial -> "));				SerialPrintln(sizeof(Serial));
+	SerialPrint(F("SSD1306AsciiAvrI2c -> "));	SerialPrintln(sizeof(display));
+	SerialPrint(F("TimeSensor -> "));			SerialPrintln(sizeof(timeSensorModule));
+	SerialPrint(F("TXSensor -> "));				SerialPrintln(sizeof(TX));
+	SerialPrint(F("RXSensor -> "));				SerialPrintln(sizeof(RX));
+	SerialPrint(F("AbstractMenuEntity -> "));	SerialPrintln(sizeof(AbstractMenuEntity));
+	SerialPrint(F("TimeMenuItem -> "));			SerialPrintln(sizeof(TimeMenuItem));
+	SerialPrint(F("DateMenuItem -> "));			SerialPrintln(sizeof(DateMenuItem));
+	SerialPrint(F("MenuEntity -> "));			SerialPrintln(sizeof(MenuEntity));
+	SerialPrint(F("HomeMenu -> "));				SerialPrintln(sizeof(HomeMenu));
+	SerialPrint(F("ButtonInputObserver -> "));	SerialPrintln(sizeof(ButtonInputObserver));
+	SerialPrint(F("SleepWakeupInterruptHandler -> "));	SerialPrintln(sizeof(SleepWakeupInterruptHandler));
+	SerialPrint(F("EventManager -> "));			SerialPrintln(sizeof(EventManager));
+	testMemoryV2();
+	testMemory();
+
+}
+
 
 };  // namespace TEST
 
@@ -146,7 +170,8 @@ void testMemory() {
 //------------------------------------------------------------------------------
 void setup() {
 	Serial.begin(CONFIG::BAUD_RATE);
-	SerialPrint(F("Hello from SmartRemote!"));
+	SerialPrintln(F("Hello from SmartRemote!"));
+	TEST::sizeTest();
 	TEST::testTxRxSetup();
 
 	setupOled();
@@ -167,4 +192,5 @@ void loop() {
 	homeMenu->update();
 	remoteProgramMenu->read();
 }
+
 
