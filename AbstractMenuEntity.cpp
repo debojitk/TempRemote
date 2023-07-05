@@ -30,14 +30,14 @@ const char* AbstractMenuEntity::getName() {
 	return this->name;
 }
 
-int AbstractMenuEntity::getBackIndex(){
+uint8_t AbstractMenuEntity::getBackIndex(){
 	return this->backIndex;
 }
 
-void AbstractMenuEntity::setCurrentIndex(int index){
+void AbstractMenuEntity::setCurrentIndex(int8_t index){
 	currentIndex = index;
 }
-int AbstractMenuEntity::getCurrentIndex(){
+int8_t AbstractMenuEntity::getCurrentIndex(){
 	return currentIndex;
 }
 
@@ -117,7 +117,7 @@ MenuEntity::MenuEntity(IMenuRenderer *renderer, const char* name, AbstractMenuEn
 	this->backIndex = numItems;
 }
 
-int MenuEntity::getNumItems() {
+uint8_t MenuEntity::getNumItems() {
 	return numItems;
 }
 
@@ -125,7 +125,7 @@ void MenuEntity::activate(){
 	AbstractMenuEntity::activate();
 }
 
-AbstractMenuEntity* MenuEntity::getItem(int index) {
+AbstractMenuEntity* MenuEntity::getItem(uint8_t index) {
 	if (index >= 0 && index < numItems) {
 		return items[index];
 	} else {
@@ -227,7 +227,7 @@ void HomeMenu::update(){
 	}
 }
 
-uint32_t HomeMenu::getValue(uint8_t index) {
+uint16_t HomeMenu::getValue(uint8_t index) {
 	return 0;
 }
 
@@ -245,7 +245,7 @@ TimeMenuItem::TimeMenuItem(IMenuRenderer *renderer, const char *name,
 	backIndex = states - 1;
 }
 
-void TimeMenuItem::updateData(int currentIndex) {
+void TimeMenuItem::updateData(int8_t currentIndex) {
 	switch(currentIndex) {
 	case TimeMenuItem::HOUR_INDEX:
 		_timeValue._hour = (_timeValue._hour + 1)%24;
@@ -268,7 +268,7 @@ void TimeMenuItem::activate() {
 	AbstractMenuEntity::activate();
 }
 
-uint32_t TimeMenuItem::getValue(uint8_t index) {
+uint16_t TimeMenuItem::getValue(uint8_t index) {
 	uint8_t retval = 0;
 	if (index > getFieldCount() - 1) return retval;
 	switch(index){
@@ -349,8 +349,8 @@ boolean FormMenuItem::isReadOnly(uint8_t index) {
 	return true;
 }
 
-uint32_t DateMenuItem::getValue(uint8_t index) {
-	uint32_t retval = 0;
+uint16_t DateMenuItem::getValue(uint8_t index) {
+	uint16_t retval = 0;
 	if (index > getFieldCount() - 1) return retval;
 	switch(index){
 	case DAY_INDEX:
@@ -371,7 +371,7 @@ const __FlashStringHelper* DateMenuItem::getLabel(uint8_t index) {
 	return (const __FlashStringHelper *)DateMenuLabels[index];
 }
 
-void DateMenuItem::updateData(int currentIndex) {
+void DateMenuItem::updateData(int8_t currentIndex) {
 	switch(currentIndex) {
 	case DAY_INDEX:
 		_timeValue._day = (_timeValue._day)%31 + 1;
@@ -397,12 +397,12 @@ const char* RemoteTestMenuItem::getName() {
 	return stringBuffer;
 }
 
-void RemoteTestMenuItem::updateData(int currentIndex) {
+void RemoteTestMenuItem::updateData(int8_t currentIndex) {
 	//nothing to update
 }
 
-uint32_t RemoteTestMenuItem::getValue(uint8_t index) {
-	uint32_t retval;
+uint16_t RemoteTestMenuItem::getValue(uint8_t index) {
+	uint16_t retval;
 	if (index > 0 || index > getFieldCount())
 		retval = 0;
 	switch(index){
@@ -432,7 +432,7 @@ void RemoteProgramMenuItem::ok() {
 	// TODO:
 }
 
-void RemoteProgramMenuItem::updateData(int currentIndex) {
+void RemoteProgramMenuItem::updateData(int8_t currentIndex) {
 	switch(currentIndex) {
 	case START_RANGE_INDEX:
 		if (_rangeStart > CONFIG::MAX_TEMPERATURE){

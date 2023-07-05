@@ -23,9 +23,9 @@ class AbstractMenuEntity: public IEventReceiver, public IRenderable { // @suppre
 public:
 	AbstractMenuEntity(const char *name, IMenuRenderer *renderer);
 	virtual const char* getName();
-	int getBackIndex();
-	void setCurrentIndex(int index);
-	int getCurrentIndex();
+	uint8_t getBackIndex();
+	void setCurrentIndex(int8_t index);
+	int8_t getCurrentIndex();
 
 	void handleEvent(EventType event);
 	void render();
@@ -44,8 +44,8 @@ public:
 protected:
 	static CustomStack<AbstractMenuEntity *, 10> menuStack;
 	const char *name;
-	int currentIndex = -1;
-	int backIndex = 0;
+	int8_t currentIndex = -1;
+	uint8_t backIndex = 0;
 	bool active = false;
 	EventManager *eventManager = nullptr;
 	IMenuRenderer *renderer;
@@ -84,8 +84,8 @@ class MenuEntity: public AbstractMenuEntity { // @suppress("Class has a virtual 
 public:
 	MenuEntity(IMenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], uint8_t numitems);
 	void activate();
-	int getNumItems();
-	AbstractMenuEntity* getItem(int index);
+	uint8_t getNumItems();
+	AbstractMenuEntity* getItem(uint8_t index);
 	void handleClick();
 	void goToNextItem();
 	void handleDoubleClick();
@@ -106,7 +106,7 @@ private:
 class MenuItem: public AbstractMenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	MenuItem(const char *name, IMenuRenderer *renderer);
-	virtual uint32_t getValue(uint8_t index) = 0;
+	virtual uint16_t getValue(uint8_t index) = 0;
 	virtual const __FlashStringHelper* getLabel(uint8_t index) = 0;
 };
 
@@ -121,11 +121,11 @@ public:
 	struct TimeValue getTime();
 	void activate();
 	void update();
-	uint32_t getValue(uint8_t index);
+	uint16_t getValue(uint8_t index);
 	const __FlashStringHelper* getLabel(uint8_t index);
 private:
-	double temperature = 30;
-	int humidity = 70;
+	float temperature = 30;
+	uint8_t humidity = 70;
 	AbstractMenuEntity *child = nullptr;
 	TimeSensor &_timeSensorModule;
 	uint32_t lastUpdateTime = 0;
@@ -138,7 +138,7 @@ public:
 		states = 2;
 		backIndex = 1;
 	}
-	virtual uint32_t getValue(uint8_t index) = 0;
+	virtual uint16_t getValue(uint8_t index) = 0;
 	virtual const __FlashStringHelper* getLabel(uint8_t index) = 0;
 	virtual void handleClick();
 	virtual void handleDoubleClick();
@@ -158,7 +158,7 @@ public:
 		AbstractMenuEntity::activate();
 	}
 protected:
-	virtual void updateData(int currentIndex) = 0;
+	virtual void updateData(int8_t currentIndex) = 0;
 	uint8_t states;
 	bool changeData = false;
 };
@@ -170,9 +170,9 @@ public:
 	void ok();
 	void activate();
 
-	virtual uint32_t getValue(uint8_t index);
+	virtual uint16_t getValue(uint8_t index);
 	virtual const __FlashStringHelper* getLabel(uint8_t index);
-	virtual void updateData(int currentIndex);
+	virtual void updateData(int8_t currentIndex);
 
 	static constexpr uint8_t HOUR_INDEX  = 0;
     static constexpr uint8_t MIN_INDEX  = 1;
@@ -185,9 +185,9 @@ protected:
 class DateMenuItem: public TimeMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	DateMenuItem(IMenuRenderer *renderer, const char* name, TimeSensor &timeModule): TimeMenuItem(renderer, name, timeModule){}
-	uint32_t getValue(uint8_t index);
+	uint16_t getValue(uint8_t index);
 	const __FlashStringHelper* getLabel(uint8_t index);
-	void updateData(int currentIndex);
+	void updateData(int8_t currentIndex);
 
 	static constexpr uint8_t DAY_INDEX  = 0;
     static constexpr uint8_t MON_INDEX  = 1;
@@ -197,7 +197,7 @@ public:
 
 class RemoteTestMenuItem: public FormMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	RemoteTestMenuItem(IMenuRenderer *renderer, uint8_t rangeStart, uint8_t rangeEnd, uint32_t code):
+	RemoteTestMenuItem(IMenuRenderer *renderer, uint8_t rangeStart, uint8_t rangeEnd, uint16_t code):
 		FormMenuItem(nullptr, renderer),
 		_rangeStart(rangeStart),
 		_rangeEnd(rangeEnd),
@@ -206,15 +206,15 @@ public:
 	}
 	virtual void ok();
 	virtual const char * getName();
-	virtual void updateData(int currentIndex);
-	virtual uint32_t getValue(uint8_t index);
+	virtual void updateData(int8_t currentIndex);
+	virtual uint16_t getValue(uint8_t index);
 	virtual const __FlashStringHelper* getLabel(uint8_t index);
 	virtual boolean isReadOnly(uint8_t index){return true;}
 
 protected:
 	uint8_t _rangeStart = 0;
 	uint8_t _rangeEnd = 0;
-	uint32_t _code = 0;
+	uint16_t _code = 0;
 	static constexpr uint8_t START_RANGE_INDEX  = 0;
     static constexpr uint8_t END_RANGE_INDEX  = 1;
     static constexpr uint8_t CODE_INDEX  = 2;
@@ -232,7 +232,7 @@ public:
 	}
 	void ok();
 	const char * getName() {return AbstractMenuEntity::getName();}
-	virtual void updateData(int currentIndex);
+	virtual void updateData(int8_t currentIndex);
 	virtual boolean isReadOnly(uint8_t index){return false;}
 	virtual const __FlashStringHelper* getLabel(uint8_t index);
 	void read();
