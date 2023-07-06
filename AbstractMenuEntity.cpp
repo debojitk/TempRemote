@@ -309,6 +309,7 @@ void DynamicMenuEntity::activate() {
 }
 
 void DynamicMenuEntity::setItems(AbstractMenuEntity *incomingItems[], uint8_t incomingNumItems) {
+	SerialPrintln(F("In setItems"));
 	if (this->items != incomingItems) {
 		// need to modify, delete the existing array first
 		for (int i = 0; i<numItems; i++) {
@@ -431,11 +432,15 @@ const __FlashStringHelper* RemoteTestMenuItem::getLabel(uint8_t index) {
 
 void RemoteProgramMenuItem::ok() {
 	if (_tr == DefaultTemperatureRange) return;
-	_rd.addRange(_tr);
-	SerialPrintln(_tr._start);
-	SerialPrintln(_tr._end);
-	SerialPrintln(_tr._hex._command);
-	SerialPrintln(F("Saved"));
+	if(_rd.addRange(_tr)) {
+		SerialPrintln(_tr._start);
+		SerialPrintln(_tr._end);
+		SerialPrintln(_tr._hex._command);
+		SerialPrintln(F("Saved"));
+	}
+	else {
+		SerialPrintln("No Save");
+	}
 	//_rd.save();
 }
 
@@ -485,10 +490,12 @@ const __FlashStringHelper* RemoteProgramMenuItem::getLabel(uint8_t index) {
 }
 
 AbstractMenuEntity** RemoteMenuItemProvider::getValues() {
+	SerialPrintln("Inside getValues()");
     free();
     _size = 0;
     for(auto it = _rd.beginRange(), itEnd = _rd.endRange(); it != itEnd; ++it) {
         TemperatureRange tr = *it;
+        tr.p();
         RemoteTestMenuItem* ptr = new RemoteTestMenuItem(_subMenuRenderer, tr);
         _values[_size] = ptr;
         ++_size;

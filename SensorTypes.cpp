@@ -1,4 +1,6 @@
-
+#define DECODE_NEC
+#define DECODE_SAMSUNG
+#define DECODE_PANASONIC
 #include "HexProgrammer.h"
 #include "SensorTypes.h"
 #include <Arduino.h>

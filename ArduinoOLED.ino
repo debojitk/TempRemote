@@ -16,6 +16,7 @@
 #include "HexProgrammer.h"
 #include "Sensor.h"
 #include "SensorTypes.h"
+#include "SmartRemoteTests.h"
 
 // 0X3C+SA0 - 0x3C or 0x3D
 #define I2C_ADDRESS 0x3C
@@ -184,8 +185,10 @@ void setup() {
 	eventManager->registereventReceiver(mainMenu);
 	eventManager->setEventCallback(receiveEvent);
 	homeMenu->activate();
-	TEST::sizeTest();
-	TEST::testTxRxSetup();
+//	TEST::sizeTest();
+//	TEST::testTxRxSetup()
+	TEST::TestMemory t1;
+	t1.setup();
 }
 //------------------------------------------------------------------------------
 void loop() {

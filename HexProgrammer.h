@@ -1,8 +1,8 @@
-
-
 #pragma once
 
 #include <stdint.h>
+#include <Arduino.h>
+#include "CommonItems.h"
 
 class RemoteData;
 
@@ -32,6 +32,11 @@ struct IRNode {
     bool operator ==(const IRNode& n) {
     	return ((n._protocol == _protocol) && (n._address == _address) && (n._command == _command));
     }
+    void p() {
+    	SerialPrint(F("Protocol :")); SerialPrintln(_protocol);
+    	SerialPrint(F("Address :")); SerialPrintln(_address);
+    	SerialPrint(F("Command :")); SerialPrintln(_command);
+    }
 };
 constexpr IRNode NullIRNode {0,0,0};
 
@@ -48,7 +53,11 @@ struct TemperatureRange {
     bool operator==(const TemperatureRange& r) {
     	return ((_start == r._start) && (_end == r._end) && (_hex == r._hex));
     }
-
+    void p() {
+    	SerialPrint(F("Start :")); SerialPrintln(_start);
+    	SerialPrint(F("End :")); SerialPrintln(_end);
+    	_hex.p();
+    }
 };
 constexpr TemperatureRange NullTemperatureRange{CONFIG::MAX_TEMPERATURE, CONFIG::MAX_TEMPERATURE, NullIRNode};
 constexpr TemperatureRange DefaultTemperatureRange{CONFIG::START_TEMPERATURE, CONFIG::START_TEMPERATURE, NullIRNode};
