@@ -63,7 +63,7 @@ HomeMenu homeMenu(renderer, "TempRemote V1.0", &mainMenu, timeSensorModule);
 IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_PIN, 300);
 // creating eventManager
 SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 100000, 20);
-EventManager *eventManager = new EventManager(buttonObserver);
+EventManager eventManager(buttonObserver);
 
 void autoWakeupCallback() {
 	SerialPrint(F("Waked up from WDT interrupt event-"));
@@ -103,19 +103,15 @@ void setupOled() {
 	display.setFont(Arial_bold_14);
 }
 
-namespace TEST {
-
-void testTxRxSetup() {
+void setupRemote() {
 	TX.setup();
 	SerialPrintln(F("TX Setup complete"));
 	RX.setup();
 	SerialPrintln(F("RX Setup complete"));
 }
 
-void testRegister() {
-	IRNode node = RX.get();
 
-}
+namespace TEST {
 
 void testMemory() {
 	uint16_t bytesLeft;
@@ -129,12 +125,6 @@ void testMemory() {
 	}
 	SerialPrint(F("Allocable chunk size -> "));
 	SerialPrintln(bytesLeft);
-#ifdef DISABLE_SERIAL_PRINT
-	display.setCursor(0, 0);
-	display.print(F("Mem : "));
-	display.print(bytesLeft);
-#endif
-	// end of freeRam
 }
 
 
@@ -164,20 +154,20 @@ void setup() {
 	setupSleepWakeupHandler();
 
 	buttonObserver->enable();
-	homeMenu.setEventManager(eventManager);
-	mainMenu.setEventManager(eventManager);
-	menu1.setEventManager(eventManager);
-	eventManager->registereventReceiver(&mainMenu);
-	eventManager->setEventCallback(receiveEvent);
+	homeMenu.setEventManager(&eventManager);
+	mainMenu.setEventManager(&eventManager);
+	menu1.setEventManager(&eventManager);
+	eventManager.registereventReceiver(&mainMenu);
+	eventManager.setEventCallback(receiveEvent);
 	homeMenu.activate();
+	setupRemote();
 	TEST::sizeTest();
-//	TEST::testTxRxSetup();
 //	TEST::TestRemoteData trd(RD);
 //	trd.setup();
 }
 //------------------------------------------------------------------------------
 void loop() {
-	eventManager->processEvents();
+	eventManager.processEvents();
 	interruptHandler->observeEvents();
 	homeMenu.update();
 	remoteProgramMenu.read();

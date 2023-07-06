@@ -191,7 +191,7 @@ SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(): SleepWakeupInterrupt
 	//default private constructor
 }
 
-SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(uint8_t pin, uint16_t disableDelay, uint8_t autoWakeupDelay) {
+SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(uint8_t pin, uint32_t disableDelay, uint8_t autoWakeupDelay) {
 	this->pin = pin;
 	this->disableDelay = disableDelay;
 	setAutoWakeupDelay(autoWakeupDelay);
@@ -234,7 +234,7 @@ void SleepWakeupInterruptHandler::initialize() {
 	hasInitialized = true;
 }
 
-SleepWakeupInterruptHandler* SleepWakeupInterruptHandler::getInstance(uint8_t pin, uint16_t interval, uint8_t autoWakeupDelay) {
+SleepWakeupInterruptHandler* SleepWakeupInterruptHandler::getInstance(uint8_t pin, uint32_t interval, uint8_t autoWakeupDelay) {
 	if(SleepWakeupInterruptHandler::_instance == nullptr){
 		SleepWakeupInterruptHandler::_instance = new SleepWakeupInterruptHandler(pin, interval, autoWakeupDelay);
 		SleepWakeupInterruptHandler::_instance->initialize();

@@ -102,13 +102,13 @@ public:
 	void setWakeupCallback(void (*cb)());
 	void setAutoWakeupCallback(void (*cb)());
 	void setAutoWakeupDelay(uint8_t autoWakeupDelay);
-	static SleepWakeupInterruptHandler *getInstance(uint8_t pin, uint16_t interval, uint8_t autoWakeupDelay);
+	static SleepWakeupInterruptHandler *getInstance(uint8_t pin, uint32_t interval, uint8_t autoWakeupDelay);
 	static void WDInterruptHandlerInvoker();
 private:
 	SleepWakeupInterruptHandler();
-	SleepWakeupInterruptHandler(uint8_t pin, uint16_t interval, uint8_t autoWakeupDelay);
+	SleepWakeupInterruptHandler(uint8_t pin, uint32_t interval, uint8_t autoWakeupDelay);
 	uint8_t pin;
-	uint16_t disableDelay;
+	uint32_t disableDelay;
 	uint32_t lastEventInstant = 0;
 	uint8_t autoWakeupDelay = 30; // in sec
 	uint8_t sleepCounterLimit = 0;
