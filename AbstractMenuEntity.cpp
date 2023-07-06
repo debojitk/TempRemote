@@ -17,7 +17,7 @@
 #include "HexProgrammer.h"
 
 // define the stack
-CustomStack<AbstractMenuEntity *, 10> AbstractMenuEntity::menuStack;
+CustomStack<AbstractMenuEntity *, 4> AbstractMenuEntity::menuStack;
 AbstractMenuEntity *AbstractMenuEntity::CurrentMenu = nullptr;
 
 char AbstractMenuEntity::stringBuffer[10];
@@ -199,13 +199,6 @@ void HomeMenu::handleDoubleClick(){
 	}
 }
 
-void HomeMenu::back(){
-	// does nothing
-}
-
-void HomeMenu::setTime(uint8_t hour, uint8_t min, uint8_t sec){
-
-}
 
 double HomeMenu::getTemperature(){
 	return temperature;
@@ -296,34 +289,40 @@ const __FlashStringHelper* TimeMenuItem::getLabel(uint8_t index) {
 
 DynamicMenuEntity::DynamicMenuEntity(
 		IMenuRenderer *renderer,
+		IMenuRenderer *subMenuRenderer,
 		const char *name,
-		IDynamicMenuItemProvider &valueProvider
+		RemoteData &rd
 ): MenuEntity(renderer, name, nullptr, 0),
-		_valueProvider(valueProvider) {
+		_subMenurenderer(subMenuRenderer),
+		_rd(rd), subMenu(renderer)
+		 {
 
 }
 
 void DynamicMenuEntity::activate() {
-	auto ** ptr = _valueProvider.getValues();
-	uint8_t size = _valueProvider.getSize();
-	setItems(ptr, size);
+	numItems = 0;
+    for(auto it = _rd.beginRange(), itEnd = _rd.endRange(); it != itEnd; ++it) {
+		numItems ++;
+    }
+	backIndex = numItems;
 	AbstractMenuEntity::activate();
 }
 
-void DynamicMenuEntity::setItems(AbstractMenuEntity *incomingItems[], uint8_t incomingNumItems) {
-	SerialPrint(F("Inside DynamicMenuEntity::setItems, size = "));
-	SerialPrintln(incomingNumItems);
-	if (this->items != incomingItems) {
-		// need to modify, delete the existing array first
-		for (int i = 0; i<numItems; i++) {
-			delete this->items[i];
-		}
-		delete[] this->items;
-		numItems = incomingNumItems;
-		this->items = incomingItems;
-	}
-}
+AbstractMenuEntity * DynamicMenuEntity::getItem(uint8_t index) {
+	TEST::testMemory();
+	if (index < 0 || index >= numItems) return nullptr;
 
+	uint8_t counter = 0;
+    for(auto it = _rd.beginRange(), itEnd = _rd.endRange(); it != itEnd; ++it) {
+        TemperatureRange tr = *it;
+        if (index == counter) {
+        	subMenu._tr = tr;
+        	return  &subMenu;
+        }
+        counter++;
+    }
+    return nullptr;
+}
 void FormMenuItem::handleClick() {
 	if (!this->isActive())
 		return;
@@ -442,6 +441,7 @@ void RemoteProgramMenuItem::ok() {
 }
 
 void RemoteProgramMenuItem::updateData(int8_t currentIndex) {
+	TEST::testMemory();
 	switch(currentIndex) {
 	case START_RANGE_INDEX:
 		if (_tr._start > CONFIG::MAX_TEMPERATURE){
@@ -482,18 +482,4 @@ void RemoteProgramMenuItem::read() {
 const __FlashStringHelper* RemoteProgramMenuItem::getLabel(uint8_t index) {
 	if (index > states - 1) return nullptr;
 	return (const __FlashStringHelper *)RemoteProgramMenuLabels[index];
-}
-
-AbstractMenuEntity** RemoteMenuItemProvider::getValues() {
-	SerialPrintln("Inside getValues()");
-    free();
-    _size = 0;
-    for(auto it = _rd.beginRange(), itEnd = _rd.endRange(); it != itEnd; ++it) {
-        TemperatureRange tr = *it;
-        tr.p();
-        RemoteTestMenuItem* ptr = new RemoteTestMenuItem(_subMenuRenderer, tr);
-        _values[_size] = ptr;
-        ++_size;
-    }
-    return _values;
 }

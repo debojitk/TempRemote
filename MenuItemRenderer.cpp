@@ -12,15 +12,15 @@
 
 HomeMenuItemRenderer::HomeMenuItemRenderer(SSD1306AsciiAvrI2c& displayObject):display(displayObject){
 }
-void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
-	this->menu = reinterpret_cast<HomeMenu *>(menu);
-	TimeValue t = this->menu->getTime();
+void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *_menu) {
+	HomeMenu * menu = reinterpret_cast<HomeMenu *>(_menu);
+	TimeValue t = menu->getTime();
 	char buffer[12];
 	display.setCursor(0, 0);
 	display.print(menu->getName());
 	display.setCursor(0, 2);
 	display.print(F("Temp: "));
-	display.print(this->menu->getTemperature());
+	display.print(menu->getTemperature());
 	display.print(F(" C"));
 	display.setCursor(0, 4);
 	display.print(t.formatDate(buffer));
@@ -32,14 +32,3 @@ void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 void HomeMenuItemRenderer::clear() {
 	display.clear();
 }
-
-//RemoteMenuItemRenderer::RemoteMenuItemRenderer(SSD1306AsciiAvrI2c &displayObject): display(displayObject) {
-//}
-//
-//void RemoteMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
-//	RemoteProgramMenuItem *thisMenu = reinterpret_cast<RemoteProgramMenuItem *>(menu);
-//}
-//
-//void RemoteMenuItemRenderer::clear() {
-//	display.clear();
-//}

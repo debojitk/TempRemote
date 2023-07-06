@@ -79,7 +79,9 @@ const char RemoteProgramMenuLabels [5] [6] PROGMEM = {
 		{ "Back" }
 };
 
-
+namespace TEST{
+	void testMemory();
+}
 	#ifdef DISABLE_SERIAL_PRINT
 		#define SerialPrint(...)
 		#define SerialPrintln(...)

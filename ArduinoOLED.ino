@@ -16,6 +16,7 @@
 #include "HexProgrammer.h"
 #include "Sensor.h"
 #include "SensorTypes.h"
+#include "SmartRemoteTests.h"
 
 // 0X3C+SA0 - 0x3C or 0x3D
 #define I2C_ADDRESS 0x3C
@@ -39,8 +40,7 @@ IMenuRenderer *oledFieldMenuRenderer = new OLEDCompactMenuItemRenderer(display);
 RemoteProgramMenuItem *remoteProgramMenu = new RemoteProgramMenuItem(oledFieldMenuRenderer, "Program", RX, RD, DefaultTemperatureRange);
 
 //Remote Test menu items
-RemoteMenuItemProvider remoteTestMenuItemProvider(oledFieldMenuRenderer, RD);
-AbstractMenuEntity *remoteTestMenu = new DynamicMenuEntity(oledMenuRenderer, "Test", remoteTestMenuItemProvider);
+AbstractMenuEntity *remoteTestMenu = new DynamicMenuEntity(oledMenuRenderer, oledFieldMenuRenderer, "Test", RD);
 
 //AbstractMenuEntity *remoteMenus[] = {remoteTestMenu};
 // if these two are enabled then due to lack of memory system is non-functioning.
@@ -58,11 +58,11 @@ AbstractMenuEntity *mainMenu = new MenuEntity(oledMenuRenderer, "Main Menu", mai
 
 // creating home menu
 HomeMenuItemRenderer *renderer = new HomeMenuItemRenderer(display);
-HomeMenu *homeMenu = new HomeMenu(renderer, "TempRemote V1.0", mainMenu, timeSensorModule);
+HomeMenu homeMenu(renderer, "TempRemote V1.0", mainMenu, timeSensorModule);
 
 IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_PIN, 300);
 // creating eventManager
-SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 10000, 20);
+SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 100000, 20);
 EventManager *eventManager = new EventManager(buttonObserver);
 
 void autoWakeupCallback() {
@@ -144,22 +144,8 @@ void testMemoryV2 ()
 }
 
 void sizeTest() {
-	SerialPrint(F("Serial -> "));				SerialPrintln(sizeof(Serial));
-	SerialPrint(F("SSD1306AsciiAvrI2c -> "));	SerialPrintln(sizeof(display));
-	SerialPrint(F("TimeSensor -> "));			SerialPrintln(sizeof(timeSensorModule));
-	SerialPrint(F("TXSensor -> "));				SerialPrintln(sizeof(TX));
-	SerialPrint(F("RXSensor -> "));				SerialPrintln(sizeof(RX));
-	SerialPrint(F("AbstractMenuEntity -> "));	SerialPrintln(sizeof(AbstractMenuEntity));
-	SerialPrint(F("TimeMenuItem -> "));			SerialPrintln(sizeof(TimeMenuItem));
-	SerialPrint(F("DateMenuItem -> "));			SerialPrintln(sizeof(DateMenuItem));
-	SerialPrint(F("MenuEntity -> "));			SerialPrintln(sizeof(MenuEntity));
-	SerialPrint(F("HomeMenu -> "));				SerialPrintln(sizeof(HomeMenu));
-	SerialPrint(F("ButtonInputObserver -> "));	SerialPrintln(sizeof(ButtonInputObserver));
-	SerialPrint(F("SleepWakeupInterruptHandler -> "));	SerialPrintln(sizeof(SleepWakeupInterruptHandler));
-	SerialPrint(F("EventManager -> "));			SerialPrintln(sizeof(EventManager));
 	testMemoryV2();
 	testMemory();
-
 }
 
 
@@ -178,20 +164,22 @@ void setup() {
 	setupSleepWakeupHandler();
 
 	buttonObserver->enable();
-	homeMenu->setEventManager(eventManager);
+	homeMenu.setEventManager(eventManager);
 	mainMenu->setEventManager(eventManager);
 	menu1->setEventManager(eventManager);
 	eventManager->registereventReceiver(mainMenu);
 	eventManager->setEventCallback(receiveEvent);
-	homeMenu->activate();
+	homeMenu.activate();
 	TEST::sizeTest();
-	TEST::testTxRxSetup();
+//	TEST::testTxRxSetup();
+//	TEST::TestRemoteData trd(RD);
+//	trd.setup();
 }
 //------------------------------------------------------------------------------
 void loop() {
 	eventManager->processEvents();
 	interruptHandler->observeEvents();
-	homeMenu->update();
+	homeMenu.update();
 	remoteProgramMenu->read();
 }
 

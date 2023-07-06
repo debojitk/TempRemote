@@ -20,21 +20,19 @@ public:
 	void clear();
 private:
 	SSD1306AsciiAvrI2c& display;
-	MenuEntity* menu = nullptr;
 	void renderMenuHeader(const char *menuHeader);
-	void selectMenu(int index);
-	int startRange = 0;
-	int endRange = 0;
-
+	void selectMenu(MenuEntity* menu, int index);
+	uint8_t startRange = 0;
+	uint8_t endRange = 0;
 };
 
 class OLEDBaseFormMenuItemRenderer: public IMenuRenderer {
 public:
 	OLEDBaseFormMenuItemRenderer(SSD1306AsciiAvrI2c& displayObject):display(displayObject){}
-	virtual void renderMenu(AbstractMenuEntity* menu);
+	void renderMenu(AbstractMenuEntity* menu);
 	virtual void renderContent(FormMenuItem* menu) = 0;
-	virtual void renderHeader(FormMenuItem* menu);
-	virtual void renderFooter(FormMenuItem* menu);
+	void renderHeader(FormMenuItem* menu);
+	void renderFooter(FormMenuItem* menu);
 	void clear() {
 		display.clear();
 	}

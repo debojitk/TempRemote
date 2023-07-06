@@ -22,7 +22,6 @@ public:
 	void clear();
 private:
 	SSD1306AsciiAvrI2c& display;
-	HomeMenu *menu;
 };
 
 class RemoteMenuItemRenderer: public IMenuRenderer { // @suppress("Class has a virtual method and non-virtual destructor")

@@ -46,11 +46,11 @@ OLEDMenuRenderer:: OLEDMenuRenderer(SSD1306AsciiAvrI2c& displayObject):display(d
 }
 
 void OLEDMenuRenderer::renderMenu(AbstractMenuEntity* _menu) {
-	this->menu = reinterpret_cast<MenuEntity *>(_menu);
+	MenuEntity * menu = reinterpret_cast<MenuEntity *>(_menu);
 	startRange = 0;
-	endRange = min(this->menu->getNumItems() + 1, VIEWPORT_MENU_COUNT); // +1 for back menu
-	renderMenuHeader(this->menu->getName());
-	selectMenu(this->menu->getCurrentIndex());
+	endRange = min(menu->getNumItems() + 1, VIEWPORT_MENU_COUNT); // +1 for back menu
+	renderMenuHeader(menu->getName());
+	selectMenu(menu, menu->getCurrentIndex());
 }
 
 void OLEDMenuRenderer::renderMenuHeader(const char *menuHeader) {
@@ -59,7 +59,7 @@ void OLEDMenuRenderer::renderMenuHeader(const char *menuHeader) {
 	display.print(menuHeader);
 }
 
-void OLEDMenuRenderer::selectMenu(int index) {
+void OLEDMenuRenderer::selectMenu(MenuEntity *menu, int index) {
 	if (index >= 0) {
 		if (index + 1 > endRange) {
 			// shift range right

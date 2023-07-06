@@ -31,19 +31,19 @@ public:
 	void render();
 
 
-	virtual bool isActive();
-	virtual void setActive(bool active);
-	virtual void setEventManager(EventManager *manager);
+	bool isActive();
+	void setActive(bool active);
+	void setEventManager(EventManager *manager);
 	virtual void activate();
-	virtual void deactivate();
+	void deactivate();
 	virtual void handleClick() = 0;
 	virtual void handleDoubleClick() = 0;
-	virtual void back();
+	void back();
 	// declare the stack
 	static AbstractMenuEntity *CurrentMenu;
-protected:
-	static CustomStack<AbstractMenuEntity *, 10> menuStack;
 	const char *name;
+protected:
+	static CustomStack<AbstractMenuEntity *, 4> menuStack;
 	int8_t currentIndex = -1;
 	uint8_t backIndex = 0;
 	bool active = false;
@@ -89,25 +89,13 @@ public:
 	MenuEntity(IMenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], uint8_t numitems);
 	void activate();
 	uint8_t getNumItems();
-	AbstractMenuEntity* getItem(uint8_t index);
+	virtual AbstractMenuEntity* getItem(uint8_t index);
 	void handleClick();
 	void goToNextItem();
 	void handleDoubleClick();
 protected:
 	AbstractMenuEntity** items;
 	uint8_t numItems = 0;
-};
-
-class DynamicMenuEntity: public MenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
-public:
-	DynamicMenuEntity(
-			IMenuRenderer *renderer,
-			const char *name,
-			IDynamicMenuItemProvider &valueProvider);
-	void activate();
-private:
-	void setItems(AbstractMenuEntity* items[],uint8_t numitems);
-	IDynamicMenuItemProvider &_valueProvider;
 };
 
 class MenuItem: public AbstractMenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
@@ -120,10 +108,8 @@ public:
 class HomeMenu: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	HomeMenu(HomeMenuItemRenderer *renderer, const char *name, AbstractMenuEntity *child, TimeSensor &timeSensor);
-	void setTime(uint8_t hour, uint8_t min, uint8_t sec);
 	void handleClick();
 	void handleDoubleClick();
-	void back();
 	double getTemperature();
 	struct TimeValue getTime();
 	void activate();
@@ -204,9 +190,8 @@ public:
 
 class RemoteTestMenuItem: public FormMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	RemoteTestMenuItem(IMenuRenderer *renderer, TemperatureRange &tr):
-		FormMenuItem(nullptr, renderer),
-		_tr(tr)
+	RemoteTestMenuItem(IMenuRenderer *renderer):
+		FormMenuItem(nullptr, renderer)
 	{
 		states = 5;
 	}
@@ -216,9 +201,8 @@ public:
 	virtual uint16_t getValue(uint8_t index);
 	virtual const __FlashStringHelper* getLabel(uint8_t index);
 	virtual boolean isReadOnly(uint8_t index){return true;}
-
-protected:
 	TemperatureRange _tr;
+protected:
 	static constexpr uint8_t START_RANGE_INDEX  = 0;
     static constexpr uint8_t END_RANGE_INDEX  = 1;
     static constexpr uint8_t CODE_INDEX  = 2;
@@ -228,11 +212,12 @@ protected:
 class RemoteProgramMenuItem: public RemoteTestMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	RemoteProgramMenuItem(IMenuRenderer *renderer, const char* name, RXSensor &rx, RemoteData &rd, TemperatureRange tr):
-		RemoteTestMenuItem(renderer, tr), _rx(rx), _rd(rd)
+		RemoteTestMenuItem(renderer), _rx(rx), _rd(rd)
 	{
 		this->name = name;
 		states = 5;
 		backIndex = states - 1;
+		_tr = DefaultTemperatureRange;
 	}
 	void ok();
 	const char * getName() {return AbstractMenuEntity::getName();}
@@ -245,6 +230,19 @@ private:
 	RemoteData &_rd;
 };
 
-
+class DynamicMenuEntity: public MenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	DynamicMenuEntity(
+			IMenuRenderer *renderer,
+			IMenuRenderer *subMenurenderer,
+			const char *name,
+			RemoteData &rd);
+	void activate();
+	AbstractMenuEntity* getItem(uint8_t index);
+private:
+	IMenuRenderer *_subMenurenderer;
+	RemoteData &_rd;
+	RemoteTestMenuItem subMenu;
+};
 
 #endif /* ABSTRACTMENUENTITY_H_ */
