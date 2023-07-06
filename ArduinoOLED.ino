@@ -37,28 +37,28 @@ IMenuRenderer *oledMenuRenderer = new OLEDMenuRenderer(display);
 IMenuRenderer *oledFieldMenuRenderer = new OLEDCompactMenuItemRenderer(display);
 
 //Create Remote Program menu
-RemoteProgramMenuItem *remoteProgramMenu = new RemoteProgramMenuItem(oledFieldMenuRenderer, "Program", RX, RD, DefaultTemperatureRange);
+RemoteProgramMenuItem remoteProgramMenu(oledFieldMenuRenderer, "Program", RX, RD, DefaultTemperatureRange);
 
 //Remote Test menu items
-AbstractMenuEntity *remoteTestMenu = new DynamicMenuEntity(oledMenuRenderer, oledFieldMenuRenderer, "Test", RD);
+DynamicMenuEntity remoteTestMenu(oledMenuRenderer, oledFieldMenuRenderer, "Test", RD);
 
 //AbstractMenuEntity *remoteMenus[] = {remoteTestMenu};
 // if these two are enabled then due to lack of memory system is non-functioning.
-AbstractMenuEntity *remoteMenus[] = {remoteTestMenu, remoteProgramMenu};
+AbstractMenuEntity *remoteMenus[] = {&remoteTestMenu, &remoteProgramMenu};
 
 
 
 // creating main menu
-AbstractMenuEntity *menu1 = new TimeMenuItem(oledFieldMenuRenderer, "Set Time", timeSensorModule);
-AbstractMenuEntity *menu4 = new DateMenuItem(oledFieldMenuRenderer, "Set Date", timeSensorModule);
-AbstractMenuEntity *menu2 = new MenuEntity(oledMenuRenderer, "Set Schedule", nullptr, 0);
-AbstractMenuEntity *menu3 = new MenuEntity(oledMenuRenderer, "Train Remote", remoteMenus, 2);
-AbstractMenuEntity *mainMenus[] = {menu1, menu4, menu2, menu3};
-AbstractMenuEntity *mainMenu = new MenuEntity(oledMenuRenderer, "Main Menu", mainMenus, 4);
+TimeMenuItem menu1(oledFieldMenuRenderer, "Set Time", timeSensorModule);
+DateMenuItem menu4(oledFieldMenuRenderer, "Set Date", timeSensorModule);
+MenuEntity menu2(oledMenuRenderer, "Set Schedule", nullptr, 0);
+MenuEntity menu3(oledMenuRenderer, "Train Remote", remoteMenus, 2);
+AbstractMenuEntity *mainMenus[] = {&menu1, &menu4, &menu2, &menu3};
+MenuEntity mainMenu(oledMenuRenderer, "Main Menu", mainMenus, 4);
 
 // creating home menu
 HomeMenuItemRenderer *renderer = new HomeMenuItemRenderer(display);
-HomeMenu homeMenu(renderer, "TempRemote V1.0", mainMenu, timeSensorModule);
+HomeMenu homeMenu(renderer, "TempRemote V1.0", &mainMenu, timeSensorModule);
 
 IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_PIN, 300);
 // creating eventManager
@@ -165,9 +165,9 @@ void setup() {
 
 	buttonObserver->enable();
 	homeMenu.setEventManager(eventManager);
-	mainMenu->setEventManager(eventManager);
-	menu1->setEventManager(eventManager);
-	eventManager->registereventReceiver(mainMenu);
+	mainMenu.setEventManager(eventManager);
+	menu1.setEventManager(eventManager);
+	eventManager->registereventReceiver(&mainMenu);
 	eventManager->setEventCallback(receiveEvent);
 	homeMenu.activate();
 	TEST::sizeTest();
@@ -180,7 +180,7 @@ void loop() {
 	eventManager->processEvents();
 	interruptHandler->observeEvents();
 	homeMenu.update();
-	remoteProgramMenu->read();
+	remoteProgramMenu.read();
 }
 
 

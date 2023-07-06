@@ -31,22 +31,6 @@ class IRenderable { // @suppress("Class has a virtual method and non-virtual des
 	virtual void render() = 0;
 };
 
-const char hourLabel[] PROGMEM = "Hour";
-const char minLabel[]  PROGMEM = "Minute";
-const char secLabel[]  PROGMEM = "Second";
-const char dayLabel[] PROGMEM = "Day";
-const char monLabel[]  PROGMEM = "Month";
-const char yearLabel[]  PROGMEM = "year";
-const char saveLabel[] PROGMEM = "Save";
-const char backLabel[] PROGMEM = "Back";
-const char testLabel[] PROGMEM = "Test";
-const char okLabel[]   PROGMEM = "OK";
-const char remoteCodeLabel[]   PROGMEM = "Code";
-const char timeLabel[]   PROGMEM = "Time";
-const char DateLabel[]   PROGMEM = "Date";
-const char tempLabel[]   PROGMEM = "Temperature";
-const char humidityLabel[]   PROGMEM = "Humidity";
-
 const char TimeMenuLabels [5] [7] PROGMEM = {
 		{ "Hour" },
 		{ "Minute" },
