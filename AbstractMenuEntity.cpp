@@ -140,8 +140,8 @@ void MenuEntity::handleClick(){
 }
 void MenuEntity::goToNextItem() {
 	currentIndex = (currentIndex + 1)%(numItems + 1);
-	SerialPrint(F("currentIndex = "));
-	SerialPrintln(currentIndex);
+//	SerialPrint(F("currentIndex = "));
+//	SerialPrintln(currentIndex);
 }
 
 void MenuEntity::handleDoubleClick(){
@@ -304,12 +304,15 @@ DynamicMenuEntity::DynamicMenuEntity(
 }
 
 void DynamicMenuEntity::activate() {
-	setItems(_valueProvider.getValues(), _valueProvider.getSize());
+	auto ** ptr = _valueProvider.getValues();
+	uint8_t size = _valueProvider.getSize();
+	setItems(ptr, size);
 	AbstractMenuEntity::activate();
 }
 
 void DynamicMenuEntity::setItems(AbstractMenuEntity *incomingItems[], uint8_t incomingNumItems) {
-	SerialPrintln(F("In setItems"));
+	SerialPrint(F("Inside DynamicMenuEntity::setItems, size = "));
+	SerialPrintln(incomingNumItems);
 	if (this->items != incomingItems) {
 		// need to modify, delete the existing array first
 		for (int i = 0; i<numItems; i++) {
@@ -429,17 +432,11 @@ const __FlashStringHelper* RemoteTestMenuItem::getLabel(uint8_t index) {
 /**
  * RemoteProgramMenuItem definition
  */
-
 void RemoteProgramMenuItem::ok() {
 	if (_tr == DefaultTemperatureRange) return;
-	if(_rd.addRange(_tr)) {
-		SerialPrintln(_tr._start);
-		SerialPrintln(_tr._end);
-		SerialPrintln(_tr._hex._command);
-		SerialPrintln(F("Saved"));
-	}
-	else {
-		SerialPrintln("No Save");
+	if(_rd.addRange(_tr)){
+		SerialPrintln(F("Saved range"));
+		_tr.p();
 	}
 	//_rd.save();
 }
@@ -476,9 +473,7 @@ void RemoteProgramMenuItem::read() {
 
 	if (currentIndex == CODE_INDEX && changeData == true) {
 		if (_tr._hex._command != remoteValue._command) {
-			_tr._hex._command = remoteValue._command;
-			_tr._hex._address = remoteValue._address;
-			_tr._hex._protocol = remoteValue._protocol;
+			_tr._hex = remoteValue;
 			render();
 		}
 	}

@@ -93,7 +93,7 @@ public:
   RangeIterator endRange();
 
 private:
-  uint8_t findHex(const IRNode& node, uint32_t& pos) const;
+  uint8_t findHex(const IRNode& node, uint8_t& pos) const;
   bool program(uint8_t beginTemp, uint8_t endTemp, uint8_t position);
   uint8_t addHex(const IRNode& node);
 

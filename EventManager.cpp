@@ -30,23 +30,23 @@ void EventManager::unregisterEventReceiver(){
 }
 void EventManager::handleEvent(EventType event){
 	if(this->eventReceiver != nullptr){
-		SerialPrint(F("Handling event "));
-		SerialPrintln(event);
+		//SerialPrint(F("Handling event "));
+		//SerialPrintln(event);
 		this->eventReceiver->handleEvent(event);
 	}
 }
 void EventManager::processEvents(){
 	EventType event = eventSourceObserver->getLastEvent();
 	if (event != NoEvent){
-		SerialPrint(F("Event captured "));
-		SerialPrintln(event);
+		//SerialPrint(F("Event captured "));
+		//SerialPrintln(event);
 		// process event
 		handleEvent(event);
 		if (_eventCallback != nullptr) {
 			_eventCallback(event);
 		}
 		eventSourceObserver->clearLastEvent();
-		SerialPrintln(F("Event cleared "));
+		//SerialPrintln(F("Event cleared "));
 	} else{
 		eventSourceObserver->observeEvents();
 	}
@@ -270,7 +270,7 @@ void SleepWakeupInterruptHandler::interruptHandler() {
 }
 
 void SleepWakeupInterruptHandler::clearLastEvent() {
-	SerialPrintln(F("lastEventInstant reset"));
+	//SerialPrintln(F("lastEventInstant reset"));
 	lastEventInstant = millis();
 }
 
@@ -283,7 +283,7 @@ void SleepWakeupInterruptHandler::observeEvents() {
 		}
 	}
 	if (autoWakedUp) {
-		SerialPrintln(F("Should go to sleep"));
+		//SerialPrintln(F("Should go to sleep"));
 		autoWakedUp = false;
 		goToSleep();
 	}

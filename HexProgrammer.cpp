@@ -39,7 +39,7 @@ RemoteData::RemoteData() {
 }
 
 uint8_t
-RemoteData::findHex(const IRNode& node, uint32_t& pos) const {
+RemoteData::findHex(const IRNode& node, uint8_t& pos) const {
 	for(pos = 0; pos < CONFIG::MAX_HEX_CODES; ++pos) {
 		if(_layout._hexCodes[pos] == node) {
 			return pos;
@@ -53,7 +53,7 @@ RemoteData::findHex(const IRNode& node, uint32_t& pos) const {
 
 uint8_t
 RemoteData::addHex(const IRNode& node) {
-	uint32_t pos;
+	uint8_t pos;
 	uint8_t index = findHex(node, pos); // is Already present
 
 	if(index != CONFIG::MAX_HEX_CODES) { // found an existing one

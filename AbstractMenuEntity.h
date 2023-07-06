@@ -62,7 +62,9 @@ public:
 
 class RemoteMenuItemProvider : public IDynamicMenuItemProvider {
 public:
-	RemoteMenuItemProvider(IMenuRenderer *renderer, RemoteData& rd) : _rd(rd), _subMenuRenderer(renderer) {}
+	RemoteMenuItemProvider(IMenuRenderer *renderer, RemoteData& rd) : _rd(rd), _subMenuRenderer(renderer) {
+		memset(_values, 0, CONFIG::NUM_INDEX);
+	}
 	virtual ~RemoteMenuItemProvider() {
 		free();
 	}
@@ -77,7 +79,7 @@ public:
 
 private:
 	const RemoteData& _rd;
-	size_t            _size = 0;
+	uint8_t            _size = 0;
 	AbstractMenuEntity* _values[CONFIG::NUM_INDEX];
 	IMenuRenderer *_subMenuRenderer;
 };
@@ -202,7 +204,7 @@ public:
 
 class RemoteTestMenuItem: public FormMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	RemoteTestMenuItem(IMenuRenderer *renderer, TemperatureRange tr):
+	RemoteTestMenuItem(IMenuRenderer *renderer, TemperatureRange &tr):
 		FormMenuItem(nullptr, renderer),
 		_tr(tr)
 	{

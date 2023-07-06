@@ -57,6 +57,7 @@ namespace TEST {
 
 class TestRemoteData {
 public:
+	TestRemoteData(RemoteData &r):_r(r){}
 	void loop()  {};
 	void setup() {
 		testDataAdd();
@@ -67,7 +68,7 @@ public:
 private:
 	void testDataAdd();
 	void testIterator();
-	RemoteData r;
+	RemoteData &_r;
 private:
 
 };

@@ -7,7 +7,6 @@
 
 #include "SmartRemoteTests.h"
 #include <Arduino.h>
-#include <MemoryFree.h>
 #include "CommonItems.h"
 
 namespace TEST {
@@ -19,13 +18,13 @@ void TestRemoteData::testDataAdd() {
 	TemperatureRange t1{15,20, ir1};
 	TemperatureRange t2{19,25, ir2};
 	TemperatureRange t3{26,49, ir3};
-	r.addRange(t1);
-	r.addRange(t2);
-	r.addRange(t3);
+	_r.addRange(t1);
+	_r.addRange(t2);
+	_r.addRange(t3);
 
 	for(uint8_t i = 15; i <= 49; ++i) {
 		IRNode ref;
-		IRNode irN = r.atTemperature(i);
+		IRNode irN = _r.atTemperature(i);
 		SerialPrint("Temp: "); SerialPrint(i);
 		if(i >= 15 && i <= 18) {
 			ref = ir1;
@@ -50,7 +49,7 @@ TestRemoteData::testIterator() {
 	IRNode ir1{10, 20, 30};
 	IRNode ir2{11, 21, 31};
 	IRNode ir3{12, 22, 32};
-	for(auto it = r.beginRange(), itEnd = r.endRange();
+	for(auto it = _r.beginRange(), itEnd = _r.endRange();
 			it != itEnd; ++it) {
 
 		TemperatureRange tr = *it;
@@ -102,7 +101,6 @@ TestMemory::setup() {
 	Serial.println(upperBound);
 
 	Serial.print(F("From FreeMemory(): "));
-	Serial.println(freeMemory());
 }
 
 }
