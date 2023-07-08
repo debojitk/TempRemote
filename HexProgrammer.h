@@ -59,9 +59,9 @@ struct IRNode {
     	return ((n._protocol == _protocol) && (n._address == _address) && (n._command == _command));
     }
     void p() {
-    	SerialPrint(F("Protocol :")); SerialPrintln(_protocol);
-    	SerialPrint(F("Address :")); SerialPrintln(_address);
-    	SerialPrint(F("Command :")); SerialPrintln(_command);
+    	SerialPrint(F("Protocol :")); SerialPrint(_protocol);
+    	SerialPrint(F(", Address :")); SerialPrint(_address);
+    	SerialPrint(F(", Command :")); SerialPrintln(_command);
     }
 };
 constexpr IRNode NullIRNode {0,0,0};
@@ -70,6 +70,11 @@ struct MemoryLayout {
   uint8_t   _index[CONFIG::NUM_INDEX];            // temperature index
   IRNode    _hexCodes[CONFIG::MAX_HEX_CODES];     // hexCode index
   Schedule  _schedules[CONFIG::NUM_SCHEDULE];
+  void p(){
+	  for (uint8_t i=0; i<CONFIG::MAX_HEX_CODES; i++) {
+		  _hexCodes[i].p();
+	  }
+  }
 };
 
 struct TemperatureRange {

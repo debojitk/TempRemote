@@ -70,10 +70,13 @@ RemoteData::program(uint8_t beginTemp, uint8_t endTemp, uint8_t pos) {
   beginTemp = beginTemp - CONFIG::START_TEMPERATURE;
   endTemp = endTemp - CONFIG::START_TEMPERATURE;
 
+
   if(endTemp >= CONFIG::NUM_INDEX || beginTemp >= CONFIG::NUM_INDEX) {
 	  return false;
   }
 
+  SerialPrint(F("beginTemp->")); SerialPrintln(beginTemp);
+  SerialPrint(F("endTemp->")); SerialPrintln(endTemp);
   for (uint8_t i = beginTemp; i <= endTemp; ++i) {
     _layout._index[i] = pos;
   }
@@ -173,7 +176,15 @@ RemoteData::beginRange() {
 
 RangeIterator
 RemoteData::endRange() {
-    return RangeIterator(*this);
+    RangeIterator ri(*this);
+    ri._posEnd = ri._posBegin = 0;
+	IRNode nEnd = at(ri._posEnd);
+
+    while(!(nEnd == NullIRNode)) {
+        nEnd = at(++ri._posEnd);
+    }
+    ri._posBegin = ri._posEnd;
+    return ri;
 }
 
 bool
@@ -182,6 +193,8 @@ RemoteData::addRange(const TemperatureRange& r) {
 	if(pos == CONFIG::MAX_HEX_CODES) {
 		return false;
 	}
+	SerialPrint(F("Pos->")); SerialPrintln(pos);
+	_layout.p();
 	return program(r._start, r._end, pos);
 }
 
