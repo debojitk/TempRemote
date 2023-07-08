@@ -120,6 +120,7 @@ public:
 
   bool isScheduleOn(const TimeValue& time) const;
   bool addSchedule(const Schedule& s);
+  const Schedule& getSchedule(uint8_t i);
 
 private:
   uint8_t findHex(const IRNode& node, uint8_t& pos) const;
