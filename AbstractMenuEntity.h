@@ -53,37 +53,6 @@ protected:
 
 };
 
-class IDynamicMenuItemProvider { // @suppress("Class has a virtual method and non-virtual destructor")
-public:
-	virtual AbstractMenuEntity** getValues() = 0;
-	virtual uint8_t getSize() = 0;
-	virtual ~IDynamicMenuItemProvider() {}
-};
-
-class RemoteMenuItemProvider : public IDynamicMenuItemProvider {
-public:
-	RemoteMenuItemProvider(IMenuRenderer *renderer, RemoteData& rd) : _rd(rd), _subMenuRenderer(renderer) {
-		memset(_values, 0, CONFIG::NUM_INDEX);
-	}
-	virtual ~RemoteMenuItemProvider() {
-		free();
-	}
-	void free() {
-		for(unsigned i = 0; i < _size; ++i) {
-			delete _values[i];
-		}
-		memset(_values, 0, CONFIG::NUM_INDEX);
-	}
-	AbstractMenuEntity** getValues();
-	uint8_t getSize() { return _size; }
-
-private:
-	const RemoteData& _rd;
-	uint8_t            _size = 0;
-	AbstractMenuEntity* _values[CONFIG::NUM_INDEX];
-	IMenuRenderer *_subMenuRenderer;
-};
-
 class MenuEntity: public AbstractMenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
 	MenuEntity(IMenuRenderer *renderer, const char* name, AbstractMenuEntity* items[], uint8_t numitems);
@@ -247,6 +216,39 @@ public:
 private:
 	RemoteData &_rd;
 	RemoteTestMenuItem subMenu;
+};
+
+class ScheduleMenuItem: public FormMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	ScheduleMenuItem(
+			IMenuRenderer *renderer,
+			RemoteData &rd, uint8_t index):
+				FormMenuItem(nullptr, renderer),
+				_rd(rd),
+				_index(index)
+	{
+		states = 6;
+		backIndex = states - 1;
+		_schedule._begin._hr = 0;
+		_schedule._begin._min = 0;
+		_schedule._end._hr = 0;
+		_schedule._end._min = 0;
+	}
+	void ok();
+	const char * getName();
+	void updateData(int8_t currentIndex);
+	const __FlashStringHelper* getLabel(uint8_t index);
+	uint16_t getValue(uint8_t index);
+private:
+	Schedule _schedule;
+	RemoteData &_rd;
+	uint8_t _index;
+
+	static constexpr uint8_t SCHEDULE_START_HOUR  = 0;
+	static constexpr uint8_t SCHEDULE_START_MIN  = 1;
+	static constexpr uint8_t SCHEDULE_END_HOUR  = 2;
+	static constexpr uint8_t SCHEDULE_END_MIN  = 3;
+
 };
 
 #endif /* ABSTRACTMENUENTITY_H_ */

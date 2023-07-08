@@ -26,8 +26,7 @@
 #define BUTTON_PIN 2
 
 // Creating input and output devices
-SSD1306AsciiAvrI2c display;
-TimeSensor timeSensorModule;
+SSD1306AsciiAvrI2c display;TimeSensor timeSensorModule;
 TXSensor TX;
 RXSensor RX;
 RemoteData RD;
@@ -42,19 +41,19 @@ RemoteProgramMenuItem remoteProgramMenu(oledFieldMenuRenderer, "Program", RX, TX
 //Remote Test menu items
 DynamicMenuEntity remoteTestMenu(oledMenuRenderer, oledFieldMenuRenderer, "Test", RD, TX);
 
-//AbstractMenuEntity *remoteMenus[] = {remoteTestMenu};
-// if these two are enabled then due to lack of memory system is non-functioning.
 AbstractMenuEntity *remoteMenus[] = {&remoteTestMenu, &remoteProgramMenu};
 
-
+// create the scheduleMenus in setup
+AbstractMenuEntity *scheduleMenus[CONFIG::NUM_SCHEDULE];
 
 // creating main menu
-TimeMenuItem menu1(oledFieldMenuRenderer, "Set Time", timeSensorModule);
-DateMenuItem menu4(oledFieldMenuRenderer, "Set Date", timeSensorModule);
-MenuEntity menu2(oledMenuRenderer, "Set Schedule", nullptr, 0);
-MenuEntity menu3(oledMenuRenderer, "Train Remote", remoteMenus, 2);
-AbstractMenuEntity *mainMenus[] = {&menu1, &menu4, &menu2, &menu3};
+TimeMenuItem timeMenu(oledFieldMenuRenderer, "Set Time", timeSensorModule);
+DateMenuItem dateMenu(oledFieldMenuRenderer, "Set Date", timeSensorModule);
+MenuEntity scheduleMenu(oledMenuRenderer, "Set Schedule", scheduleMenus, CONFIG::NUM_SCHEDULE);
+MenuEntity remoteMenu(oledMenuRenderer, "Train Remote", remoteMenus, 2);
+AbstractMenuEntity *mainMenus[] = {&timeMenu, &dateMenu, &scheduleMenu, &remoteMenu};
 MenuEntity mainMenu(oledMenuRenderer, "Main Menu", mainMenus, 4);
+
 
 // creating home menu
 HomeMenuItemRenderer *renderer = new HomeMenuItemRenderer(display);
@@ -64,6 +63,14 @@ IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_P
 // creating eventManager
 SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 100000, 20);
 EventManager eventManager(buttonObserver);
+
+
+void createSchedules() {
+	for (uint8_t i = 0; i< CONFIG::NUM_SCHEDULE; i++) {
+		scheduleMenus[i] = new ScheduleMenuItem(oledFieldMenuRenderer, RD, i);
+	}
+	TEST::testMemory();
+}
 
 void autoWakeupCallback() {
 	SerialPrint(F("Waked up from WDT interrupt event-"));
@@ -101,6 +108,8 @@ void setupOled() {
 #endif // RST_PIN >= 0
 	// Call oled.setI2cClock(frequency) to change from the default frequency.
 	display.setFont(Arial_bold_14);
+	//display.setFont(X11fixed7x14B);
+
 }
 
 void setupRemote() {
@@ -152,11 +161,12 @@ void setup() {
 
 	setupOled();
 	setupSleepWakeupHandler();
+	createSchedules();
 
 	buttonObserver->enable();
 	homeMenu.setEventManager(&eventManager);
 	mainMenu.setEventManager(&eventManager);
-	menu1.setEventManager(&eventManager);
+	timeMenu.setEventManager(&eventManager);
 	eventManager.registereventReceiver(&mainMenu);
 	eventManager.setEventCallback(receiveEvent);
 	homeMenu.activate();

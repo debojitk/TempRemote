@@ -96,7 +96,6 @@ void SerialMenuRenderer::clear() {
 
 void OLEDHorizontalMenuItemRenderer::renderContent(FormMenuItem *_menu) {
 	display.setCursor(0, 3);
-	display.setFont(Arial_bold_14);
 	display.clearToEOL();
 	if (_menu->getCurrentIndex() > -1 && _menu->getCurrentIndex() < (int)_menu->getFieldCount()) {
 		display.print(_menu->getLabel(_menu->getCurrentIndex()));
@@ -152,13 +151,14 @@ void OLEDBaseFormMenuItemRenderer::renderFooter(FormMenuItem *menu) {
 
 
 void OLEDCompactMenuItemRenderer::renderContent(FormMenuItem *menu) {
-	display.setRow(2);
+	display.setCursor(0,2);
 	display.clearToEOL();
-	display.setRow(4);
+	display.setCursor(0,4);
 	display.clearToEOL();
-	for (uint8_t i = 0, col = 0; i < menu->getFieldCount(); i++, col = col + COL_WIDTH) {
+	uint8_t colWidth = OLED_COLUMNS / menu->getFieldCount();
+	for (uint8_t i = 0, col = 0; i < menu->getFieldCount(); i++, col = col + colWidth) {
 		display.setCursor(col, 2);
-		uint8_t charCount = COL_WIDTH / 8;
+		uint8_t charCount = colWidth / 8;
 		char trimmedString[charCount + 1];
 		strlcpy_P(trimmedString, (const char *)menu->getLabel(i), charCount + 1);
 
@@ -167,7 +167,9 @@ void OLEDCompactMenuItemRenderer::renderContent(FormMenuItem *menu) {
 		if (i == menu->getCurrentIndex()) {
 			display.setInvertMode(true);
 		}
-		display.print(menu->getValue(i));
+		char value[5];
+		sprintf_P(value, PSTR("%02d"), menu->getValue(i));
+		display.print(value);
 		display.setInvertMode(false);
 	}
 }

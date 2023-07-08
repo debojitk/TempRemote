@@ -219,7 +219,7 @@ RemoteData::addSchedule(const Schedule& s) {
 	return false;
 }
 
-const Schedule&
+Schedule&
 RemoteData::getSchedule(uint8_t i) {
 	return _layout._schedules[i];
 }

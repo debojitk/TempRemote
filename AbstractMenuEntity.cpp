@@ -20,7 +20,7 @@
 CustomStack<AbstractMenuEntity *, 6> AbstractMenuEntity::menuStack;
 AbstractMenuEntity *AbstractMenuEntity::CurrentMenu = nullptr;
 
-char AbstractMenuEntity::stringBuffer[10];
+char AbstractMenuEntity::stringBuffer[15];
 // Definition for AbstractMenuEntity
 AbstractMenuEntity::AbstractMenuEntity(const char *name, IMenuRenderer *renderer) {
 	this->name = name;
@@ -400,7 +400,7 @@ void RemoteTestMenuItem::ok() {
 }
 
 const char* RemoteTestMenuItem::getName() {
-	sprintf(stringBuffer, "%2d-%2d", _tr._start, _tr._end);
+	sprintf_P(stringBuffer, PSTR("Range %02d-%02d"), _tr._start, _tr._end);
 	return stringBuffer;
 }
 
@@ -485,4 +485,59 @@ void RemoteProgramMenuItem::read() {
 const __FlashStringHelper* RemoteProgramMenuItem::getLabel(uint8_t index) {
 	if (index > states - 1) return nullptr;
 	return (const __FlashStringHelper *)RemoteProgramMenuLabels[index];
+}
+
+void ScheduleMenuItem::ok() {
+	_rd.getSchedule(_index) = _schedule;
+	//_rd.save();
+}
+
+const char* ScheduleMenuItem::getName() {
+	TEST::testMemory();
+	sprintf_P(stringBuffer, PSTR("Schedule-%1d"), _index);
+	return stringBuffer;
+}
+
+void ScheduleMenuItem::updateData(int8_t currentIndex) {
+	switch(currentIndex) {
+	case SCHEDULE_START_HOUR:
+		_schedule._begin._hr = (_schedule._begin._hr + 1)%CONFIG::NULL_HOUR;
+		break;
+	case SCHEDULE_START_MIN:
+		_schedule._begin._min = (_schedule._begin._min + 10)%CONFIG::NULL_MIN;
+		break;
+	case SCHEDULE_END_HOUR:
+		_schedule._end._hr = (_schedule._end._hr + 1)%CONFIG::NULL_HOUR;
+		break;
+	case SCHEDULE_END_MIN:
+		_schedule._end._min = (_schedule._end._min + 10)%CONFIG::NULL_MIN;
+		break;
+	}
+}
+
+const __FlashStringHelper* ScheduleMenuItem::getLabel(uint8_t index) {
+
+	if (index > states - 1) return nullptr;
+	return (const __FlashStringHelper *)ScheduleMenuLabels[index];
+}
+
+uint16_t ScheduleMenuItem::getValue(uint8_t index) {
+	uint16_t retval;
+	if (index > 0 || index > getFieldCount())
+		retval = 0;
+	switch(index){
+	case SCHEDULE_START_HOUR:
+		retval = _schedule._begin._hr;
+		break;
+	case SCHEDULE_START_MIN:
+		retval = _schedule._begin._min;
+		break;
+	case SCHEDULE_END_HOUR:
+		retval = _schedule._end._hr;
+		break;
+	case SCHEDULE_END_MIN:
+		retval = _schedule._end._min;
+		break;
+	}
+	return retval;
 }

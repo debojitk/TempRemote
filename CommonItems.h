@@ -63,6 +63,16 @@ const char RemoteProgramMenuLabels [5] [6] PROGMEM = {
 		{ "Back" }
 };
 
+const char ScheduleMenuLabels [6] [6] PROGMEM = {
+		{ "HR1" },
+		{ "MI1" },
+		{ "HR2" },
+		{ "MI2" },
+		{ "Save" },
+		{ "Back" }
+};
+
+
 namespace TEST{
 	void testMemory();
 }
