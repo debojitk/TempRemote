@@ -116,7 +116,7 @@ public:
 	RemoteTXModule();
 	~RemoteTXModule(){}
 
-	void set(RemoteRXValue val);
+	bool set(RemoteRXValue val);
 	void setup();
 private:
 	static constexpr uint8_t PIN = 5;

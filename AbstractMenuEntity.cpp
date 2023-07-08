@@ -17,7 +17,7 @@
 #include "HexProgrammer.h"
 
 // define the stack
-CustomStack<AbstractMenuEntity *, 4> AbstractMenuEntity::menuStack;
+CustomStack<AbstractMenuEntity *, 6> AbstractMenuEntity::menuStack;
 AbstractMenuEntity *AbstractMenuEntity::CurrentMenu = nullptr;
 
 char AbstractMenuEntity::stringBuffer[10];
@@ -291,10 +291,10 @@ DynamicMenuEntity::DynamicMenuEntity(
 		IMenuRenderer *renderer,
 		IMenuRenderer *subMenuRenderer,
 		const char *name,
-		RemoteData &rd
+		RemoteData &rd,
+		TXSensor &tx
 ): MenuEntity(renderer, name, nullptr, 0),
-		_subMenurenderer(subMenuRenderer),
-		_rd(rd), subMenu(renderer)
+		_rd(rd), subMenu(subMenuRenderer, tx)
 		 {
 
 }
@@ -393,7 +393,10 @@ void DateMenuItem::updateData(int8_t currentIndex) {
  * RemoteTestMenuItem definition
  */
 void RemoteTestMenuItem::ok() {
-	//TODO:
+	if(_tx.set(_tr._hex)){
+		SerialPrint(F("Emitting code"));
+		_tr._hex.p();
+	}
 }
 
 const char* RemoteTestMenuItem::getName() {

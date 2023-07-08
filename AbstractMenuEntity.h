@@ -43,7 +43,7 @@ public:
 	static AbstractMenuEntity *CurrentMenu;
 	const char *name;
 protected:
-	static CustomStack<AbstractMenuEntity *, 4> menuStack;
+	static CustomStack<AbstractMenuEntity *, 6> menuStack;
 	int8_t currentIndex = -1;
 	uint8_t backIndex = 0;
 	bool active = false;
@@ -190,10 +190,11 @@ public:
 
 class RemoteTestMenuItem: public FormMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	RemoteTestMenuItem(IMenuRenderer *renderer):
-		FormMenuItem(nullptr, renderer)
+	RemoteTestMenuItem(IMenuRenderer *renderer, TXSensor &tx):
+		FormMenuItem(nullptr, renderer), _tx(tx)
 	{
 		states = 5;
+		backIndex = states - 1;
 	}
 	virtual void ok();
 	virtual const char * getName();
@@ -201,18 +202,21 @@ public:
 	virtual uint16_t getValue(uint8_t index);
 	virtual const __FlashStringHelper* getLabel(uint8_t index);
 	virtual boolean isReadOnly(uint8_t index){return true;}
+
 	TemperatureRange _tr;
 protected:
 	static constexpr uint8_t START_RANGE_INDEX  = 0;
     static constexpr uint8_t END_RANGE_INDEX  = 1;
     static constexpr uint8_t CODE_INDEX  = 2;
+private:
+    TXSensor &_tx;
 
 };
 
 class RemoteProgramMenuItem: public RemoteTestMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	RemoteProgramMenuItem(IMenuRenderer *renderer, const char* name, RXSensor &rx, RemoteData &rd, TemperatureRange tr):
-		RemoteTestMenuItem(renderer), _rx(rx), _rd(rd)
+	RemoteProgramMenuItem(IMenuRenderer *renderer, const char* name, RXSensor &rx, TXSensor &tx, RemoteData &rd, TemperatureRange tr):
+		RemoteTestMenuItem(renderer, tx), _rx(rx), _rd(rd)
 	{
 		this->name = name;
 		states = 5;
@@ -221,9 +225,9 @@ public:
 	}
 	void ok();
 	const char * getName() {return AbstractMenuEntity::getName();}
-	virtual void updateData(int8_t currentIndex);
-	virtual boolean isReadOnly(uint8_t index){return false;}
-	virtual const __FlashStringHelper* getLabel(uint8_t index);
+	void updateData(int8_t currentIndex);
+	boolean isReadOnly(uint8_t index){return false;}
+	const __FlashStringHelper* getLabel(uint8_t index);
 	void read();
 private:
 	RXSensor &_rx;
@@ -236,11 +240,11 @@ public:
 			IMenuRenderer *renderer,
 			IMenuRenderer *subMenurenderer,
 			const char *name,
-			RemoteData &rd);
+			RemoteData &rd,
+			TXSensor &tx);
 	void activate();
 	AbstractMenuEntity* getItem(uint8_t index);
 private:
-	IMenuRenderer *_subMenurenderer;
 	RemoteData &_rd;
 	RemoteTestMenuItem subMenu;
 };

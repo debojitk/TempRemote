@@ -37,10 +37,10 @@ IMenuRenderer *oledMenuRenderer = new OLEDMenuRenderer(display);
 IMenuRenderer *oledFieldMenuRenderer = new OLEDCompactMenuItemRenderer(display);
 
 //Create Remote Program menu
-RemoteProgramMenuItem remoteProgramMenu(oledFieldMenuRenderer, "Program", RX, RD, DefaultTemperatureRange);
+RemoteProgramMenuItem remoteProgramMenu(oledFieldMenuRenderer, "Program", RX, TX, RD, DefaultTemperatureRange);
 
 //Remote Test menu items
-DynamicMenuEntity remoteTestMenu(oledMenuRenderer, oledFieldMenuRenderer, "Test", RD);
+DynamicMenuEntity remoteTestMenu(oledMenuRenderer, oledFieldMenuRenderer, "Test", RD, TX);
 
 //AbstractMenuEntity *remoteMenus[] = {remoteTestMenu};
 // if these two are enabled then due to lack of memory system is non-functioning.

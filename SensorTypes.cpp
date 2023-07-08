@@ -85,12 +85,13 @@ RemoteTXModule::setup() {
 	_tx.begin(PIN);
 }
 
-void
+bool
 RemoteTXModule::set(RemoteRXValue node) {
 	_tx.write((decode_type_t)node._protocol,
 			  node._address,
 			  node._command,
 			  REPEATS);
+	return true;
 }
 
 
