@@ -2,6 +2,7 @@
 #include "HexProgrammer.h"
 #include <arduino.h>
 #include <EEPROM.h>
+#include "SensorTypes.h"
 
   /***
 POWER: 0xCF8976 : 13601142
@@ -182,5 +183,26 @@ RemoteData::addRange(const TemperatureRange& r) {
 		return false;
 	}
 	return program(r._start, r._end, pos);
+}
+
+bool
+RemoteData::isScheduleOn(const TimeValue& t) const {
+	for(uint8_t i = 0; i < CONFIG::NUM_SCHEDULE; ++i) {
+		if(_layout._schedules[i].inRange(t._hour, t._min)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool
+RemoteData::addSchedule(const Schedule& s) {
+	for(uint8_t i = 0; i < CONFIG::NUM_SCHEDULE; ++i) {
+		if(_layout._schedules[i] == NullSchedule) {
+			_layout._schedules[i] = s;
+			return true;
+		}
+	}
+	return false;
 }
 

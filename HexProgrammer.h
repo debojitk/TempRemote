@@ -5,6 +5,7 @@
 #include "CommonItems.h"
 
 class RemoteData;
+class TimeValue;
 
 namespace CONFIG {
     constexpr uint32_t NUM_INDEX         = 35;              // starting from START_TEMPERATURE
@@ -13,16 +14,41 @@ namespace CONFIG {
     constexpr uint32_t BAUD_RATE         = 115200;
     constexpr uint32_t START_TEMPERATURE = 15;
     constexpr uint32_t MAX_TEMPERATURE   = 1000;
+    constexpr uint32_t NULL_HOUR         = 24; // 0 - 23
+    constexpr uint32_t NULL_MIN          = 60; // 0 - 59
 };
 
 struct SchedulerTime {
-	uint8_t _hr = 0;
-	uint8_t _min = 0;
+	uint8_t _hr = CONFIG::NULL_HOUR;
+	uint8_t _min = CONFIG::NULL_MIN;
+	bool greaterEq(uint8_t hr, uint8_t min) const {
+		if(hr == _hr) {
+			return (min >= _min);
+		}
+		return hr > _hr;
+	}
+	bool lessEq(uint8_t hr, uint8_t min) const {
+		if(hr == _hr) {
+			return (min <= _min);
+		}
+		return hr < _hr;
+	}
+	bool operator ==(const SchedulerTime& s) const {
+		return ((s._hr == _hr) && (s._min == _min));
+	}
 };
 struct Schedule {
 	SchedulerTime _begin;
 	SchedulerTime _end;
+	bool inRange(uint8_t hr, uint8_t min) const {
+		return (_begin.greaterEq(hr, min) && _end.lessEq(hr, min));
+	}
+	bool operator ==(const Schedule& s) const {
+		return ((s._begin == _begin) && (s._end == _end));
+	}
 };
+
+constexpr Schedule NullSchedule;
 
 // 5 bytes per IR
 struct IRNode {
@@ -91,6 +117,9 @@ public:
 
   RangeIterator beginRange();
   RangeIterator endRange();
+
+  bool isScheduleOn(const TimeValue& time) const;
+  bool addSchedule(const Schedule& s);
 
 private:
   uint8_t findHex(const IRNode& node, uint8_t& pos) const;
