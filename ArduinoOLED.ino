@@ -8,7 +8,6 @@
 #include "AbstractMenuEntity.h"
 #include "CommonItems.h"
 #include "EventManager.h"
-#include "SerialMenuRenderer.h"
 #include "OLEDMenuRenderer.h"
 #include "MenuItemRenderer.h"
 #include <EEPROM.h>
@@ -26,10 +25,13 @@
 #define BUTTON_PIN 2
 
 // Creating input and output devices
-SSD1306AsciiAvrI2c display;TimeSensor timeSensorModule;
+SSD1306AsciiAvrI2c display;
+TimeSensor timeSensorModule;
 TXSensor TX;
 RXSensor RX;
 RemoteData RD;
+TemperatureModule TM;
+HumidityModule HM;
 
 // creating renderer
 IMenuRenderer *oledMenuRenderer = new OLEDMenuRenderer(display);
@@ -57,7 +59,7 @@ MenuEntity mainMenu(oledMenuRenderer, "Main Menu", mainMenus, 4);
 
 // creating home menu
 HomeMenuItemRenderer *renderer = new HomeMenuItemRenderer(display);
-HomeMenu homeMenu(renderer, "TempRemote V1.0", &mainMenu, timeSensorModule);
+HomeMenu homeMenu(renderer, "TempRemote V1.0", &mainMenu, timeSensorModule, TM, HM);
 
 IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_PIN, 300);
 // creating eventManager

@@ -174,35 +174,46 @@ MenuItem::MenuItem(const char *name, IMenuRenderer *renderer): AbstractMenuEntit
 
 // Definition for HomeMenu
 
+
+HomeMenu::HomeMenu(
+			HomeMenuItemRenderer *renderer,
+			const char *name,
+			AbstractMenuEntity *child,
+			TimeSensor &timeSensor,
+			TemperatureModule &tm,
+			HumidityModule &hm):
+				MenuItem(name, renderer),
+				_child(child),
+				_timeSensorModule(timeSensor),
+				_tm(tm),
+				_hm(hm)
+	{
+	}
 void HomeMenu::activate(){
 	AbstractMenuEntity::activate();
-}
-
-
-
-HomeMenu::HomeMenu(HomeMenuItemRenderer *renderer,
-		const char *name, AbstractMenuEntity *child,
-		TimeSensor &timeSensor):MenuItem(name, renderer), _timeSensorModule(timeSensor) {
-	this->child = child;
-	this->temperature = 30;
 }
 
 void HomeMenu::handleClick(){
 	// does nothing
 }
 void HomeMenu::handleDoubleClick(){
-	if (this->child && !this->child->isActive()){
+	if (_child && !_child->isActive()){
 		deactivate();
 		AbstractMenuEntity::menuStack.push(this);
-		this->child->setEventManager(eventManager);
-		this->child->activate();
+		_child->setEventManager(eventManager);
+		_child->activate();
 	}
 }
 
 
-double HomeMenu::getTemperature(){
-	return temperature;
+TemperatureValue HomeMenu::getTemperature(){
+	return _tm.get();
 }
+
+HumidityValue HomeMenu::getHumidity(){
+	return _hm.get();
+}
+
 struct TimeValue HomeMenu::getTime(){
 	return _timeSensorModule.get();
 }

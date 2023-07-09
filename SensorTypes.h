@@ -77,7 +77,11 @@ class TemperatureModule {
 public:
 	TemperatureModule() : _dht22(PIN) {}
 	TemperatureValue get() {
-		return _dht22.getTemperature();
+		if (_dht22.update()) {
+			return (float)_dht22.lastT()/float(10);
+		} else {
+			return 0;
+		}
 	}
 private:
 	static constexpr uint8_t PIN = 6;
@@ -88,7 +92,11 @@ class HumidityModule {
 public:
 	HumidityModule() : _dht22(PIN) {}
 	HumidityValue get() {
-		return _dht22.getHumidity();
+		if (_dht22.update()) {
+			return (float)_dht22.lastH()/float(10);
+		} else {
+			return 0;
+		}
 	}
 private:
 	static constexpr uint8_t PIN = 6;

@@ -76,21 +76,28 @@ public:
 
 class HomeMenu: public MenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
 public:
-	HomeMenu(HomeMenuItemRenderer *renderer, const char *name, AbstractMenuEntity *child, TimeSensor &timeSensor);
+	HomeMenu(
+			HomeMenuItemRenderer *renderer,
+			const char *name,
+			AbstractMenuEntity *child,
+			TimeSensor &timeSensor,
+			TemperatureModule &tm,
+			HumidityModule &hm);
 	void handleClick();
 	void handleDoubleClick();
-	double getTemperature();
+	TemperatureValue getTemperature();
+	HumidityValue getHumidity();
 	struct TimeValue getTime();
 	void activate();
 	void update();
 	uint16_t getValue(uint8_t index);
 	const __FlashStringHelper* getLabel(uint8_t index);
 private:
-	float temperature = 30;
-	uint8_t humidity = 70;
-	AbstractMenuEntity *child = nullptr;
+	AbstractMenuEntity *_child;
 	TimeSensor &_timeSensorModule;
 	uint32_t lastUpdateTime = 0;
+	TemperatureModule &_tm;
+	HumidityModule &_hm;
 };
 
 

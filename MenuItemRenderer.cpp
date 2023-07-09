@@ -19,8 +19,11 @@ void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *_menu) {
 	display.setCursor(0, 0);
 	display.print(menu->getName());
 	display.setCursor(0, 2);
-	display.print(F("Temp: "));
+	display.print(F("T: "));
 	display.print(menu->getTemperature());
+	display.setCursor(64, 2);
+	display.print(F("H: "));
+	display.print(menu->getHumidity());
 	display.print(F(" C"));
 	display.setCursor(0, 4);
 	display.print(t.formatDate(buffer));
