@@ -16,18 +16,21 @@ void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *_menu) {
 	HomeMenu * menu = reinterpret_cast<HomeMenu *>(_menu);
 	TimeValue t = menu->getTime();
 	char buffer[12];
-	display.setCursor(0, 0);
+	display.setCursor(2, 0);
 	display.print(menu->getName());
-	display.setCursor(0, 2);
+	display.setCursor(2, 2);
 	display.print(F("T: "));
-	display.print(menu->getTemperature());
-	display.setCursor(64, 2);
+	display.print(menu->getTemperature()._t);
+	display.print(F("C"));
+	display.setCursor(60, 2);
 	display.print(F("H: "));
-	display.print(menu->getHumidity());
-	display.print(F(" C"));
-	display.setCursor(0, 4);
+	display.print(menu->getTemperature()._h);
+	display.print(F("%"));
+	display.setCursor(2, 4);
+	display.print(F("Date: "));
 	display.print(t.formatDate(buffer));
-	display.setCursor(0, 6);
+	display.setCursor(2, 6);
+	display.print(F("Time: "));
 	display.print(t.formatTime(buffer));
 
 }

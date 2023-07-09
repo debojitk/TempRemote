@@ -46,7 +46,7 @@ public:
 		RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
 		RtcDateTime now = _rtc.GetDateTime();
 		if (now < compiled) {
-			_rtc.SetDateTime(compiled);
+		_rtc.SetDateTime(compiled);
 		}
 	}
 	TimeValue get() const;
@@ -55,7 +55,7 @@ public:
 private:
 	static constexpr uint8_t IO  = 3;
 	static constexpr uint8_t CLK = 4;
-	static constexpr uint8_t CE  = 8;
+	static constexpr uint8_t CE  = 7;
 
 	ThreeWire            _myWire; // (IO, CLK, CE); // IO, SCLK, CE
 	RtcDS1302<ThreeWire> _rtc;
@@ -73,37 +73,27 @@ private:
 };
 
 
-using TemperatureValue = float;
-using HumidityValue = float;
+
+struct TemperatureValue {
+	float _t;
+	float _h;
+};
+
 
 class TemperatureModule {
 public:
 	TemperatureModule() : _dht22(PIN) {}
 	TemperatureValue get() {
 		if (_dht22.update()) {
-			return (float)_dht22.lastT()/float(10);
-		} else {
-			return 0;
+			_last._t = (float)_dht22.lastT()/float(10);
+			_last._h = (float)_dht22.lastH()/float(10);
 		}
+		return _last;
 	}
 private:
 	static constexpr uint8_t PIN = 6;
 	DHT22 _dht22;
-};
-
-class HumidityModule {
-public:
-	HumidityModule() : _dht22(PIN) {}
-	HumidityValue get() {
-		if (_dht22.update()) {
-			return (float)_dht22.lastH()/float(10);
-		} else {
-			return 0;
-		}
-	}
-private:
-	static constexpr uint8_t PIN = 6;
-	DHT22 _dht22;
+	TemperatureValue _last;
 };
 
 using RemoteRXValue = IRNode;
@@ -139,7 +129,6 @@ private:
 template <typename SensorModule, typename Value>
 class Sensor;
 
-using TemperatureValue = float;
 #ifdef DS3231
 	using TimeSensor = Sensor<TimeModuleDS3231, TimeValue>;
 #else

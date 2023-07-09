@@ -31,7 +31,6 @@ TXSensor TX;
 RXSensor RX;
 RemoteData RD;
 TemperatureModule TM;
-HumidityModule HM;
 
 // creating renderer
 IMenuRenderer *oledMenuRenderer = new OLEDMenuRenderer(display);
@@ -59,7 +58,7 @@ MenuEntity mainMenu(oledMenuRenderer, "Main Menu", mainMenus, 4);
 
 // creating home menu
 HomeMenuItemRenderer *renderer = new HomeMenuItemRenderer(display);
-HomeMenu homeMenu(renderer, "TempRemote V1.0", &mainMenu, timeSensorModule, TM, HM);
+HomeMenu homeMenu(renderer, "Smart Remote", &mainMenu, timeSensorModule, TM);
 
 IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_PIN, 300);
 // creating eventManager
@@ -80,7 +79,7 @@ void autoWakeupCallback() {
 		return;
 	}
 	TemperatureValue tv = TM.get();
-	RemoteRXValue rxv = RD.atTemperature((uint8_t)tv);
+	RemoteRXValue rxv = RD.atTemperature((uint8_t)tv._t);
 	TX.set(rxv);
 }
 
@@ -114,8 +113,9 @@ void setupOled() {
 	display.begin(&Adafruit128x64, I2C_ADDRESS);
 #endif // RST_PIN >= 0
 	// Call oled.setI2cClock(frequency) to change from the default frequency.
-	display.setFont(Arial_bold_14);
+	//display.setFont(Arial_bold_14);
 	//display.setFont(X11fixed7x14B);
+	display.setFont(Verdana12);
 
 }
 

@@ -81,12 +81,10 @@ public:
 			const char *name,
 			AbstractMenuEntity *child,
 			TimeSensor &timeSensor,
-			TemperatureModule &tm,
-			HumidityModule &hm);
+			TemperatureModule& tm);
 	void handleClick();
 	void handleDoubleClick();
 	TemperatureValue getTemperature();
-	HumidityValue getHumidity();
 	struct TimeValue getTime();
 	void activate();
 	void update();
@@ -97,7 +95,6 @@ private:
 	TimeSensor &_timeSensorModule;
 	uint32_t lastUpdateTime = 0;
 	TemperatureModule &_tm;
-	HumidityModule &_hm;
 };
 
 

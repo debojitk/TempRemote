@@ -49,7 +49,7 @@ TimeValue TimeModuleDS3231::get() const {
 TimeValue
 TimeModuleDS1302::get() const {
 	TimeValue t;
-	RtcDateTime dt = const_cast<RtcDS1302<ThreeWire>&>(_rtc).GetDateTime();
+	RtcDateTime dt = _rtc.GetDateTime();
 	t._day = dt.Day();
 	t._hour = dt.Hour();
 	t._min = dt.Minute();

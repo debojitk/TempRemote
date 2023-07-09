@@ -180,13 +180,11 @@ HomeMenu::HomeMenu(
 			const char *name,
 			AbstractMenuEntity *child,
 			TimeSensor &timeSensor,
-			TemperatureModule &tm,
-			HumidityModule &hm):
+			TemperatureModule &tm):
 				MenuItem(name, renderer),
 				_child(child),
 				_timeSensorModule(timeSensor),
-				_tm(tm),
-				_hm(hm)
+				_tm(tm)
 	{
 	}
 void HomeMenu::activate(){
@@ -208,10 +206,6 @@ void HomeMenu::handleDoubleClick(){
 
 TemperatureValue HomeMenu::getTemperature(){
 	return _tm.get();
-}
-
-HumidityValue HomeMenu::getHumidity(){
-	return _hm.get();
 }
 
 struct TimeValue HomeMenu::getTime(){
