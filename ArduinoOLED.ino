@@ -75,8 +75,13 @@ void createSchedules() {
 }
 
 void autoWakeupCallback() {
-//	SerialPrint(F("Waked up from WDT interrupt event-"));
-//	SerialPrintlnWithDelay(millis());
+	TimeValue v = timeSensorModule.get();
+	if(!RD.isScheduleOn(v)) {
+		return;
+	}
+	TemperatureValue tv = TM.get();
+	RemoteRXValue rxv = RD.atTemperature((uint8_t)tv);
+	TX.set(rxv);
 }
 
 void sleepCallback() {
@@ -152,6 +157,15 @@ void sizeTest() {
 
 };  // namespace TEST
 
+static void setupTest() {
+#ifdef ENABLE_TEST
+	TEST::sizeTest();
+//	TEST::TestRemoteData trd(RD);
+//	trd.setup();
+//	TEST::TestSaveRestore sr;
+//	sr.setup();
+#endif
+}
 
 
 //------------------------------------------------------------------------------
@@ -173,11 +187,8 @@ void setup() {
 	eventManager.setEventCallback(receiveEvent);
 	homeMenu.activate();
 	setupRemote();
-	TEST::sizeTest();
-//	TEST::TestRemoteData trd(RD);
-//	trd.setup();
-//	TEST::TestSaveRestore sr;
-//	sr.setup();
+	setupTest();
+
 }
 //------------------------------------------------------------------------------
 void loop() {
