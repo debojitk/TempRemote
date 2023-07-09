@@ -31,6 +31,25 @@ private:
 
 };
 
+#ifndef	DISABLE_SERIAL_PRINT
+class TestSaveRestore {
+public:
+	TestSaveRestore() {}
+	void loop()  {};
+	void setup() {
+		resetTest();
+	}
+
+private:
+	void resetTest();
+	void checkNull();
+	void setData();
+	void setNull();
+	void checkData();
+	RemoteData _r;
+};
+#endif
+
 //class TestSchedule {
 //public:
 //	TestRemoteData(RemoteData &r):_r(r){}

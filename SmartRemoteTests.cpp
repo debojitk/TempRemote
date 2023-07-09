@@ -9,7 +9,19 @@
 #include <Arduino.h>
 #include "CommonItems.h"
 
+
 namespace TEST {
+
+void CHECK(bool cond, const char* c) {
+	Serial.print(c);
+	if(cond) {
+		Serial.println(" : PASSED");
+	}
+	else {
+		Serial.println(" : FAILED");
+	}
+}
+
 
 void TestRemoteData::testDataAdd() {
 	IRNode ir1{10, 20, 30};
@@ -103,5 +115,144 @@ TestMemory::setup() {
 	Serial.print(F("From FreeMemory(): "));
 }
 
+#ifndef	DISABLE_SERIAL_PRINT
+void
+TestSaveRestore::resetTest() {
+
+
+	checkNull();
+
+	Serial.println("Saving null....");
+
+	_r.save();
+
+	Serial.println("Saved....");
+
+	Serial.println("Filling Remote data with garbage....");
+
+	setData();
+
+	Serial.println("Restoring ....");
+
+	_r.restore();
+
+	Serial.println("Restored....NULL");
+
+	checkNull();
+
+	------------------------------------------------------------
+
+	setData();
+
+	_r.save();
+
+	setNull();
+
+	_r.p();
+
+	_r.restore();
+
+	checkData();
+
+	_r.p();
+
+
 }
+
+void
+TestSaveRestore::checkNull() {
+	for(auto i = 0; i < CONFIG::NUM_INDEX; ++i) {
+		CHECK(_r.getLayout()._index[i] == CONFIG::MAX_HEX_CODES, "NULL Index check");
+	}
+
+	for(auto i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
+		CHECK(_r.getLayout()._hexCodes[i] == NullIRNode, "NULL Hex code check");
+	}
+
+	for(auto i = 0; i < CONFIG::NUM_SCHEDULE; ++i) {
+		CHECK(_r.getLayout()._schedules[i] == NullSchedule, "NULL schedule check");
+	}
+}
+
+void
+TestSaveRestore::setData() {
+
+	for(auto i = 0; i < CONFIG::NUM_INDEX; ++i) {
+		_r.getLayout()._index[i] = CONFIG::MAX_HEX_CODES - 1;
+		CHECK((_r.getLayout()._index[i] == CONFIG::MAX_HEX_CODES - 1), "Index not NULL");
+	}
+
+	IRNode ir{12, 22, 32};
+	for(auto i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
+		_r.getLayout()._hexCodes[i] = ir;
+		CHECK(!(_r.getLayout()._hexCodes[i] == NullIRNode), "Hex code not NULL");
+	}
+
+	SchedulerTime st1;
+	st1._hr = 1;
+	st1._min = 2;
+	SchedulerTime st2;
+	st2._hr = 3;
+	st2._min = 4;
+	Schedule s;
+	s._begin = st1;
+	s._end = st2;
+	for(auto i = 0; i < CONFIG::NUM_SCHEDULE; ++i) {
+		_r.getLayout()._schedules[i] = s;
+		CHECK((_r.getLayout()._schedules[i] == s), "Schedule not NULL");
+	}
+}
+
+void
+TestSaveRestore::setNull() {
+
+	for(auto i = 0; i < CONFIG::NUM_INDEX; ++i) {
+		_r.getLayout()._index[i] = CONFIG::MAX_HEX_CODES;
+		CHECK((_r.getLayout()._index[i] == CONFIG::MAX_HEX_CODES), "Index is set NULL");
+	}
+
+	IRNode ir{12, 22, 32};
+	for(auto i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
+		_r.getLayout()._hexCodes[i] = NullIRNode;
+		CHECK((_r.getLayout()._hexCodes[i] == NullIRNode), "Hex code is set NULL");
+	}
+
+
+	for(auto i = 0; i < CONFIG::NUM_SCHEDULE; ++i) {
+		_r.getLayout()._schedules[i] = NullSchedule;
+		CHECK((_r.getLayout()._schedules[i] == NullSchedule), "Schedule is set NULL");
+	}
+}
+
+void
+TestSaveRestore::checkData() {
+
+	for(auto i = 0; i < CONFIG::NUM_INDEX; ++i) {
+		CHECK((_r.getLayout()._index[i] == CONFIG::MAX_HEX_CODES - 1), "Index check");
+	}
+
+
+	IRNode ir{12, 22, 32};
+	for(auto i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
+		CHECK((_r.getLayout()._hexCodes[i] == ir), "Hex code check");
+	}
+
+	SchedulerTime st1;
+	st1._hr = 1;
+	st1._min = 2;
+	SchedulerTime st2;
+	st2._hr = 3;
+	st2._min = 4;
+	Schedule s;
+	s._begin = st1;
+	s._end = st2;
+	for(auto i = 0; i < CONFIG::NUM_SCHEDULE; ++i) {
+		CHECK((_r.getLayout()._schedules[i] == s), "Schedule check");
+	}
+}
+#endif
+
+} // namespace
+
+
 

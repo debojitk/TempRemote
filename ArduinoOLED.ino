@@ -176,6 +176,8 @@ void setup() {
 	TEST::sizeTest();
 //	TEST::TestRemoteData trd(RD);
 //	trd.setup();
+//	TEST::TestSaveRestore sr;
+//	sr.setup();
 }
 //------------------------------------------------------------------------------
 void loop() {

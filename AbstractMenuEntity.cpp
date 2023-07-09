@@ -449,7 +449,7 @@ void RemoteProgramMenuItem::ok() {
 	if (_tr == DefaultTemperatureRange) return;
 	if(_rd.addRange(_tr)){
 		SerialPrintln(F("Saved range"));
-		_tr.p();
+//		_tr.p();
 	}
 	//_rd.save();
 }

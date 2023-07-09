@@ -7,7 +7,7 @@
 
 #ifndef COMMONITEMS_H_
 #define COMMONITEMS_H_
-//#define DISABLE_SERIAL_PRINT
+#define DISABLE_SERIAL_PRINT
 
 enum EventType: unsigned int {
 	NoEvent = 0,

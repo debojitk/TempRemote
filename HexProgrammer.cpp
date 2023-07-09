@@ -194,7 +194,7 @@ RemoteData::addRange(const TemperatureRange& r) {
 		return false;
 	}
 	SerialPrint(F("Pos->")); SerialPrintln(pos);
-	_layout.p();
+//	_layout.p();
 	return program(r._start, r._end, pos);
 }
 
