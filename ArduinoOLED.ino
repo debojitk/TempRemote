@@ -75,8 +75,8 @@ void createSchedules() {
 }
 
 void autoWakeupCallback() {
-	SerialPrint(F("Waked up from WDT interrupt event-"));
-	SerialPrintlnWithDelay(millis());
+//	SerialPrint(F("Waked up from WDT interrupt event-"));
+//	SerialPrintlnWithDelay(millis());
 }
 
 void sleepCallback() {
@@ -85,8 +85,8 @@ void sleepCallback() {
 	if (AbstractMenuEntity::CurrentMenu)AbstractMenuEntity::CurrentMenu->deactivate();
 }
 void wakeupCallback() {
-	SerialPrint(F("Waked up from button interrupt event-"));
-	SerialPrintlnWithDelay(millis());
+//	SerialPrint(F("Waked up from button interrupt event-"));
+//	SerialPrintlnWithDelay(millis());
 	buttonObserver->enable();
 	if (AbstractMenuEntity::CurrentMenu)AbstractMenuEntity::CurrentMenu->activate();
 }
@@ -116,9 +116,9 @@ void setupOled() {
 
 void setupRemote() {
 	TX.setup();
-	SerialPrintln(F("TX Setup complete"));
+//	SerialPrintln(F("TX Setup complete"));
 	RX.setup();
-	SerialPrintln(F("RX Setup complete"));
+//	SerialPrintln(F("RX Setup complete"));
 }
 
 
@@ -159,7 +159,7 @@ void setup() {
 #ifndef DISABLE_SERIAL_PRINT
 	Serial.begin(CONFIG::BAUD_RATE);
 #endif
-	SerialPrintln(F("Hello from SmartRemote!"));
+//	SerialPrintln(F("Hello from SmartRemote!"));
 
 	setupOled();
 	setupSleepWakeupHandler();

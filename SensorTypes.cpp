@@ -46,12 +46,32 @@ TimeValue TimeModuleDS3231::get() const {
 	return t;
 }
 
+TimeValue
+TimeModuleDS1302::get() const {
+	TimeValue t;
+	RtcDateTime dt = const_cast<RtcDS1302<ThreeWire>&>(_rtc).GetDateTime();
+	t._day = dt.Day();
+	t._hour = dt.Hour();
+	t._min = dt.Minute();
+	t._month = dt.Month();
+	t._sec = dt.Second();
+	t._year = dt.Year();
+	return t;
+}
+
 bool TimeModuleDS3231::set(const TimeValue &val) {
 	RtcDateTime dateTime(val._year, val._month, val._day, val._hour, val._min, val._sec);
 	_rtc.SetDateTime(dateTime);
 	return true;
 }
 
+
+bool
+TimeModuleDS1302::set(const TimeValue &val) {
+	RtcDateTime dateTime(val._year, val._month, val._day, val._hour, val._min, val._sec);
+	_rtc.SetDateTime(dateTime);
+	return true;
+}
 
 RemoteRXModule::RemoteRXModule() :
 		_rx(IrReceiver) {}

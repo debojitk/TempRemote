@@ -36,6 +36,12 @@ struct SchedulerTime {
 	bool operator ==(const SchedulerTime& s) const {
 		return ((s._hr == _hr) && (s._min == _min));
 	}
+#ifdef ENABLE_TEST
+    void p() {
+        SerialPrint(F("Hr :")); SerialPrint(_hr);
+        SerialPrint(F(" Min :")); SerialPrintln(_min);
+    }
+#endif
 };
 struct Schedule {
 	SchedulerTime _begin;
@@ -46,6 +52,12 @@ struct Schedule {
 	bool operator ==(const Schedule& s) const {
 		return ((s._begin == _begin) && (s._end == _end));
 	}
+#ifdef ENABLE_TEST
+    void p() {
+        _begin.p();
+        _end.p();
+    }
+#endif
 };
 
 constexpr Schedule NullSchedule;
@@ -58,11 +70,13 @@ struct IRNode {
     bool operator ==(const IRNode& n) {
     	return ((n._protocol == _protocol) && (n._address == _address) && (n._command == _command));
     }
+#ifdef ENABLE_TEST
     void p() {
     	SerialPrint(F("Protocol :")); SerialPrint(_protocol);
     	SerialPrint(F(", Address :")); SerialPrint(_address);
     	SerialPrint(F(", Command :")); SerialPrintln(_command);
     }
+#endif
 };
 constexpr IRNode NullIRNode {0,0,0};
 
@@ -70,11 +84,14 @@ struct MemoryLayout {
   uint8_t   _index[CONFIG::NUM_INDEX];            // temperature index
   IRNode    _hexCodes[CONFIG::MAX_HEX_CODES];     // hexCode index
   Schedule  _schedules[CONFIG::NUM_SCHEDULE];
+
+#ifdef ENABLE_TEST
   void p(){
 	  for (uint8_t i=0; i<CONFIG::MAX_HEX_CODES; i++) {
 		  _hexCodes[i].p();
 	  }
   }
+#endif
 };
 
 struct TemperatureRange {
@@ -84,11 +101,13 @@ struct TemperatureRange {
     bool operator==(const TemperatureRange& r) {
     	return ((_start == r._start) && (_end == r._end) && (_hex == r._hex));
     }
+#ifdef ENABLE_TEST
     void p() {
     	SerialPrint(F("Start :")); SerialPrintln(_start);
     	SerialPrint(F("End :")); SerialPrintln(_end);
     	_hex.p();
     }
+#endif
 };
 constexpr TemperatureRange NullTemperatureRange{CONFIG::MAX_TEMPERATURE, CONFIG::MAX_TEMPERATURE, NullIRNode};
 constexpr TemperatureRange DefaultTemperatureRange{CONFIG::START_TEMPERATURE, CONFIG::START_TEMPERATURE, NullIRNode};
@@ -127,7 +146,7 @@ public:
   bool addSchedule(const Schedule& s);
   Schedule& getSchedule(uint8_t i);
 
-#ifndef    DISABLE_SERIAL_PRINT
+#ifdef ENABLE_TEST
   /// only for testing
   MemoryLayout& getLayout() { return _layout; }
   void p() {

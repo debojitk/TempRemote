@@ -406,7 +406,7 @@ void DateMenuItem::updateData(int8_t currentIndex) {
 void RemoteTestMenuItem::ok() {
 	if(_tx.set(_tr._hex)){
 		SerialPrint(F("Emitting code"));
-		_tr._hex.p();
+//		_tr._hex.p();
 	}
 }
 

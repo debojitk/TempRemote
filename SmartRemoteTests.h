@@ -31,7 +31,7 @@ private:
 
 };
 
-#ifndef	DISABLE_SERIAL_PRINT
+#ifdef	ENABLE_TEST
 class TestSaveRestore {
 public:
 	TestSaveRestore() {}

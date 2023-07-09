@@ -115,7 +115,7 @@ TestMemory::setup() {
 	Serial.print(F("From FreeMemory(): "));
 }
 
-#ifndef	DISABLE_SERIAL_PRINT
+#ifdef	ENABLE_TEST
 void
 TestSaveRestore::resetTest() {
 

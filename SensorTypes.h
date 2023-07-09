@@ -49,6 +49,9 @@ public:
 			_rtc.SetDateTime(compiled);
 		}
 	}
+	TimeValue get() const;
+	bool set(const TimeValue&);
+
 private:
 	static constexpr uint8_t IO  = 3;
 	static constexpr uint8_t CLK = 4;
@@ -137,7 +140,11 @@ template <typename SensorModule, typename Value>
 class Sensor;
 
 using TemperatureValue = float;
-using TimeSensor = Sensor<TimeModuleDS3231, TimeValue>;
+#ifdef DS3231
+	using TimeSensor = Sensor<TimeModuleDS3231, TimeValue>;
+#else
+using TimeSensor = Sensor<TimeModuleDS1302, TimeValue>;
+#endif
 using TempSensor = Sensor<TemperatureModule, TemperatureValue>;
 using RXSensor = Sensor<RemoteRXModule, RemoteRXValue>;
 using TXSensor = Sensor<RemoteTXModule, RemoteRXValue>;
