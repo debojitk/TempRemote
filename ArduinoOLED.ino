@@ -1,7 +1,48 @@
-// Simple I2C test for ebay 128x64 oled.
-// Use smaller faster AvrI2c class in place of Wire.
-// Edit AVRI2C_FASTMODE in SSD1306Ascii.h to change the default I2C frequency.
-//
+/**
+ * Smart Remote V1.0
+ * Developers - Arnab Chatterjee, Debojit Kundu
+ * Date - 10-JUL-2023
+ * Devices and Corresponding Libraries
+ * OLED Module - SSD1306 Oled .96"/1.44" - SSD1306Ascii - https://github.com/greiman/SSD1306Ascii (1.3.5)
+ * Temperature/Humidity Module - DHT22 - LightWeight DHT Lib - http://github.com/jweigelt/dht22-library (1.0)
+ * RTC Module - DS3231 - Inbuilt - Wire I2C lib https://github.com/vishnuajith/i2c-minimal
+ * RTC Module - DS1302 - RTC By Makuna - https://github.com/Makuna/Rtc/wiki (2.3.7)
+ * Infrared Receiver TSOPV1738 - IRemote Lib - https://github.com/Arduino-IRremote/Arduino-IRremote (4.1.2)
+ * Infrared Transmitter - IR LED Module by Seed studio - IRemote Lib - https://github.com/Arduino-IRremote/Arduino-IRremote (4.1.2)
+ * Timer1 - TimerOne Library - http://code.google.com/p/arduino-timerone(1.1.0)
+ * EEPROM - Inbuilt - http://www.arduino.cc/en/Reference/EEPROM (2.0.0)
+ *
+ * Switches found in CommonItems.h
+ * #define DS3231 - If DS3231 RTC is used, if disabled then DS1302 is used - Default - Enabled
+ * #define DISABLE_SERIAL_PRINT - If enabled, turns off all debug prints - Default - Disabled, enable to save another 1.5k progmem
+ * #define ENABLE_TEST - Enable to run RemoteData and EEPROM test cases - Default -  Disabled
+ *
+ * Switches in SensorTypes.cpp - 	#define DECODE_NEC
+									#define DECODE_SAMSUNG
+									#define DECODE_PANASONIC
+ * Enables the above Remote controls in IRemote library
+ * Constants in HexProgrammer.h
+ *
+ 	 NUM_INDEX         = 15;            // starting from START_TEMPERATURE
+     NUM_SCHEDULE      = 2;				// Number of Schedules
+     MAX_HEX_CODES     = 7;				// Max number of remote codes
+     BAUD_RATE         = 115200;		// Serial baud rate
+     START_TEMPERATURE = 20;			// Start temperature
+     MAX_TEMPERATURE   = 100;			// max temperature, treated as invalid temp
+     NULL_HOUR         = 24; 			// Null Hour definition
+     NULL_MIN          = 60; 			// Null Minute definition
+ *
+ *	 Credits-
+ *	 1. https://www.thecoderscorner.com/electronics/microcontrollers/efficiency/arduino-avr-sketch-compilation-cost-of-vtables-wire-analysis/
+ *	 2. Offloading Vtable to Progmem -
+ *	 	https://forum.arduino.cc/t/put-avr-vtables-into-the-flash/639611
+ *	 	https://github.com/jcmvbkbc/avr-flash-vtbl
+ *	 	https://c.1und1.de/@520232801136547587/bdXynAy6S5ym-0B2PZPquA
+ *	 	**NOTE** - This code uses this plugin to gain > 300 bytes. This is enabled in C++ compile options as below:
+ *	 	-fplugin="full\path\to\avr-flash-vtbl.dll"
+ *	 	The avr compiler is - avr-gcc-9.2.0-x64-mingw
+ *
+ */
 #include "SSD1306Ascii.h"
 #include "SSD1306AsciiAvrI2c.h"
 #include <avr/pgmspace.h>
@@ -116,14 +157,13 @@ void setupOled() {
 	//display.setFont(Arial_bold_14);
 	//display.setFont(X11fixed7x14B);
 	display.setFont(Verdana12);
+	display.setContrast(255);
 
 }
 
 void setupRemote() {
 	TX.setup();
-//	SerialPrintln(F("TX Setup complete"));
 	RX.setup();
-//	SerialPrintln(F("RX Setup complete"));
 }
 
 

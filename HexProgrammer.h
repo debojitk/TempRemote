@@ -8,12 +8,12 @@ class RemoteData;
 class TimeValue;
 
 namespace CONFIG {
-    constexpr uint32_t NUM_INDEX         = 35;              // starting from START_TEMPERATURE
+    constexpr uint32_t NUM_INDEX         = 15;              // starting from START_TEMPERATURE
     constexpr uint32_t NUM_SCHEDULE      = 2;
     constexpr uint32_t MAX_HEX_CODES     = 7;
     constexpr uint32_t BAUD_RATE         = 115200;
-    constexpr uint32_t START_TEMPERATURE = 15;
-    constexpr uint32_t MAX_TEMPERATURE   = 1000;
+    constexpr uint32_t START_TEMPERATURE = 20;
+    constexpr uint32_t MAX_TEMPERATURE   = 100;
     constexpr uint32_t NULL_HOUR         = 24; // 0 - 23
     constexpr uint32_t NULL_MIN          = 60; // 0 - 59
 };

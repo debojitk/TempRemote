@@ -2,15 +2,14 @@
 
 #include <DHT22.h>
 #include <RtcDS1302.h>
-#include <RtcDS3231.h>
-#include <Wire.h>
 #include "HexProgrammer.h";
+#include "i2c.h"
 
 class IRrecv;
 class IRsend;
 class decode_results;
 class IRNode;
-
+class SimpleDS3231;
 struct TimeValue {
 	uint8_t  _month;
 	uint8_t  _day;
@@ -69,7 +68,8 @@ public:
 	bool set(const TimeValue& val);
 
 private:
-	RtcDS3231<TwoWire> _rtc;
+	static constexpr uint8_t DS3231_I2C_ADDRESS = 0x68;
+	iic &_i2c;
 };
 
 
