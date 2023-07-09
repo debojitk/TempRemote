@@ -140,7 +140,7 @@ TestSaveRestore::resetTest() {
 
 	checkNull();
 
-	------------------------------------------------------------
+	//------------------------------------------------------------
 
 	setData();
 
@@ -155,8 +155,6 @@ TestSaveRestore::resetTest() {
 	checkData();
 
 	_r.p();
-
-
 }
 
 void

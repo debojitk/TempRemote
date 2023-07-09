@@ -127,6 +127,14 @@ public:
   bool addSchedule(const Schedule& s);
   Schedule& getSchedule(uint8_t i);
 
+#ifndef    DISABLE_SERIAL_PRINT
+  /// only for testing
+  MemoryLayout& getLayout() { return _layout; }
+  void p() {
+      _layout.p();
+  }
+#endif
+
 private:
   uint8_t findHex(const IRNode& node, uint8_t& pos) const;
   bool program(uint8_t beginTemp, uint8_t endTemp, uint8_t position);

@@ -50,24 +50,6 @@ private:
 };
 #endif
 
-//class TestSchedule {
-//public:
-//	TestRemoteData(RemoteData &r):_r(r){}
-//	void loop()  {};
-//	void setup() {
-//		addSchedules();
-//		testIterator();
-//	}
-//
-//
-//private:
-//	void testDataAdd();
-//	void testIterator();
-//	RemoteData &_r;
-//private:
-//
-//};
-
 
 class TestMemory {
 public:
