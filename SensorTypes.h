@@ -108,7 +108,7 @@ public:
 	RemoteRXValue get();
 	void setup();
 private:
-	static constexpr uint8_t PIN = 4;
+	static constexpr uint8_t PIN = 11;
 	IRrecv& _rx;
 };
 

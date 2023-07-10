@@ -214,7 +214,7 @@ void setup() {
 	Serial.begin(CONFIG::BAUD_RATE);
 #endif
 //	SerialPrintln(F("Hello from SmartRemote!"));
-
+	RD.restore();
 	setupOled();
 	setupSleepWakeupHandler();
 	createSchedules();

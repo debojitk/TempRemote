@@ -445,7 +445,8 @@ void RemoteProgramMenuItem::ok() {
 		SerialPrintln(F("Saved range"));
 //		_tr.p();
 	}
-	//_rd.save();
+	_rd.save();
+	back();
 }
 
 void RemoteProgramMenuItem::updateData(int8_t currentIndex) {
@@ -494,7 +495,8 @@ const __FlashStringHelper* RemoteProgramMenuItem::getLabel(uint8_t index) {
 
 void ScheduleMenuItem::ok() {
 	_rd.getSchedule(_index) = _schedule;
-	//_rd.save();
+	_rd.save();
+	back();
 }
 
 const char* ScheduleMenuItem::getName() {
