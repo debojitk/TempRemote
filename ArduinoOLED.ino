@@ -103,7 +103,7 @@ HomeMenu homeMenu(renderer, "Smart Remote", &mainMenu, timeSensorModule, TM);
 
 IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_PIN, 300);
 // creating eventManager
-SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 100000, 20);
+SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 10000, 20);
 EventManager eventManager(buttonObserver);
 
 
@@ -115,13 +115,19 @@ void createSchedules() {
 }
 
 void autoWakeupCallback() {
+	SerialPrintln(F("AutoWakeupCallback"));
+	static RemoteRXValue prev = NullRemoteRXValue;
 	TimeValue v = timeSensorModule.get();
 	if(!RD.isScheduleOn(v)) {
 		return;
 	}
 	TemperatureValue tv = TM.get();
 	RemoteRXValue rxv = RD.atTemperature((uint8_t)tv._t);
-	TX.set(rxv);
+//	if(!(rxv == prev)) {
+		TX.set(rxv);
+		SerialPrint(F("Executing Code: ")); rxv.p();
+		prev = rxv;
+//	}
 }
 
 void sleepCallback() {

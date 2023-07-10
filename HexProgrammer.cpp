@@ -200,11 +200,25 @@ RemoteData::addRange(const TemperatureRange& r) {
 
 bool
 RemoteData::isScheduleOn(const TimeValue& t) const {
+	uint8_t count = 0;
 	for(uint8_t i = 0; i < CONFIG::NUM_SCHEDULE; ++i) {
-		if(_layout._schedules[i].inRange(t._hour, t._min)) {
+		Schedule& s = getSchedule(i);
+		if(s == NullSchedule) {
+			++count;
+			continue;
+		}
+		SchedulerTime sc;
+		sc._hr = t._hour;
+		sc._min = t._min;
+		if(_layout._schedules[i].inRange(sc)) {
 			return true;
 		}
 	}
+	// if there is no schedule, then schedule is on
+	if(count == CONFIG::NUM_SCHEDULE) {
+		return true;
+	}
+
 	return false;
 }
 

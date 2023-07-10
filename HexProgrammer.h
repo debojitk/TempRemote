@@ -21,17 +21,26 @@ namespace CONFIG {
 struct SchedulerTime {
 	uint8_t _hr = CONFIG::NULL_HOUR;
 	uint8_t _min = CONFIG::NULL_MIN;
-	bool greaterEq(uint8_t hr, uint8_t min) const {
-		if(hr == _hr) {
-			return (min >= _min);
+	bool greaterEq(const SchedulerTime& t) const {
+		if(_hr == t._hr) {
+			return (_min >= t._min);
 		}
-		return hr > _hr;
+		return _hr > t._hr;
 	}
-	bool lessEq(uint8_t hr, uint8_t min) const {
-		if(hr == _hr) {
-			return (min <= _min);
+	bool lessEq(const SchedulerTime& t) const {
+		if(_hr == t._hr) {
+			return (_min <= t._min);
 		}
-		return hr < _hr;
+		return _hr < t._hr;
+	}
+	bool greater(const SchedulerTime& t) const {
+		if(t == *this) {
+			return false;
+		}
+		if(_hr == t._hr) {
+			return (_min > t._min);
+		}
+		return _hr > t._hr;
 	}
 	bool operator ==(const SchedulerTime& s) const {
 		return ((s._hr == _hr) && (s._min == _min));
@@ -46,8 +55,16 @@ struct SchedulerTime {
 struct Schedule {
 	SchedulerTime _begin;
 	SchedulerTime _end;
-	bool inRange(uint8_t hr, uint8_t min) const {
-		return (_begin.greaterEq(hr, min) && _end.lessEq(hr, min));
+	bool inRange(const SchedulerTime& t) const {
+		if(_begin.greater(_end)) {
+			if(_begin.lessEq(t) || _end.greaterEq(t)) {
+				return true;
+			}
+		}
+		else {
+			return (_begin.lessEq(t) && _end.greaterEq(t));
+		}
+		return false;
 	}
 	bool operator ==(const Schedule& s) const {
 		return ((s._begin == _begin) && (s._end == _end));
