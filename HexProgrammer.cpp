@@ -159,16 +159,32 @@ RangeIterator::operator !=(const RangeIterator& ri) const {
 RangeIterator 
 RemoteData::beginRange() {
     RangeIterator ri(*this);
-    ri._posEnd = ri._posBegin = 0;
 
-    IRNode nBeg = at(ri._posBegin);
-    if(nBeg == NullIRNode) {
-        return RangeIterator(*this);
+    // Find correct position for _posBegin
+    ri._posBegin = 0;
+    while(ri._posBegin != CONFIG::NUM_INDEX) {
+    	IRNode nBeg = at(ri._posBegin);
+    	if(!(nBeg == NullIRNode)) {
+    		break;
+    	}
+    	++ri._posBegin;
+    }
+    ri._posEnd = ri._posBegin;
+    if(ri._posBegin == CONFIG::NUM_INDEX) {
+    	return *this;
     }
 
-    IRNode nEnd = at(ri._posEnd);
-    while(nBeg == nEnd) {
-        nEnd = at(++(ri._posEnd));
+    // Find correct position for _posEnd
+    IRNode nBeg = at(ri._posBegin);
+//    IRNode nEnd = at(ri._posEnd);
+    while (ri._posEnd != CONFIG::NUM_INDEX) {
+    	IRNode nEnd = at(ri._posEnd);
+    	if(nBeg == nEnd) {
+    		++(ri._posEnd);
+    	}
+    	else { // nBeg != nEnd
+    		break;
+    	}
     }
     --(ri._posEnd); // retract
     return ri;
@@ -177,13 +193,6 @@ RemoteData::beginRange() {
 RangeIterator
 RemoteData::endRange() {
     RangeIterator ri(*this);
-    ri._posEnd = ri._posBegin = 0;
-	IRNode nEnd = at(ri._posEnd);
-
-    while(!(nEnd == NullIRNode)) {
-        nEnd = at(++ri._posEnd);
-    }
-    ri._posBegin = ri._posEnd;
     return ri;
 }
 

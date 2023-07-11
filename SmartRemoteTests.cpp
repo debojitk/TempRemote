@@ -90,6 +90,16 @@ TestRemoteData::testIterator() {
 }
 
 void
+TestRemoteData::testIteratorNull() {
+
+	for(auto it = _r.beginRange(), itEnd = _r.endRange();
+			it != itEnd; ++it) {
+			SerialPrintln("Null test FAILED");
+	}
+	SerialPrintln("Null Range test Passed");
+}
+
+void
 TestMemory::setup() {
 	size_t lowerBound = 1;
 	size_t upperBound = 5000;

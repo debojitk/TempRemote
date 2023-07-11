@@ -18,12 +18,14 @@ public:
 	TestRemoteData(RemoteData &r):_r(r){}
 	void loop()  {};
 	void setup() {
+		testIteratorNull();
 		testDataAdd();
 		testIterator();
 	}
 
 
 private:
+	void testIteratorNull();
 	void testDataAdd();
 	void testIterator();
 	RemoteData &_r;
