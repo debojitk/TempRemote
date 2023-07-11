@@ -131,6 +131,8 @@ private:
 	void goToSleep();
 	void disableADC();
 	void enableADC();
+
+	volatile bool wdtExecuted = false;
 };
 
 #endif /* EVENTMANAGER_H_ */

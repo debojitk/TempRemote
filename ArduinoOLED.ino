@@ -41,6 +41,12 @@
  *	 	**NOTE** - This code uses this plugin to gain > 300 bytes. This is enabled in C++ compile options as below:
  *	 	-fplugin="full\path\to\avr-flash-vtbl.dll"
  *	 	The avr compiler is - avr-gcc-9.2.0-x64-mingw
+ *     3. Progmem Details -
+ *         http://www.gammon.com.au/progmem
+ *         https://andybrown.me.uk/wk/2011/01/01/debugging-avr-dynamic-memory-allocation/
+ *     4. Low Power Arduino - https://www.youtube.com/watch?v=urLSDi7SD8M
+ *     5. Chat GPT 3.0 for all other stuffs that I did not know :)
+ *
  *
  */
 #include "SSD1306Ascii.h"
@@ -123,11 +129,12 @@ void autoWakeupCallback() {
 	}
 	TemperatureValue tv = TM.get();
 	RemoteRXValue rxv = RD.atTemperature((uint8_t)tv._t);
-//	if(!(rxv == prev)) {
+	SerialPrint(F("Temp: ")); SerialPrintln(tv._t);
+	if(!(rxv == prev)) {
 		TX.set(rxv);
 		SerialPrint(F("Executing Code: ")); rxv.p();
 		prev = rxv;
-//	}
+	}
 }
 
 void sleepCallback() {
@@ -220,6 +227,7 @@ void setup() {
 	Serial.begin(CONFIG::BAUD_RATE);
 #endif
 //	SerialPrintln(F("Hello from SmartRemote!"));
+//	RD.save();
 	RD.restore();
 	setupOled();
 	setupSleepWakeupHandler();

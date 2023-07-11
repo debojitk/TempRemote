@@ -275,6 +275,20 @@ void SleepWakeupInterruptHandler::clearLastEvent() {
 }
 
 void SleepWakeupInterruptHandler::observeEvents() {
+	if (wdtExecuted) {
+		wdtExecuted = false;
+		enableADC();
+		// check if enough slept
+		if ((sleepCounter + 1) >= sleepCounterLimit) {
+			// perform necessary activity
+			noInterrupts();
+			_autoWakeupCallback();
+			interrupts();
+			sleepCounter = 0;
+		}
+		sleepCounter ++;
+		autoWakedUp = true;
+	}
 	if (!enabled) {
 		if (millis()<lastEventInstant) lastEventInstant = millis();
 		if ((millis() - lastEventInstant) > disableDelay) {
@@ -370,13 +384,5 @@ ISR(WDT_vect){
 
 
 void SleepWakeupInterruptHandler::WDInterruptHandler(){
-	enableADC();
-	// check if enough slept
-	if ((sleepCounter + 1) >= sleepCounterLimit) {
-		// perform necessary activity
-		_autoWakeupCallback();
-		sleepCounter = 0;
-	}
-	sleepCounter ++;
-	autoWakedUp = true;
+	wdtExecuted = true;
 }

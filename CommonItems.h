@@ -9,7 +9,7 @@
 #define COMMONITEMS_H_
 //#define DISABLE_SERIAL_PRINT
 #define DS3231
-//#define ENABLE_TEST
+#define ENABLE_TEST
 
 enum EventType: unsigned int {
 	NoEvent = 0,
