@@ -99,9 +99,9 @@ TimeMenuItem timeMenu(oledFieldMenuRenderer, "Set Time", timeSensorModule);
 DateMenuItem dateMenu(oledFieldMenuRenderer, "Set Date", timeSensorModule);
 MenuEntity scheduleMenu(oledMenuRenderer, "Set Schedule", scheduleMenus, CONFIG::NUM_SCHEDULE);
 MenuEntity remoteMenu(oledMenuRenderer, "Train Remote", remoteMenus, 2);
-AbstractMenuEntity *mainMenus[] = {&timeMenu, &dateMenu, &scheduleMenu, &remoteMenu};
-MenuEntity mainMenu(oledMenuRenderer, "Main Menu", mainMenus, 4);
-
+ResetMenu resetMenu("Reset EEPROM", RD);
+AbstractMenuEntity *mainMenus[] = {&timeMenu, &dateMenu, &scheduleMenu, &remoteMenu, &resetMenu};
+MenuEntity mainMenu(oledMenuRenderer, "Main Menu", mainMenus, 5);
 
 // creating home menu
 HomeMenuItemRenderer *renderer = new HomeMenuItemRenderer(display);
@@ -117,7 +117,6 @@ void createSchedules() {
 	for (uint8_t i = 0; i< CONFIG::NUM_SCHEDULE; i++) {
 		scheduleMenus[i] = new ScheduleMenuItem(oledFieldMenuRenderer, RD, i);
 	}
-	TEST::testMemory();
 }
 
 void autoWakeupCallback() {

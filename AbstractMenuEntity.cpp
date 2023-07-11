@@ -314,7 +314,6 @@ void DynamicMenuEntity::activate() {
 }
 
 AbstractMenuEntity * DynamicMenuEntity::getItem(uint8_t index) {
-	TEST::testMemory();
 	if (index < 0 || index >= numItems) return nullptr;
 
 	uint8_t counter = 0;
@@ -450,7 +449,6 @@ void RemoteProgramMenuItem::ok() {
 }
 
 void RemoteProgramMenuItem::updateData(int8_t currentIndex) {
-	TEST::testMemory();
 	switch(currentIndex) {
 	case START_RANGE_INDEX:
 		if (_tr._start > CONFIG::MAX_TEMPERATURE){
@@ -500,7 +498,6 @@ void ScheduleMenuItem::ok() {
 }
 
 const char* ScheduleMenuItem::getName() {
-	TEST::testMemory();
 	sprintf_P(stringBuffer, PSTR("Schedule-%1d"), _index);
 	return stringBuffer;
 }
@@ -547,4 +544,17 @@ uint16_t ScheduleMenuItem::getValue(uint8_t index) {
 		break;
 	}
 	return retval;
+}
+
+void ResetMenu::handleClick() {
+}
+
+void ResetMenu::handleDoubleClick() {
+}
+
+void ResetMenu::activate() {
+	SerialPrintln(F("Executing reset menu"));
+	_rd.clear();
+	_rd.save();
+	back();
 }

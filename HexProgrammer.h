@@ -170,6 +170,7 @@ public:
   bool isScheduleOn(const TimeValue& time) const;
   bool addSchedule(const Schedule& s);
   Schedule& getSchedule(uint8_t i);
+  void clear();
 
 #ifdef ENABLE_TEST
   /// only for testing

@@ -31,12 +31,19 @@ void RemoteData::restore() {
 }
 
 RemoteData::RemoteData() {
-  for (uint8_t i = 0; i < CONFIG::NUM_INDEX; ++i) {
-    _layout._index[i] = CONFIG::MAX_HEX_CODES;
-  }
-  for (uint8_t i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
-    _layout._hexCodes[i] = NullIRNode;
-  }
+	clear();
+}
+
+void RemoteData::clear() {
+	for (uint8_t i = 0; i < CONFIG::NUM_INDEX; ++i) {
+		_layout._index[i] = CONFIG::MAX_HEX_CODES;
+	}
+	for (uint8_t i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
+		_layout._hexCodes[i] = NullIRNode;
+	}
+	for (uint8_t i = 0; i < CONFIG::NUM_SCHEDULE; ++i) {
+		_layout._schedules[i] = NullSchedule;
+	}
 }
 
 uint8_t

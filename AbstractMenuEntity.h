@@ -255,4 +255,14 @@ private:
 
 };
 
+class ResetMenu: public AbstractMenuEntity { // @suppress("Class has a virtual method and non-virtual destructor")
+public:
+	ResetMenu(const char *name, RemoteData &rd): AbstractMenuEntity(name, nullptr), _rd(rd) {}
+	void handleClick();
+	void handleDoubleClick();
+	void activate();
+private:
+	RemoteData &_rd;
+};
+
 #endif /* ABSTRACTMENUENTITY_H_ */
