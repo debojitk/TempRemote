@@ -126,15 +126,18 @@ RangeIterator::operator *() const {
 
 RangeIterator
 RangeIterator::operator ++() {
+	RangeIterator nullIt(_rt);
     if((_posBegin >= CONFIG::NUM_INDEX) || (_posEnd >= CONFIG::NUM_INDEX)) {
-        return RangeIterator(_rt);
+    	*this = nullIt;
+        return *this;
     }
     _posBegin = _posEnd + 1;
     _posEnd = _posBegin;
 
     IRNode nBeg = _rt.at(_posBegin);
     if(nBeg == NullIRNode) {
-        return RangeIterator(_rt);
+    	*this = nullIt;
+        return *this;
     }
 
     IRNode nEnd = _rt.at(_posEnd);

@@ -128,6 +128,7 @@ struct TemperatureRange {
 };
 constexpr TemperatureRange NullTemperatureRange{CONFIG::MAX_TEMPERATURE, CONFIG::MAX_TEMPERATURE, NullIRNode};
 constexpr TemperatureRange DefaultTemperatureRange{CONFIG::START_TEMPERATURE, CONFIG::START_TEMPERATURE, NullIRNode};
+
 class RangeIterator {
 public:
     RangeIterator(uint8_t posBegin, uint8_t posEnd, const RemoteData& rt) :
@@ -137,6 +138,13 @@ public:
     RangeIterator operator ++();
     bool operator ==(const RangeIterator& ri) const;
     bool operator !=(const RangeIterator& ri) const;
+    RangeIterator& operator =(const RangeIterator& ri) {
+    	if(*this != ri) {
+    		_posBegin = ri._posBegin;
+    		_posEnd = ri._posEnd;
+    	}
+    	return *this;
+    }
 private:
     uint8_t _posBegin = CONFIG::NUM_INDEX;
     uint8_t _posEnd = CONFIG::NUM_INDEX;
