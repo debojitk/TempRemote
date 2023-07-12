@@ -8,7 +8,7 @@
 #ifndef EVENTMANAGER_H_
 #define EVENTMANAGER_H_
 
-enum EventType: unsigned int;
+enum EventType: uint8_t;
 class IEventReceiver;
 class SleepWakeupInterruptHandler;
 
@@ -69,23 +69,22 @@ private:
 	ButtonInputObserver();
 	ButtonInputObserver(int pin, int interval);
 	void timerInterrupt();
-	bool hasClicked();
+	EventType getEvent();
 
 	uint8_t buttonPin;
 	unsigned long doubleClickInterval;
 	static ButtonInputObserver *instance;
 	bool hasInitialized = false;
 
-	uint8_t counter = 0;
-	uint8_t buttonState = 0;
+	uint8_t buttonState = HIGH;
 	uint8_t lastButtonState = 0;
-	uint8_t lastClickCount = 0;
 	uint8_t currentButtonState = 0;
-	static constexpr int debounceDelay = 25;
 	uint8_t clickCount = 0;
 	unsigned long lastDebounceTime = 0;
 	unsigned long clickInstant = 0;
-
+	bool clickPending = true;
+	static constexpr uint8_t debounceDelay = 25;
+	static constexpr uint16_t longPressDelay = 1000;
 
 };
 

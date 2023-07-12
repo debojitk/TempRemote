@@ -13,7 +13,7 @@
 #include "CommonItems.h"
 #include "SensorTypes.h"
 
-enum EventType: unsigned int;
+enum EventType: uint8_t;
 class IMenuRenderer;
 class EventManager;
 class HomeMenuItemRenderer;

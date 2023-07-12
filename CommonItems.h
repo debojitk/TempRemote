@@ -11,7 +11,7 @@
 //#define DS3231
 #define ENABLE_TEST
 
-enum EventType: unsigned int {
+enum EventType: uint8_t {
 	NoEvent = 0,
 	SingleClickEvent,
 	DoubleClickEvent,

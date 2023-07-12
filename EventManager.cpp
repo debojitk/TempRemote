@@ -128,36 +128,52 @@ void ButtonInputObserver::enable() {
 	}
 }
 
-bool ButtonInputObserver::hasClicked() {
-	lastClickCount = counter;
+EventType ButtonInputObserver::getEvent() {
+	EventType event = NoEvent;
 	currentButtonState = digitalRead(buttonPin);
 
-	if (currentButtonState != lastButtonState) {
-		lastDebounceTime = millis();
+	if (currentButtonState != lastButtonState) {// debounced
+		lastDebounceTime = millis(); // update last debounce instant
 	}
 
 	if ((millis() - lastDebounceTime) > debounceDelay) {
+		// now the contact is stable
 		if (currentButtonState != buttonState) {
 			buttonState = currentButtonState;
 			if (buttonState == LOW) {
-				counter++;
+				clickPending = true;
+			} else {
+				if (clickPending) {
+					event = SingleClickEvent;
+					clickPending = false;
+				}
+			}
+		} else if(currentButtonState == LOW && clickPending) {
+			if ((millis() - lastDebounceTime) > longPressDelay) {
+				event = LongPressEvent;
+				clickPending = false;
 			}
 		}
 	}
 	lastButtonState = currentButtonState;
 
-	return counter-lastClickCount;
+	return event;
 }
 void ButtonInputObserver::timerInterrupt() {
 	// scan for events only if last event is handled
 	if(enabled && lastEvent == NoEvent) {
 		unsigned long currentTime = millis();
-		bool clicked = hasClicked();
-		if (clicked) {
+		EventType capturedEvent = getEvent();
+		if (capturedEvent == SingleClickEvent) {
 			clickInstant = millis();
 			currentTime = clickInstant;
 			clickCount++;
+		} else if (capturedEvent == LongPressEvent) {
+			SerialPrintln(F("LongPressEvent"));
+			lastEvent = LongPressEvent;
+			return;
 		}
+
 		if (clickCount == 1) {
 			if ((currentTime - clickInstant) > doubleClickInterval){
 				SerialPrintln(F("SingleClickEvent"));
@@ -170,6 +186,7 @@ void ButtonInputObserver::timerInterrupt() {
 			lastEvent = DoubleClickEvent;
 			clickCount = 0;
 		}
+
 	}
 }
 
