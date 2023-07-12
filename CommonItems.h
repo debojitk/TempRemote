@@ -76,7 +76,7 @@ const char ScheduleMenuLabels [6] [6] PROGMEM = {
 
 
 namespace TEST{
-	void testMemory();
+	uint16_t testMemory();
 }
 	#ifdef DISABLE_SERIAL_PRINT
 		#define SerialPrint(...)

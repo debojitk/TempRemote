@@ -181,7 +181,7 @@ void setupRemote() {
 
 namespace TEST {
 
-void testMemory() {
+uint16_t testMemory() {
 	uint16_t bytesLeft;
 	for(size_t i = 1; i < 2048; ++i) {
 		void* ptr = malloc(sizeof(uint8_t) * i);
@@ -193,6 +193,7 @@ void testMemory() {
 	}
 	SerialPrint(F("Allocable chunk size -> "));
 	SerialPrintln(bytesLeft);
+	return bytesLeft;
 }
 
 

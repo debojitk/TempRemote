@@ -47,7 +47,7 @@ bool AbstractMenuEntity::isActive(){
 
 void AbstractMenuEntity::setActive(bool active){
 	this->active = active;
-	setCurrentIndex(-1);
+	setCurrentIndex(0);
 }
 
 void AbstractMenuEntity::handleEvent(EventType event){
@@ -192,7 +192,9 @@ void HomeMenu::activate(){
 }
 
 void HomeMenu::handleClick(){
-	// does nothing
+	currentIndex = (currentIndex + 1) % STATES;
+	renderer->clear();
+	render();
 }
 void HomeMenu::handleDoubleClick(){
 	if (_child && !_child->isActive()){

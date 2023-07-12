@@ -95,6 +95,7 @@ private:
 	TimeSensor &_timeSensorModule;
 	uint32_t lastUpdateTime = 0;
 	TemperatureModule &_tm;
+	static constexpr uint8_t STATES = 7;
 };
 
 
