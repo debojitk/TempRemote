@@ -84,7 +84,7 @@ private:
 	unsigned long clickInstant = 0;
 	bool clickPending = true;
 	static constexpr uint8_t debounceDelay = 25;
-	static constexpr uint16_t longPressDelay = 1000;
+	static constexpr uint16_t longPressDelay = 700;
 
 };
 

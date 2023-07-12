@@ -55,7 +55,7 @@ void AbstractMenuEntity::handleEvent(EventType event){
 	case EventType::SingleClickEvent:
 		handleClick();
 		break;
-	case EventType::DoubleClickEvent:
+	case EventType::LongPressEvent:
 		handleDoubleClick();
 		break;
 	default:
