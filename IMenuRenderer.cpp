@@ -118,8 +118,6 @@ void OLEDHorizontalMenuItemRenderer::renderContent(FormMenuItem *_menu) {
 
 void OLEDBaseFormMenuItemRenderer::renderMenu(AbstractMenuEntity *menu) {
 	FormMenuItem *_menu = (FormMenuItem*)menu;
-	//display.setFont(Arial_bold_14);
-	//clear();
 	renderHeader(_menu);
 	renderContent(_menu);
 	renderFooter(_menu);
@@ -129,6 +127,14 @@ void OLEDBaseFormMenuItemRenderer::renderHeader(FormMenuItem *menu) {
 	display.setInvertMode(false);
 	display.setCursor(0, 0);
 	display.print(menu->getName());
+	display.setCursor(115, 0);
+	if (menu->editMode()) {
+		display.set2X();
+		display.print(F("*"));
+		display.set1X();
+	} else {
+		display.clearToEOL();
+	}
 }
 
 void OLEDBaseFormMenuItemRenderer::renderFooter(FormMenuItem *menu) {

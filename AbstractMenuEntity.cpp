@@ -347,6 +347,11 @@ void FormMenuItem::handleDoubleClick() {
 		ok();
 	} else {
 		changeData = !changeData;
+		if (!changeData) {
+			handleClick();
+		} else {
+			render();
+		}
 	}
 }
 

@@ -30,30 +30,25 @@ void EventManager::unregisterEventReceiver(){
 }
 void EventManager::handleEvent(EventType event){
 	if(this->eventReceiver != nullptr){
-		//SerialPrint(F("Handling event "));
-		//SerialPrintln(event);
 		this->eventReceiver->handleEvent(event);
 	}
 }
 void EventManager::processEvents(){
 	EventType event = eventSourceObserver->getLastEvent();
 	if (event != NoEvent){
-		//SerialPrint(F("Event captured "));
-		//SerialPrintln(event);
 		// process event
 		handleEvent(event);
 		if (_eventCallback != nullptr) {
 			_eventCallback(event);
 		}
 		eventSourceObserver->clearLastEvent();
-		//SerialPrintln(F("Event cleared "));
 	} else{
 		eventSourceObserver->observeEvents();
 	}
 }
 
 
-EventType AbsEventSourceObserver::getLastEvent(){
+EventType AbsEventSourceObserver::getLastEvent() {
 	return lastEvent;
 }
 void AbsEventSourceObserver::clearLastEvent() {

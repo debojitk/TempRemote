@@ -123,6 +123,9 @@ public:
 		changeData = false;
 		AbstractMenuEntity::activate();
 	}
+	bool editMode() {
+		return changeData;
+	}
 protected:
 	virtual void updateData(int8_t currentIndex) = 0;
 	uint8_t states;
