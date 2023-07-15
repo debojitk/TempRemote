@@ -21,10 +21,10 @@ struct TimeValue {
 
 	const char* formatDate(char *buffer) {
 		sprintf_P(buffer,
-				PSTR("%02u/%02u/%04u"),
+				PSTR("%02u-%02u-%02u"),
 				_day,
 				_month,
-				_year
+				_year - 2000
 		);
 		return buffer;
 	}

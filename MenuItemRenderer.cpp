@@ -49,14 +49,14 @@ void HomeMenuItemRenderer::renderMenu(AbstractMenuEntity *_menu) {
 		display.set2X();
 		display.print(t.formatTime(buffer));
 		break;
-	case 3: //temp+hum
+	case 3: //temp
 		display.setCursor(2, 2);display.print(F("Temperature"));
 		display.setCursor(2, 4);
 		display.set2X();
 		display.print(menu->getTemperature()._t);
 		display.print(F(" C"));
 		break;
-	case 4: //temp+hum
+	case 4: //hum
 		display.setCursor(2, 2);display.print(F("Humidity"));
 		display.setCursor(2, 4);
 		display.set2X();

@@ -144,8 +144,9 @@ void sleepCallback() {
 void wakeupCallback() {
 //	SerialPrint(F("Waked up from button interrupt event-"));
 //	SerialPrintlnWithDelay(millis());
-	buttonObserver->enable();
 	if (AbstractMenuEntity::CurrentMenu)AbstractMenuEntity::CurrentMenu->activate();
+	delay(300);
+	buttonObserver->enable();
 }
 
 void setupSleepWakeupHandler() {
