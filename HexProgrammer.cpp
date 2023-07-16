@@ -15,8 +15,8 @@ BOOST: 0xCFF10E : 13627662
 ***/
 
 static_assert(sizeof(MemoryLayout) ==
-		                   ((sizeof(uint8_t) * CONFIG::NUM_INDEX) +
-		                   (sizeof(IRNode) * CONFIG::MAX_HEX_CODES) +
+		                   ((sizeof(uint8_t) * CONFIG::NUM_INDEX * CONFIG::REMOTE_BANKS) +
+		                   (sizeof(IRNode) * CONFIG::MAX_HEX_CODES * CONFIG::REMOTE_BANKS) +
 						    (sizeof(Schedule) * CONFIG::NUM_SCHEDULE))
 						   );
 
@@ -36,10 +36,10 @@ RemoteData::RemoteData() {
 
 void RemoteData::clear() {
 	for (uint8_t i = 0; i < CONFIG::NUM_INDEX; ++i) {
-		_layout._index[i] = CONFIG::MAX_HEX_CODES;
+		_layout._index[_bankId][i] = CONFIG::MAX_HEX_CODES;
 	}
 	for (uint8_t i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
-		_layout._hexCodes[i] = NullIRNode;
+		_layout._hexCodes[_bankId][i] = NullIRNode;
 	}
 	for (uint8_t i = 0; i < CONFIG::NUM_SCHEDULE; ++i) {
 		_layout._schedules[i] = NullSchedule;
@@ -49,10 +49,10 @@ void RemoteData::clear() {
 uint8_t
 RemoteData::findHex(const IRNode& node, uint8_t& pos) const {
 	for(pos = 0; pos < CONFIG::MAX_HEX_CODES; ++pos) {
-		if(_layout._hexCodes[pos] == node) {
+		if(_layout._hexCodes[_bankId][pos] == node) {
 			return pos;
 		}
-		else if(_layout._hexCodes[pos] == NullIRNode) {
+		else if(_layout._hexCodes[_bankId][pos] == NullIRNode) {
 			return CONFIG::MAX_HEX_CODES;
 		}
 	}
@@ -68,7 +68,7 @@ RemoteData::addHex(const IRNode& node) {
 		return index;
 	}
 
-	_layout._hexCodes[pos] = node;
+	_layout._hexCodes[_bankId][pos] = node;
 	return pos;
 }
 
@@ -85,7 +85,7 @@ RemoteData::program(uint8_t beginTemp, uint8_t endTemp, uint8_t pos) {
   SerialPrint(F("beginTemp->")); SerialPrintln(beginTemp);
   SerialPrint(F("endTemp->")); SerialPrintln(endTemp);
   for (uint8_t i = beginTemp; i <= endTemp; ++i) {
-    _layout._index[i] = pos;
+    _layout._index[_bankId][i] = pos;
   }
   return true;
 }
@@ -100,16 +100,16 @@ RemoteData::at(uint8_t t) const {
   if (t >= CONFIG::NUM_INDEX) {
     return NullIRNode;
   }
-  uint8_t hexIndex = _layout._index[t];
+  uint8_t hexIndex = _layout._index[_bankId][t];
   if(hexIndex >= CONFIG::MAX_HEX_CODES) {
 	return NullIRNode;
   }
-  return (_layout._hexCodes[hexIndex]);
+  return (_layout._hexCodes[_bankId][hexIndex]);
 }
 
 uint8_t
 RemoteData::atIndex(uint8_t val) const {
-	  return _layout._index[val];
+	  return _layout._index[_bankId][val];
 }
 
 TemperatureRange

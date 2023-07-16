@@ -49,6 +49,7 @@ private:
 	void setNull();
 	void checkData();
 	RemoteData _r;
+	uint8_t bankId = 0;
 };
 #endif
 

@@ -18,6 +18,11 @@ enum EventType: uint8_t {
 	LongPressEvent
 	// Add more event types as needed
 };
+
+enum RemoteBankType: uint8_t {
+	Fan = 0,
+	AC
+};
 struct CurrentTime {
 	int hours;
 	int minutes;

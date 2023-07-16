@@ -170,11 +170,11 @@ TestSaveRestore::resetTest() {
 void
 TestSaveRestore::checkNull() {
 	for(auto i = 0; i < CONFIG::NUM_INDEX; ++i) {
-		CHECK(_r.getLayout()._index[i] == CONFIG::MAX_HEX_CODES, "NULL Index check");
+		CHECK(_r.getLayout()._index[bankId][i] == CONFIG::MAX_HEX_CODES, "NULL Index check");
 	}
 
 	for(auto i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
-		CHECK(_r.getLayout()._hexCodes[i] == NullIRNode, "NULL Hex code check");
+		CHECK(_r.getLayout()._hexCodes[bankId][i] == NullIRNode, "NULL Hex code check");
 	}
 
 	for(auto i = 0; i < CONFIG::NUM_SCHEDULE; ++i) {
@@ -184,16 +184,15 @@ TestSaveRestore::checkNull() {
 
 void
 TestSaveRestore::setData() {
-
 	for(auto i = 0; i < CONFIG::NUM_INDEX; ++i) {
-		_r.getLayout()._index[i] = CONFIG::MAX_HEX_CODES - 1;
-		CHECK((_r.getLayout()._index[i] == CONFIG::MAX_HEX_CODES - 1), "Index not NULL");
+		_r.getLayout()._index[bankId][i] = CONFIG::MAX_HEX_CODES - 1;
+		CHECK((_r.getLayout()._index[bankId][i] == CONFIG::MAX_HEX_CODES - 1), "Index not NULL");
 	}
 
 	IRNode ir{12, 22, 32};
 	for(auto i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
-		_r.getLayout()._hexCodes[i] = ir;
-		CHECK(!(_r.getLayout()._hexCodes[i] == NullIRNode), "Hex code not NULL");
+		_r.getLayout()._hexCodes[bankId][i] = ir;
+		CHECK(!(_r.getLayout()._hexCodes[bankId][i] == NullIRNode), "Hex code not NULL");
 	}
 
 	SchedulerTime st1;
@@ -215,14 +214,14 @@ void
 TestSaveRestore::setNull() {
 
 	for(auto i = 0; i < CONFIG::NUM_INDEX; ++i) {
-		_r.getLayout()._index[i] = CONFIG::MAX_HEX_CODES;
-		CHECK((_r.getLayout()._index[i] == CONFIG::MAX_HEX_CODES), "Index is set NULL");
+		_r.getLayout()._index[bankId][i] = CONFIG::MAX_HEX_CODES;
+		CHECK((_r.getLayout()._index[bankId][i] == CONFIG::MAX_HEX_CODES), "Index is set NULL");
 	}
 
 	IRNode ir{12, 22, 32};
 	for(auto i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
-		_r.getLayout()._hexCodes[i] = NullIRNode;
-		CHECK((_r.getLayout()._hexCodes[i] == NullIRNode), "Hex code is set NULL");
+		_r.getLayout()._hexCodes[bankId][i] = NullIRNode;
+		CHECK((_r.getLayout()._hexCodes[bankId][i] == NullIRNode), "Hex code is set NULL");
 	}
 
 
@@ -236,13 +235,13 @@ void
 TestSaveRestore::checkData() {
 
 	for(auto i = 0; i < CONFIG::NUM_INDEX; ++i) {
-		CHECK((_r.getLayout()._index[i] == CONFIG::MAX_HEX_CODES - 1), "Index check");
+		CHECK((_r.getLayout()._index[bankId][i] == CONFIG::MAX_HEX_CODES - 1), "Index check");
 	}
 
 
 	IRNode ir{12, 22, 32};
 	for(auto i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
-		CHECK((_r.getLayout()._hexCodes[i] == ir), "Hex code check");
+		CHECK((_r.getLayout()._hexCodes[bankId][i] == ir), "Hex code check");
 	}
 
 	SchedulerTime st1;
