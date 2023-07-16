@@ -131,7 +131,6 @@ void autoWakeupCallback() {
 	SerialPrint(F("Temp: ")); SerialPrintln(tv._t);
 	if(!(rxv == prev)) {
 		TX.set(rxv);
-		SerialPrint(F("Executing Code: ")); rxv.p();
 		prev = rxv;
 	}
 }
