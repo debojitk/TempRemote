@@ -107,7 +107,7 @@ MenuEntity mainMenu(oledMenuRenderer, "Main Menu", mainMenus, 5);
 HomeMenuItemRenderer *renderer = new HomeMenuItemRenderer(display);
 HomeMenu homeMenu(renderer, "Smart Remote", &mainMenu, timeSensorModule, TM);
 
-IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_PIN, 300);
+IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_PIN, 100);
 // creating eventManager
 SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 10000, 20);
 EventManager eventManager(buttonObserver);
@@ -131,7 +131,7 @@ void autoWakeupCallback() {
 	SerialPrint(F("Temp: ")); SerialPrintln(tv._t);
 	if(!(rxv == prev)) {
 		TX.set(rxv);
-		SerialPrint(F("Executing Code: ")); rxv.p();
+		//SerialPrint(F("Executing Code: ")); rxv.p();
 		prev = rxv;
 	}
 }

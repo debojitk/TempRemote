@@ -16,7 +16,7 @@ BOOST: 0xCFF10E : 13627662
 
 static_assert(sizeof(MemoryLayout) ==
 		                   ((sizeof(uint8_t) * CONFIG::NUM_INDEX * CONFIG::REMOTE_BANKS) +
-		                   (sizeof(IRNode) * CONFIG::MAX_HEX_CODES * CONFIG::REMOTE_BANKS) +
+		                   (sizeof(IRNode) * CONFIG::MAX_HEX_CODES) +
 						    (sizeof(Schedule) * CONFIG::NUM_SCHEDULE))
 						   );
 
@@ -35,11 +35,14 @@ RemoteData::RemoteData() {
 }
 
 void RemoteData::clear() {
-	for (uint8_t i = 0; i < CONFIG::NUM_INDEX; ++i) {
-		_layout._index[_bankId][i] = CONFIG::MAX_HEX_CODES;
+	for (uint8_t bank = 0; bank < CONFIG::REMOTE_BANKS; ++bank) {
+		for (uint8_t i = 0; i < CONFIG::NUM_INDEX; ++i) {
+			_layout._index[bank][i] = CONFIG::MAX_HEX_CODES;
+		}
 	}
+	setActiveRemoteBank(0);
 	for (uint8_t i = 0; i < CONFIG::MAX_HEX_CODES; ++i) {
-		_layout._hexCodes[_bankId][i] = NullIRNode;
+		_layout._hexCodes[i] = NullIRNode;
 	}
 	for (uint8_t i = 0; i < CONFIG::NUM_SCHEDULE; ++i) {
 		_layout._schedules[i] = NullSchedule;
@@ -49,10 +52,10 @@ void RemoteData::clear() {
 uint8_t
 RemoteData::findHex(const IRNode& node, uint8_t& pos) const {
 	for(pos = 0; pos < CONFIG::MAX_HEX_CODES; ++pos) {
-		if(_layout._hexCodes[_bankId][pos] == node) {
+		if(_layout._hexCodes[pos] == node) {
 			return pos;
 		}
-		else if(_layout._hexCodes[_bankId][pos] == NullIRNode) {
+		else if(_layout._hexCodes[pos] == NullIRNode) {
 			return CONFIG::MAX_HEX_CODES;
 		}
 	}
@@ -68,7 +71,7 @@ RemoteData::addHex(const IRNode& node) {
 		return index;
 	}
 
-	_layout._hexCodes[_bankId][pos] = node;
+	_layout._hexCodes[pos] = node;
 	return pos;
 }
 
@@ -84,6 +87,7 @@ RemoteData::program(uint8_t beginTemp, uint8_t endTemp, uint8_t pos) {
 
   SerialPrint(F("beginTemp->")); SerialPrintln(beginTemp);
   SerialPrint(F("endTemp->")); SerialPrintln(endTemp);
+  SerialPrint(F("Bank->")); SerialPrintln(_bankId);
   for (uint8_t i = beginTemp; i <= endTemp; ++i) {
     _layout._index[_bankId][i] = pos;
   }
@@ -104,7 +108,7 @@ RemoteData::at(uint8_t t) const {
   if(hexIndex >= CONFIG::MAX_HEX_CODES) {
 	return NullIRNode;
   }
-  return (_layout._hexCodes[_bankId][hexIndex]);
+  return (_layout._hexCodes[hexIndex]);
 }
 
 uint8_t

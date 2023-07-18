@@ -19,7 +19,7 @@ enum EventType: uint8_t {
 	// Add more event types as needed
 };
 
-enum RemoteBankType: uint8_t {
+enum RemoteType: uint8_t {
 	Fan = 0,
 	AC
 };
@@ -54,7 +54,8 @@ const char DateMenuLabels [5] [6] PROGMEM = {
 		{ "Back" }
 };
 
-const char RemoteTestMenuLabels [5] [6] PROGMEM = {
+const char RemoteTestMenuLabels [6] [6] PROGMEM = {
+		{ "Type" },
 		{ "Start" },
 		{ "End" },
 		{ "Code" },
@@ -62,7 +63,8 @@ const char RemoteTestMenuLabels [5] [6] PROGMEM = {
 		{ "Back" }
 };
 
-const char RemoteProgramMenuLabels [5] [6] PROGMEM = {
+const char RemoteProgramMenuLabels [6] [6] PROGMEM = {
+		{ "Type" },
 		{ "Start" },
 		{ "End" },
 		{ "Code" },

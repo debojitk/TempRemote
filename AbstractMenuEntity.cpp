@@ -20,7 +20,7 @@
 CustomStack<AbstractMenuEntity *, 6> AbstractMenuEntity::menuStack;
 AbstractMenuEntity *AbstractMenuEntity::CurrentMenu = nullptr;
 
-char AbstractMenuEntity::stringBuffer[15];
+char AbstractMenuEntity::stringBuffer[20];
 // Definition for AbstractMenuEntity
 AbstractMenuEntity::AbstractMenuEntity(const char *name, IMenuRenderer *renderer) {
 	this->name = name;
@@ -308,9 +308,13 @@ DynamicMenuEntity::DynamicMenuEntity(
 
 void DynamicMenuEntity::activate() {
 	numItems = 0;
-    for(auto it = _rd.beginRange(), itEnd = _rd.endRange(); it != itEnd; ++it) {
-		numItems ++;
-    }
+	for (uint8_t bankId = 0; bankId < CONFIG::REMOTE_BANKS; bankId ++) {
+		_rd.setActiveRemoteBank(bankId);
+		for(auto it = _rd.beginRange(), itEnd = _rd.endRange(); it != itEnd; ++it) {
+			numItems ++;
+		}
+	}
+	_rd.setActiveRemoteBank(0);
 	backIndex = numItems;
 	AbstractMenuEntity::activate();
 }
@@ -319,14 +323,19 @@ AbstractMenuEntity * DynamicMenuEntity::getItem(uint8_t index) {
 	if (index < 0 || index >= numItems) return nullptr;
 
 	uint8_t counter = 0;
-    for(auto it = _rd.beginRange(), itEnd = _rd.endRange(); it != itEnd; ++it) {
-        TemperatureRange tr = *it;
-        if (index == counter) {
-        	subMenu._tr = tr;
-        	return  &subMenu;
-        }
-        counter++;
-    }
+	for (uint8_t bankId = 0; bankId < CONFIG::REMOTE_BANKS; bankId ++) {
+		_rd.setActiveRemoteBank(bankId);
+		for(auto it = _rd.beginRange(), itEnd = _rd.endRange(); it != itEnd; ++it) {
+			TemperatureRange tr = *it;
+			if (index == counter) {
+				subMenu._tr = tr;
+				subMenu._remoteType = bankId;
+				_rd.setActiveRemoteBank(0);
+				return  &subMenu;
+			}
+			counter++;
+		}
+	}
     return nullptr;
 }
 void FormMenuItem::handleClick() {
@@ -411,7 +420,14 @@ void RemoteTestMenuItem::ok() {
 }
 
 const char* RemoteTestMenuItem::getName() {
-	sprintf_P(stringBuffer, PSTR("Range %02d-%02d"), _tr._start, _tr._end);
+	char type[4];
+	if (_remoteType == RemoteType::Fan) {
+		strcpy_P(type, PSTR("FAN"));
+	}
+	else {
+		strcpy_P(type, PSTR("AC"));
+	}
+	sprintf_P(stringBuffer, PSTR("Range(%s) %02d-%02d"), type, _tr._start, _tr._end);
 	return stringBuffer;
 }
 
@@ -424,6 +440,9 @@ uint16_t RemoteTestMenuItem::getValue(uint8_t index) {
 	if (index > 0 || index > getFieldCount())
 		retval = 0;
 	switch(index){
+	case REMOTE_TYPE:
+		retval = _remoteType;
+		break;
 	case START_RANGE_INDEX:
 		retval = _tr._start;
 		break;
@@ -447,7 +466,8 @@ const __FlashStringHelper* RemoteTestMenuItem::getLabel(uint8_t index) {
  */
 void RemoteProgramMenuItem::ok() {
 	if (_tr == DefaultTemperatureRange) return;
-	if(_rd.addRange(_tr)){
+
+	if(_rd.setActiveRemoteBank(_remoteType) && _rd.addRange(_tr)){
 		SerialPrintln(F("Saved range"));
 //		_tr.p();
 	}
@@ -457,8 +477,11 @@ void RemoteProgramMenuItem::ok() {
 
 void RemoteProgramMenuItem::updateData(int8_t currentIndex) {
 	switch(currentIndex) {
+	case REMOTE_TYPE:
+		_remoteType = (_remoteType + 1) % CONFIG::REMOTE_BANKS;
+		break;
 	case START_RANGE_INDEX:
-		if (_tr._start > CONFIG::MAX_TEMPERATURE){
+		if (_tr._start > CONFIG::MAX_TEMPERATURE) {
 			_tr._start = CONFIG::START_TEMPERATURE;
 		} else {
 			_tr._start ++;

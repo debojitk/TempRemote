@@ -8,14 +8,15 @@ class RemoteData;
 class TimeValue;
 
 namespace CONFIG {
-    constexpr uint32_t NUM_INDEX         = 35;              // starting from START_TEMPERATURE
+    constexpr uint32_t NUM_INDEX         = 15;              // starting from START_TEMPERATURE
     constexpr uint32_t NUM_SCHEDULE      = 2;
     constexpr uint32_t MAX_HEX_CODES     = 7;
     constexpr uint32_t BAUD_RATE         = 115200;
-    constexpr uint32_t START_TEMPERATURE = 15;
+    constexpr uint32_t START_TEMPERATURE = 20;
     constexpr uint32_t MAX_TEMPERATURE   = 100;
     constexpr uint32_t NULL_HOUR         = 24; // 0 - 23
     constexpr uint32_t NULL_MIN          = 60; // 0 - 59
+    constexpr uint8_t REMOTE_BANKS		 = 2; // 0 for Remote 1 (fan), 1 for Remote 2 (AC)
 };
 
 struct SchedulerTime {
@@ -98,14 +99,14 @@ struct IRNode {
 constexpr IRNode NullIRNode {0,0,0};
 
 struct MemoryLayout {
-  uint8_t   _index[CONFIG::NUM_INDEX];            // temperature index
+  uint8_t   _index[CONFIG::REMOTE_BANKS][CONFIG::NUM_INDEX];            // temperature index
   IRNode    _hexCodes[CONFIG::MAX_HEX_CODES];     // hexCode index
   Schedule  _schedules[CONFIG::NUM_SCHEDULE];
 
 #ifdef ENABLE_TEST
   void p(){
 	  for (uint8_t i=0; i<CONFIG::MAX_HEX_CODES; i++) {
-		  _hexCodes[i].p();
+		  _hexCodes[_bankId][i].p();
 	  }
   }
 #endif
@@ -158,7 +159,7 @@ public:
   // EPROM has limited write cycles
   void save() const;
   void restore();
-  uint8_t atIndex(uint8_t val) const;
+  uint8_t atIndex(uint8_t val) const;//change
   // 0xFFFFFF or correct value
   IRNode at(uint8_t t) const;
   IRNode atTemperature(uint8_t t) const;
@@ -172,6 +173,15 @@ public:
   Schedule& getSchedule(uint8_t i);
   void clear();
 
+  uint8_t getActiveRemoteBank(){
+	  return _bankId;
+  }
+  bool setActiveRemoteBank(uint8_t bankId) {
+	  if (bankId > CONFIG::REMOTE_BANKS - 1) return false;
+	  _bankId = bankId;
+	  return true;
+  }
+
 #ifdef ENABLE_TEST
   /// only for testing
   MemoryLayout& getLayout() { return _layout; }
@@ -184,6 +194,7 @@ private:
   uint8_t findHex(const IRNode& node, uint8_t& pos) const;
   bool program(uint8_t beginTemp, uint8_t endTemp, uint8_t position);
   uint8_t addHex(const IRNode& node);
+  uint8_t _bankId = 0;
 
 private:
   MemoryLayout _layout;

@@ -170,7 +170,7 @@ public:
 	RemoteTestMenuItem(IMenuRenderer *renderer, TXSensor &tx):
 		FormMenuItem(nullptr, renderer), _tx(tx)
 	{
-		states = 5;
+		states = 6;
 		backIndex = states - 1;
 	}
 	virtual void ok();
@@ -181,13 +181,14 @@ public:
 	virtual boolean isReadOnly(uint8_t index){return true;}
 
 	TemperatureRange _tr;
+	RemoteType _remoteType = RemoteType::Fan;
 protected:
-	static constexpr uint8_t START_RANGE_INDEX  = 0;
-    static constexpr uint8_t END_RANGE_INDEX  = 1;
-    static constexpr uint8_t CODE_INDEX  = 2;
+	static constexpr uint8_t REMOTE_TYPE  = 0;
+	static constexpr uint8_t START_RANGE_INDEX  = 1;
+    static constexpr uint8_t END_RANGE_INDEX  = 2;
+    static constexpr uint8_t CODE_INDEX  = 3;
 private:
     TXSensor &_tx;
-
 };
 
 class RemoteProgramMenuItem: public RemoteTestMenuItem { // @suppress("Class has a virtual method and non-virtual destructor")
@@ -196,7 +197,7 @@ public:
 		RemoteTestMenuItem(renderer, tx), _rx(rx), _rd(rd)
 	{
 		this->name = name;
-		states = 5;
+		states = 6;
 		backIndex = states - 1;
 		_tr = DefaultTemperatureRange;
 	}
