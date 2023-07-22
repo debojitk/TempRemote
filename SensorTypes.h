@@ -5,11 +5,9 @@
 #include "HexProgrammer.h";
 #include "i2c.h"
 
-class IRrecv;
-class IRsend;
-class decode_results;
 class IRNode;
 class SimpleDS3231;
+struct IRMP_DATA;
 struct TimeValue {
 	uint8_t  _month;
 	uint8_t  _day;
@@ -108,8 +106,8 @@ public:
 	RemoteRXValue get();
 	void setup();
 private:
-	static constexpr uint8_t PIN = 11;
-	IRrecv& _rx;
+	static constexpr uint8_t PIN = 4;
+	IRMP_DATA *_data = nullptr;
 };
 
 class RemoteTXModule {
@@ -122,7 +120,7 @@ public:
 private:
 	static constexpr uint8_t PIN = 5;
 	static constexpr uint8_t REPEATS = 5;
-	IRsend& _tx;
+	IRMP_DATA * _data = nullptr;
 };
 
 
@@ -132,7 +130,7 @@ class Sensor;
 #ifdef DS3231
 	using TimeSensor = Sensor<TimeModuleDS3231, TimeValue>;
 #else
-using TimeSensor = Sensor<TimeModuleDS1302, TimeValue>;
+	using TimeSensor = Sensor<TimeModuleDS1302, TimeValue>;
 #endif
 using TempSensor = Sensor<TemperatureModule, TemperatureValue>;
 using RXSensor = Sensor<RemoteRXModule, RemoteRXValue>;

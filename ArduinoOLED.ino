@@ -7,8 +7,8 @@
  * Temperature/Humidity Module - DHT22 - LightWeight DHT Lib - http://github.com/jweigelt/dht22-library (1.0)
  * RTC Module - DS3231 - Inbuilt - Wire I2C lib https://github.com/vishnuajith/i2c-minimal
  * RTC Module - DS1302 - RTC By Makuna - https://github.com/Makuna/Rtc/wiki (2.3.7)
- * Infrared Receiver TSOPV1738 - IRemote Lib - https://github.com/Arduino-IRremote/Arduino-IRremote (4.1.2)
- * Infrared Transmitter - IR LED Module by Seed studio - IRemote Lib - https://github.com/Arduino-IRremote/Arduino-IRremote (4.1.2)
+ * Infrared Receiver TSOPV1738 - IRemote Lib - https://github.com/IRMP-org/IRMP (3.6.3)
+ * Infrared Transmitter - IR LED Module by Seed studio - IRemote Lib - https://github.com/IRMP-org/IRMP (3.6.3)
  * Timer1 - TimerOne Library - http://code.google.com/p/arduino-timerone(1.1.0)
  * EEPROM - Inbuilt - http://www.arduino.cc/en/Reference/EEPROM (2.0.0)
  *
