@@ -7,18 +7,6 @@
 class RemoteData;
 class TimeValue;
 
-namespace CONFIG {
-    constexpr uint32_t NUM_INDEX         = 15;              // starting from START_TEMPERATURE
-    constexpr uint32_t NUM_SCHEDULE      = 2;
-    constexpr uint32_t MAX_HEX_CODES     = 7;
-    constexpr uint32_t BAUD_RATE         = 115200;
-    constexpr uint32_t START_TEMPERATURE = 20;
-    constexpr uint32_t MAX_TEMPERATURE   = 100;
-    constexpr uint32_t NULL_HOUR         = 24; // 0 - 23
-    constexpr uint32_t NULL_MIN          = 60; // 0 - 59
-    constexpr uint8_t REMOTE_BANKS		 = 2; // 0 for Remote 1 (fan), 1 for Remote 2 (AC)
-};
-
 struct SchedulerTime {
 	uint8_t _hr = CONFIG::NULL_HOUR;
 	uint8_t _min = CONFIG::NULL_MIN;
@@ -46,7 +34,7 @@ struct SchedulerTime {
 	bool operator ==(const SchedulerTime& s) const {
 		return ((s._hr == _hr) && (s._min == _min));
 	}
-#ifdef ENABLE_TEST
+#ifndef DISABLE_SERIAL_PRINT
     void p() {
         SerialPrint(F("Hr :")); SerialPrint(_hr);
         SerialPrint(F(" Min :")); SerialPrintln(_min);
@@ -70,7 +58,7 @@ struct Schedule {
 	bool operator ==(const Schedule& s) const {
 		return ((s._begin == _begin) && (s._end == _end));
 	}
-#ifdef ENABLE_TEST
+#ifndef DISABLE_SERIAL_PRINT
     void p() {
         _begin.p();
         _end.p();
@@ -88,7 +76,7 @@ struct IRNode {
     bool operator ==(const IRNode& n) {
     	return ((n._protocol == _protocol) && (n._address == _address) && (n._command == _command));
     }
-#ifdef ENABLE_TEST
+#ifndef DISABLE_SERIAL_PRINT
     void p() {
     	SerialPrint(F("Protocol :")); SerialPrint(_protocol);
     	SerialPrint(F(", Address :")); SerialPrint(_address);
@@ -119,7 +107,7 @@ struct TemperatureRange {
     bool operator==(const TemperatureRange& r) {
     	return ((_start == r._start) && (_end == r._end) && (_hex == r._hex));
     }
-#ifdef ENABLE_TEST
+#ifndef DISABLE_SERIAL_PRINT
     void p() {
     	SerialPrint(F("Start :")); SerialPrintln(_start);
     	SerialPrint(F("End :")); SerialPrintln(_end);

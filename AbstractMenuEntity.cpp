@@ -481,7 +481,7 @@ void RemoteProgramMenuItem::updateData(int8_t currentIndex) {
 		_remoteType = (_remoteType + 1) % CONFIG::REMOTE_BANKS;
 		break;
 	case START_RANGE_INDEX:
-		if (_tr._start > CONFIG::MAX_TEMPERATURE) {
+		if (_tr._start >= CONFIG::START_TEMPERATURE + CONFIG::NUM_INDEX - 1) {
 			_tr._start = CONFIG::START_TEMPERATURE;
 		} else {
 			_tr._start ++;
@@ -489,8 +489,8 @@ void RemoteProgramMenuItem::updateData(int8_t currentIndex) {
 		if (_tr._start >= _tr._end) _tr._end = _tr._start;
 		break;
 	case END_RANGE_INDEX:
-		if (_tr._end > CONFIG::MAX_TEMPERATURE){
-			_tr._end = min(_tr._start + 1, CONFIG::MAX_TEMPERATURE);
+		if (_tr._end >= CONFIG::START_TEMPERATURE + CONFIG::NUM_INDEX){
+			_tr._end = min(_tr._start + 1, CONFIG::START_TEMPERATURE + CONFIG::NUM_INDEX - 1);
 		} else {
 			_tr._end ++;
 		}

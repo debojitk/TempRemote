@@ -10,6 +10,38 @@
 //#define DISABLE_SERIAL_PRINT
 //#define DS3231
 #define ENABLE_TEST
+namespace CONFIG {
+    constexpr uint32_t NUM_INDEX         = 15;       // starting from START_TEMPERATURE
+    constexpr uint32_t NUM_SCHEDULE      = 2;
+    constexpr uint32_t MAX_HEX_CODES     = 12;
+    constexpr uint32_t BAUD_RATE         = 115200;
+    constexpr uint32_t START_TEMPERATURE = 20;
+    constexpr uint32_t MAX_TEMPERATURE   = 100;
+    constexpr uint32_t NULL_HOUR         = 24; 		// 0 - 23
+    constexpr uint32_t NULL_MIN          = 60; 		// 0 - 59
+    constexpr uint8_t  REMOTE_BANKS		 = 2; 		// 0 for Remote 1 (fan), 1 for Remote 2 (AC)
+
+    constexpr uint8_t  DS1307_PIN_IO	 = 3;
+    constexpr uint8_t  DS1307_PIN_CLK	 = 4;
+    constexpr uint8_t  DS1307_PIN_CE	 = 7;
+    constexpr uint16_t DS3231_I2C_ADDRESS= 0x68;
+    constexpr uint8_t  DHT22_PIN		 = 6;
+    constexpr uint8_t  IR_RECV_PIN		 = 4;
+    constexpr uint8_t  IR_SEND_PIN		 = 5;
+    constexpr uint8_t  BUTTON_PIN		 = 2;
+
+    constexpr uint8_t  IR_SEND_REPEATS	 = 1;
+
+    constexpr uint8_t  DEBOUNCE_DELAY_MSEC	 				= 25;
+    constexpr uint16_t LONGPRESS_DELAY_MSEC	 				= 700;
+    constexpr uint8_t  SINGLE_CLICK_DETECT_DELAY_MSEC	 	= 100;
+    constexpr uint8_t  AUTOWAKEUP_DELAY_SEC	 				= 20;
+    constexpr uint8_t  AUTOSLEEP_DELAY_SEC	 				= 20;
+
+
+
+};
+
 
 enum EventType: uint8_t {
 	NoEvent = 0,

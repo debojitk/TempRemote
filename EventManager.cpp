@@ -199,14 +199,14 @@ ButtonInputObserver * ButtonInputObserver::getInstance(int pin, int interval){
 
 SleepWakeupInterruptHandler *SleepWakeupInterruptHandler::_instance = nullptr;
 
-SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(): SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(2,5000, 30){
+SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(): SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(2,5, 30){
 	//default private constructor
 }
 
-SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(uint8_t pin, uint32_t disableDelay, uint8_t autoWakeupDelay) {
+SleepWakeupInterruptHandler::SleepWakeupInterruptHandler(uint8_t pin, uint32_t disableDelaySec, uint8_t autoWakeupDelaySec) {
 	this->pin = pin;
-	this->disableDelay = disableDelay;
-	setAutoWakeupDelay(autoWakeupDelay);
+	this->disableDelay = disableDelaySec * 1000L;
+	setAutoWakeupDelay(autoWakeupDelaySec);
 
 	AbsEventSourceObserver::disable();
 }
@@ -292,13 +292,14 @@ void SleepWakeupInterruptHandler::observeEvents() {
 		enableADC();
 		// check if enough slept
 		if ((sleepCounter + 1) >= sleepCounterLimit) {
-			// perform necessary activity
-			noInterrupts();
+			// perform necessary activity, but disable button interrupt so that while executing handler button interrupt should not interrupt the execution
+			detachInterrupt(digitalPinToInterrupt(pin));
 			_autoWakeupCallback();
-			interrupts();
+			attachInterrupt(digitalPinToInterrupt(pin), SleepWakeupInterruptHandler::interruptHandlerInvoker, LOW);
 			sleepCounter = 0;
+		} else{
+			sleepCounter ++;
 		}
-		sleepCounter ++;
 		autoWakedUp = true;
 	}
 	if (!enabled) {

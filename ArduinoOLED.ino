@@ -69,7 +69,6 @@
 #define CHAR_HEIGHT 12
 #define VIEWPORT_MENU_COUNT 3
 #define RST_PIN -1
-#define BUTTON_PIN 2
 
 // Creating input and output devices
 SSD1306AsciiAvrI2c display;
@@ -107,9 +106,9 @@ MenuEntity mainMenu(oledMenuRenderer, "Main Menu", mainMenus, 5);
 HomeMenuItemRenderer *renderer = new HomeMenuItemRenderer(display);
 HomeMenu homeMenu(renderer, "Smart Remote", &mainMenu, timeSensorModule, TM);
 
-IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(BUTTON_PIN, 100);
+IEventSourceObserver *buttonObserver = ButtonInputObserver::getInstance(CONFIG::BUTTON_PIN, CONFIG::SINGLE_CLICK_DETECT_DELAY_MSEC);
 // creating eventManager
-SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(BUTTON_PIN, 10000, 20);
+SleepWakeupInterruptHandler *interruptHandler = SleepWakeupInterruptHandler::getInstance(CONFIG::BUTTON_PIN, CONFIG::AUTOWAKEUP_DELAY_SEC, CONFIG::AUTOSLEEP_DELAY_SEC);
 EventManager eventManager(buttonObserver);
 
 
@@ -121,18 +120,21 @@ void createSchedules() {
 
 void autoWakeupCallback() {
 	SerialPrintln(F("AutoWakeupCallback"));
-	static RemoteRXValue prev = NullRemoteRXValue;
+	static RemoteRXValue prev[] = {NullRemoteRXValue, NullRemoteRXValue};
 	TimeValue v = timeSensorModule.get();
 	if(!RD.isScheduleOn(v)) {
 		return;
 	}
 	TemperatureValue tv = TM.get();
-	RemoteRXValue rxv = RD.atTemperature((uint8_t)tv._t);
 	SerialPrint(F("Temp: ")); SerialPrintln(tv._t);
-	if(!(rxv == prev)) {
-		TX.set(rxv);
-		//SerialPrint(F("Executing Code: ")); rxv.p();
-		prev = rxv;
+	for (int8_t i = CONFIG::REMOTE_BANKS -1; i >= 0; i-- ) {
+		RD.setActiveRemoteBank(i);
+		RemoteRXValue rxv = RD.atTemperature((uint8_t)tv._t);
+		SerialPrint(F("Executing Code: ")); rxv.p();
+		if (!(rxv == NullRemoteRXValue) && !(rxv == prev[i])){
+			TX.set(rxv);
+			prev[i] = rxv;
+		}
 	}
 }
 

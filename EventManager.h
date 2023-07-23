@@ -83,8 +83,8 @@ private:
 	unsigned long lastDebounceTime = 0;
 	unsigned long clickInstant = 0;
 	bool clickPending = true;
-	static constexpr uint8_t debounceDelay = 25;
-	static constexpr uint16_t longPressDelay = 700;
+	static constexpr uint8_t debounceDelay = CONFIG::DEBOUNCE_DELAY_MSEC;
+	static constexpr uint16_t longPressDelay = CONFIG::LONGPRESS_DELAY_MSEC;
 
 };
 

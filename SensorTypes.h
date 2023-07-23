@@ -50,9 +50,9 @@ public:
 	bool set(const TimeValue&);
 
 private:
-	static constexpr uint8_t IO  = 3;
-	static constexpr uint8_t CLK = 4;
-	static constexpr uint8_t CE  = 7;
+	static constexpr uint8_t IO  = CONFIG::DS1307_PIN_IO;
+	static constexpr uint8_t CLK = CONFIG::DS1307_PIN_CLK;
+	static constexpr uint8_t CE  = CONFIG::DS1307_PIN_CE;
 
 	ThreeWire            _myWire; // (IO, CLK, CE); // IO, SCLK, CE
 	RtcDS1302<ThreeWire> _rtc;
@@ -66,7 +66,7 @@ public:
 	bool set(const TimeValue& val);
 
 private:
-	static constexpr uint8_t DS3231_I2C_ADDRESS = 0x68;
+	static constexpr uint8_t DS3231_I2C_ADDRESS = CONFIG::DS3231_I2C_ADDRESS;
 	iic &_i2c;
 };
 
@@ -89,7 +89,7 @@ public:
 		return _last;
 	}
 private:
-	static constexpr uint8_t PIN = 6;
+	static constexpr uint8_t PIN = CONFIG::DHT22_PIN;
 	DHT22 _dht22;
 	TemperatureValue _last;
 };
@@ -106,7 +106,7 @@ public:
 	RemoteRXValue get();
 	void setup();
 private:
-	static constexpr uint8_t PIN = 4;
+	static constexpr uint8_t PIN = CONFIG::IR_RECV_PIN;
 	IRMP_DATA *_data = nullptr;
 };
 
@@ -118,8 +118,8 @@ public:
 	bool set(RemoteRXValue val);
 	void setup();
 private:
-	static constexpr uint8_t PIN = 5;
-	static constexpr uint8_t REPEATS = 5;
+	static constexpr uint8_t PIN = CONFIG::IR_SEND_PIN;
+	static constexpr uint8_t REPEATS = CONFIG::IR_SEND_REPEATS;
 	IRMP_DATA * _data = nullptr;
 };
 
