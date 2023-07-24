@@ -163,11 +163,11 @@ void receiveEvent(EventType event) {
 
 
 void setupOled() {
-#if RST_PIN >= 0
-	display.begin(&Adafruit128x64, I2C_ADDRESS, RST_PIN);
-#else // RST_PIN >= 0
+#ifdef SH1106_I2C
+	display.begin(&SH1106_128x64, I2C_ADDRESS);
+#else
 	display.begin(&Adafruit128x64, I2C_ADDRESS);
-#endif // RST_PIN >= 0
+#endif
 	// Call oled.setI2cClock(frequency) to change from the default frequency.
 	//display.setFont(Arial_bold_14);
 	//display.setFont(X11fixed7x14B);

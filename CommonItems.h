@@ -10,6 +10,9 @@
 //#define DISABLE_SERIAL_PRINT
 //#define DS3231
 #define ENABLE_TEST
+
+#define SH1106_I2C
+
 namespace CONFIG {
     constexpr uint32_t NUM_INDEX         = 15;       // starting from START_TEMPERATURE
     constexpr uint32_t NUM_SCHEDULE      = 2;
