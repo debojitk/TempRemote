@@ -21,6 +21,13 @@ TimeModuleDS3231::TimeModuleDS3231():_i2c(i2c) {
 
 void TimeModuleDS3231::setup() {
 	i2c.init();
+	RtcDateTime _rtc(__DATE__, __TIME__);
+	TimeValue compiledTime{ _rtc.Month(), _rtc.Day(), _rtc.Year(), _rtc.Hour(), _rtc.Minute(), _rtc.Second()};
+	TimeValue currentTime = get();
+
+	if (currentTime < compiledTime) {
+		set(compiledTime);
+	}
 }
 
 TimeValue TimeModuleDS3231::get() const {

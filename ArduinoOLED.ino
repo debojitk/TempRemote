@@ -180,6 +180,9 @@ void setupRemote() {
 	TX.setup();
 	RX.setup();
 }
+void setupRTC() {
+	timeSensorModule.setup();
+}
 
 
 namespace TEST {
@@ -244,6 +247,7 @@ void setup() {
 	eventManager.setEventCallback(receiveEvent);
 	homeMenu.activate();
 	setupRemote();
+	setupRTC();
 	setupTest();
 
 }

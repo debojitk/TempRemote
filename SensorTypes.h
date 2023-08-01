@@ -34,6 +34,40 @@ struct TimeValue {
 				_sec );
 		return buffer;
 	}
+    bool operator<(const TimeValue& other) const {
+        if (_year < other._year)
+            return true;
+        if (_year > other._year)
+            return false;
+
+        if (_month < other._month)
+            return true;
+        if (_month > other._month)
+            return false;
+
+        if (_day < other._day)
+            return true;
+        if (_day > other._day)
+            return false;
+
+        if (_hour < other._hour)
+            return true;
+        if (_hour > other._hour)
+            return false;
+
+        if (_min < other._min)
+            return true;
+        if (_min > other._min)
+            return false;
+
+        return _sec < other._sec;
+    }
+
+    // Method to compare two TimeValue objects for equality
+    bool operator==(const TimeValue& other) const {
+        return (_month == other._month && _day == other._day && _year == other._year &&
+                _hour == other._hour && _min == other._min && _sec == other._sec);
+    }
 };
 
 class TimeModuleDS1302 {

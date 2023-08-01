@@ -261,6 +261,7 @@ void TimeMenuItem::updateData(int8_t currentIndex) {
 
 void TimeMenuItem::ok() {
 	_timeModule.set(_timeValue);
+	back();
 }
 
 void TimeMenuItem::activate() {
@@ -535,16 +536,16 @@ const char* ScheduleMenuItem::getName() {
 void ScheduleMenuItem::updateData(int8_t currentIndex) {
 	switch(currentIndex) {
 	case SCHEDULE_START_HOUR:
-		_schedule._begin._hr = (_schedule._begin._hr + 1)%CONFIG::NULL_HOUR;
+		_schedule._begin._hr = (_schedule._begin._hr + 1)%(CONFIG::NULL_HOUR + 1); // can set to 24 to unset it
 		break;
 	case SCHEDULE_START_MIN:
-		_schedule._begin._min = (_schedule._begin._min + 10)%CONFIG::NULL_MIN;
+		_schedule._begin._min = (_schedule._begin._min + 10)%(CONFIG::NULL_MIN + 1); // can set to 60 to unset it
 		break;
 	case SCHEDULE_END_HOUR:
-		_schedule._end._hr = (_schedule._end._hr + 1)%CONFIG::NULL_HOUR;
+		_schedule._end._hr = (_schedule._end._hr + 1)%(CONFIG::NULL_HOUR + 1);
 		break;
 	case SCHEDULE_END_MIN:
-		_schedule._end._min = (_schedule._end._min + 10)%CONFIG::NULL_MIN;
+		_schedule._end._min = (_schedule._end._min + 10)%(CONFIG::NULL_MIN + 1);
 		break;
 	}
 }

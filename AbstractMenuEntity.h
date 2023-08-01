@@ -238,10 +238,8 @@ public:
 	{
 		states = 6;
 		backIndex = states - 1;
-		_schedule._begin._hr = 0;
-		_schedule._begin._min = 0;
-		_schedule._end._hr = 0;
-		_schedule._end._min = 0;
+		_schedule._begin = _rd.getSchedule(index)._begin;
+		_schedule._end = _rd.getSchedule(index)._end;
 	}
 	void ok();
 	const char * getName();
