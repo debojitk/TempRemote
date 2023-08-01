@@ -174,7 +174,8 @@ void OLEDCompactMenuItemRenderer::renderContent(FormMenuItem *menu) {
 			display.setInvertMode(true);
 		}
 		char value[5];
-		sprintf_P(value, PSTR("%02d"), menu->getValue(i));
+		//sprintf_P(value, PSTR("%02d"), menu->getValue(i));
+		menu->format(i, value);
 		display.print(value);
 		display.setInvertMode(false);
 	}

@@ -462,6 +462,19 @@ const __FlashStringHelper* RemoteTestMenuItem::getLabel(uint8_t index) {
 	return (const __FlashStringHelper *)RemoteTestMenuLabels[index];
 }
 
+void RemoteTestMenuItem::format(uint8_t index, char *buffer) {
+	if (index == REMOTE_TYPE) {
+		if (getValue(REMOTE_TYPE) == RemoteType::Fan) {
+			strcpy_P(buffer, PSTR("FAN"));
+		} else if (getValue(REMOTE_TYPE) == RemoteType::AC){
+			strcpy_P(buffer, PSTR("AC"));
+		}
+	} else {
+		FormMenuItem::format(index, buffer);
+	}
+}
+
+
 /**
  * RemoteProgramMenuItem definition
  */

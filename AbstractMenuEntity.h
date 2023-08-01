@@ -127,6 +127,9 @@ public:
 	bool editMode() {
 		return changeData;
 	}
+	virtual void format(uint8_t index, char *buffer) {
+		sprintf_P(buffer, PSTR("%02d"), getValue(index));
+	}
 protected:
 	virtual void updateData(int8_t currentIndex) = 0;
 	uint8_t states;
@@ -182,6 +185,7 @@ public:
 
 	TemperatureRange _tr;
 	RemoteType _remoteType = RemoteType::Fan;
+	void format(uint8_t index, char *buffer);
 protected:
 	static constexpr uint8_t REMOTE_TYPE  = 0;
 	static constexpr uint8_t START_RANGE_INDEX  = 1;
