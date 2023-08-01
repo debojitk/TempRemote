@@ -116,9 +116,15 @@ class TemperatureModule {
 public:
 	TemperatureModule() : _dht22(PIN) {}
 	TemperatureValue get() {
-		if (_dht22.update()) {
+		noInterrupts();
+		bool update =_dht22.update();
+		interrupts();
+		if (update) {
+			SerialPrintln(F("Received value from DHT"));
 			_last._t = (float)_dht22.lastT()/float(10);
 			_last._h = (float)_dht22.lastH()/float(10);
+		} else{
+			SerialPrintln(F("No update from DHT, returning previous value"));
 		}
 		return _last;
 	}

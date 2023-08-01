@@ -118,7 +118,10 @@ void createSchedules() {
 	}
 }
 
+// calling this function would forcefully reset arduino
+void(* resetFunc) (void) = 0;//declare reset function at address 0
 void autoWakeupCallback() {
+	static uint8_t forceFireCounter = 0;
 	SerialPrintln(F("AutoWakeupCallback"));
 	static RemoteRXValue prev[] = {NullRemoteRXValue, NullRemoteRXValue};
 	TimeValue v = timeSensorModule.get();
@@ -127,15 +130,22 @@ void autoWakeupCallback() {
 	}
 	TemperatureValue tv = TM.get();
 	SerialPrint(F("Temp: ")); SerialPrintln(tv._t);
+	if (tv._t == 0.0f) {
+		// reset the arduino, something strange has heppened
+		resetFunc();
+	}
 	for (int8_t i = CONFIG::REMOTE_BANKS -1; i >= 0; i-- ) {
 		RD.setActiveRemoteBank(i);
 		RemoteRXValue rxv = RD.atTemperature((uint8_t)tv._t);
 		SerialPrint(F("Executing Code: ")); rxv.p();
-		if (!(rxv == NullRemoteRXValue) && !(rxv == prev[i])){
+		if (!(rxv == NullRemoteRXValue) && (!(rxv == prev[i]) || forceFireCounter >=CONFIG::FORCEFIRE_LIMIT)){
 			TX.set(rxv);
 			prev[i] = rxv;
+			forceFireCounter = 0;
 		}
 	}
+	forceFireCounter ++;
+	SerialPrint(F("Forcefire counter = "));SerialPrintln(forceFireCounter);
 }
 
 void sleepCallback() {

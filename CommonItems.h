@@ -41,8 +41,8 @@ namespace CONFIG {
     constexpr uint8_t  AUTOWAKEUP_DELAY_SEC	 				= 20;
     constexpr uint8_t  AUTOSLEEP_DELAY_SEC	 				= 20;
 
-
-
+    //if same value is firing for long and due to previous same value actual firing is not happening then force-fire after some time
+    constexpr uint8_t  FORCEFIRE_LIMIT	 				= 200;
 };
 
 
