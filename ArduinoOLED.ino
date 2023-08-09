@@ -142,6 +142,7 @@ void autoWakeupCallback() {
 			TX.set(rxv);
 			prev[i] = rxv;
 			forceFireCounter = 0;
+			delay(1000);
 		}
 	}
 	forceFireCounter ++;
